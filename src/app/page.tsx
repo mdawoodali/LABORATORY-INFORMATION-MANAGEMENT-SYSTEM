@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
 import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, FlaskConical } from 'lucide-react';
-import TemplateModal from '@/components/TemplateModal';
+import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
@@ -14,7 +14,6 @@ export default function HomePage() {
   const [recentReports, setRecentReports] = useState<any[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -60,7 +59,7 @@ export default function HomePage() {
     const updated = templates.filter(t => t.id !== id);
     setTemplates(updated);
     localStorage.setItem('sr_templates', JSON.stringify(updated));
-    toast.success('Template deleted');
+    toast.success("Template deleted");
   };
 
   const handleSaveTemplate = (name: string, docxBase64?: string, thumbnailBase64?: string) => {
@@ -210,7 +209,7 @@ export default function HomePage() {
             <motion.button
               whileHover={{ y: -5 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => toast.custom((t) => <TemplateUploadToast t={t} onSave={handleSaveTemplate} />, { duration: Infinity })}
               className="group w-[180px] h-[240px] bg-white/50 border border-dashed border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 hover:border-[#2b579a] hover:bg-blue-50/30 transition-all cursor-pointer"
             >
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
@@ -271,13 +270,6 @@ export default function HomePage() {
           )}
         </motion.div>
       </div>
-
-      {/* Modals */}
-      <TemplateModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSave={handleSaveTemplate} 
-      />
     </div>
   );
 }
