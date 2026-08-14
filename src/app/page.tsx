@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
-import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, Activity } from 'lucide-react';
+import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, FlaskConical } from 'lucide-react';
 import TemplateModal from '@/components/TemplateModal';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
@@ -107,7 +107,7 @@ export default function HomePage() {
         <div className="flex items-center gap-6">
           {/* Typographic Logo */}
           <div className="flex items-center gap-2 text-[#2b579a]">
-            <Activity size={32} strokeWidth={2.5} />
+            <FlaskConical size={32} strokeWidth={2.5} />
             <div className="font-[family-name:var(--font-montserrat)] tracking-tight leading-none">
               <span className="text-2xl font-black">S.R.</span>
               <span className="text-xl font-bold ml-1 opacity-90">LABORATORIES</span>
