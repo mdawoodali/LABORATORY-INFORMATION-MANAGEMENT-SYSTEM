@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import html2canvas from 'html2canvas';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import Barcode from 'react-barcode';
 import ReportForm from '@/components/form/ReportForm';
 import Header from '@/components/report/Header';
 import SubHeader from '@/components/report/SubHeader';
@@ -13,6 +14,7 @@ import Signature from '@/components/report/Signature';
 import Footer from '@/components/report/Footer';
 import PnacLogo from '@/components/report/PnacLogo';
 import { ReportFormData, TestRow } from '@/types';
+import { supabase } from '@/lib/supabase';
 
 // Initialize PDF fonts
 if (pdfMake.vfs === undefined) {
@@ -54,6 +56,7 @@ export default function Home() {
   ]);
 
   const [sampleImage, setSampleImage] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const totalPages = 3;
   
@@ -62,33 +65,56 @@ export default function Home() {
       alert("Please enter a password to lock the PDF.");
       return;
     }
+    
+    setIsGenerating(true);
 
-    // Capture pages as high-res images
-    const pages = document.querySelectorAll('.a4-page');
-    const content = [];
+    try {
+      // 1. Save receipt to Supabase database
+      const { error } = await supabase
+        .from('receipts')
+        .upsert({
+          id: formData.reportNo,
+          password: password,
+          data: { formData, tests, sampleImage }
+        });
+        
+      if (error) {
+        console.error("Supabase Error:", error);
+        alert("Warning: Could not save to database. Have you created the 'receipts' table in Supabase yet? Check the console for details.");
+      }
 
-    for (let i = 0; i < pages.length; i++) {
-      const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 2, useCORS: true });
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
-      content.push({
-        image: imgData,
-        width: 595.28, // A4 Width in points
-        height: 841.89, // A4 Height in points
-        margin: [0, 0, 0, 0]
-      });
+      // 2. Capture pages as high-res images
+      const pages = document.querySelectorAll('.a4-page');
+      const content = [];
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        content.push({
+          image: imgData,
+          width: 595.28, // A4 Width in points
+          height: 841.89, // A4 Height in points
+          margin: [0, 0, 0, 0]
+        });
+      }
+
+      const docDefinition = {
+        pageSize: 'A4' as const,
+        pageMargins: [0, 0, 0, 0] as [number, number, number, number],
+        content: content,
+        userPassword: password, // Locks the PDF!
+        ownerPassword: password,
+        permissions: { printing: 'high', modifying: false, copying: false }
+      };
+
+      // @ts-ignore
+      pdfMake.createPdf(docDefinition).download(`SR_Lab_Report_${formData.reportNo}.pdf`);
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred during generation.");
+    } finally {
+      setIsGenerating(false);
     }
-
-    const docDefinition = {
-      pageSize: 'A4' as const,
-      pageMargins: [0, 0, 0, 0] as [number, number, number, number],
-      content: content,
-      userPassword: password, // Locks the PDF!
-      ownerPassword: password,
-      permissions: { printing: 'high', modifying: false, copying: false }
-    };
-
-    // @ts-ignore
-    pdfMake.createPdf(docDefinition).download(`SR_Lab_Report_${formData.reportNo}.pdf`);
   };
 
   const updateField = (field: keyof ReportFormData, value: string) => {
