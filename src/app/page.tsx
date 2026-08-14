@@ -12,7 +12,7 @@ import { ReportFormData, TestRow } from '@/types';
 
 export default function Home() {
   const [formData, setFormData] = useState<ReportFormData>({
-    reportNo: Math.floor(100000 + Math.random() * 900000).toString(),
+    reportNo: '519438',
     applicant: 'M/s. COTTON ART PRINTING',
     address: '196 Ghona West Ghona Road, Faisalabad Pakistan.',
     phone: '-',
@@ -31,8 +31,8 @@ export default function Home() {
     buyingHouse: '-',
     manufacturer: '-',
     previousReportNo: '-',
-    sampleReceivingDate: new Date().toLocaleDateString('en-GB'),
-    sampleReportingDate: new Date(Date.now() + 5 * 86400000).toLocaleDateString('en-GB'),
+    sampleReceivingDate: '14/08/2026',
+    sampleReportingDate: '19/08/2026',
     careLabelSymbols: '-',
     sampleDetails: 'A Sample of Recycled Material, tested for Density, Melt Flow Index, Shape and Filteration Level LDPE Content.'
   });
