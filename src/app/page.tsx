@@ -8,6 +8,7 @@ import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
 import Footer from '@/components/report/Footer';
+import PnacLogo from '@/components/report/PnacLogo';
 import { ReportFormData, TestRow } from '@/types';
 
 export default function Home() {
@@ -82,7 +83,6 @@ export default function Home() {
   return (
     <div className="flex h-screen bg-slate-200 overflow-hidden font-sans">
       
-      {/* FORM SIDEBAR */}
       <ReportForm 
         formData={formData}
         updateField={updateField}
@@ -96,39 +96,69 @@ export default function Home() {
         handlePrint={handlePrint}
       />
 
-      {/* PDF PREVIEW AREA */}
       <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible">
         
         {/* PAGE 1 */}
-        <div className="a4-page flex flex-col">
+        <div className="a4-page flex flex-col pt-[15mm]">
           <Header />
           <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
-          <PageOneData data={formData} />
-          <Signature />
+          
+          <div className="border-[1.5px] border-black rounded-[2rem] flex-1 flex flex-col relative mt-2 pb-2">
+            <PnacLogo />
+            
+            <div className="flex justify-between items-end px-8 pt-10">
+               <div className="font-sans font-bold text-[14px]">ISO/IEC 17025:2017 Accredited Lab</div>
+               <div className="font-sans font-bold text-[26px] tracking-wider pr-10">TEST REPORT</div>
+            </div>
+
+            <PageOneData data={formData} />
+            <Signature />
+          </div>
+
           <Footer />
         </div>
 
         {/* PAGE 2 */}
-        <div className="a4-page flex flex-col">
+        <div className="a4-page flex flex-col pt-[15mm]">
           <Header />
           <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
-          <TestTable sampleDetails={formData.sampleDetails} tests={tests} />
+          
+          <div className="border-[1.5px] border-black rounded-[2rem] flex-1 flex flex-col relative mt-2 pb-2">
+            <PnacLogo />
+            
+            <div className="flex justify-between items-end px-8 pt-10">
+               <div className="font-sans font-bold text-[14px]">ISO/IEC 17025:2017 Accredited Lab</div>
+               <div className="font-sans font-bold text-[26px] tracking-wider pr-10">TEST REPORT</div>
+            </div>
+
+            <TestTable sampleDetails={formData.sampleDetails} tests={tests} />
+          </div>
+
           <Footer />
         </div>
 
-        {/* PAGE 3 (Image Page) */}
-        <div className="a4-page flex flex-col">
+        {/* PAGE 3 */}
+        <div className="a4-page flex flex-col pt-[15mm]">
           <Header />
-          <div className="flex justify-end mb-8 mt-4">
-            <div className="bg-gray-200 px-4 py-1 text-base font-sans font-bold">Report # {formData.reportNo}</div>
+          <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
+          
+          <div className="border-[1.5px] border-black rounded-[2rem] flex-1 flex flex-col relative mt-2 pb-2">
+            <PnacLogo />
+            
+            <div className="flex justify-between items-end px-8 pt-10 mb-6">
+               <div className="font-sans font-bold text-[14px]">ISO/IEC 17025:2017 Accredited Lab</div>
+               <div className="font-sans font-bold text-[26px] tracking-wider pr-10">TEST REPORT</div>
+            </div>
+
+            <div className="flex-1 flex justify-center items-start pt-10 border-t-[1.5px] border-black">
+              {sampleImage ? (
+                <img src={sampleImage} alt="Sample" className="max-w-[80%] max-h-[600px] object-contain shadow-sm" />
+              ) : (
+                <div className="text-slate-400 italic mt-20 font-sans">No sample image attached.</div>
+              )}
+            </div>
           </div>
-          <div className="flex-1 flex justify-center items-start pt-10 border-t border-black">
-            {sampleImage ? (
-              <img src={sampleImage} alt="Sample" className="max-w-[80%] max-h-[600px] object-contain shadow-sm" />
-            ) : (
-              <div className="text-slate-400 italic mt-20">No sample image uploaded.</div>
-            )}
-          </div>
+
           <Footer />
         </div>
 

@@ -1,40 +1,81 @@
 import React from 'react';
 import { ReportFormData } from '@/types';
 
-export default function PageOneData({ data }: { data: ReportFormData }) {
+interface PageOneDataProps {
+  data: ReportFormData;
+}
+
+export default function PageOneData({ data }: PageOneDataProps) {
+  const fields = [
+    { label: 'APPLICANT', value: data.applicant, bold: true },
+    { label: 'ADDRESS', value: data.address },
+    { label: 'PHONE #', value: data.phone },
+    { label: 'SAMPLE DESCRIPTION', value: data.sampleDescription },
+    { label: 'SAMPLE', value: data.sample },
+    { label: 'SHAPE', value: data.shape },
+    { label: 'SAMPLE DATE', value: data.sampleDate },
+    { label: 'ORDER NO.', value: data.orderNo },
+    { label: 'COLOR', value: data.color },
+    { label: 'SIZE', value: data.size },
+    { label: 'FABRIC CONSTRUCTION', value: data.fabricConstruction },
+    { label: 'FABRIC WEIGHT', value: data.fabricWeight },
+    { label: 'FIBRE CONTENT', value: data.fibreContent },
+    { label: 'END USE', value: data.endUse },
+    { label: 'BUYER NAME', value: data.buyerName },
+    { label: 'BUYING HOUSE', value: data.buyingHouse },
+    { label: 'MANUFACTURER', value: data.manufacturer },
+    { label: 'PREVIOUS REPORT #', value: data.previousReportNo },
+    { label: 'SAMPLE RECEIVING DATE', value: data.sampleReceivingDate },
+    { label: 'SAMPLE REPORTING DATE', value: data.sampleReportingDate },
+    { label: 'CARE LABEL SYMBOLS', value: data.careLabelSymbols },
+  ];
+
   return (
-    <>
-      <div className="mb-4">
-        <span className="font-semibold text-sm font-sans">SAMPLE SUBMITTED AND DESCRIBED BY CLIENT AS:</span>
+    <div className="flex flex-col w-full text-[12px] font-sans font-medium px-4 mt-6">
+      
+      {/* Top Label */}
+      <div className="font-bold mb-3 uppercase text-[12.5px] tracking-wide">
+        SAMPLE SUBMITTED AND DESCRIBED BY CLIENT AS:
       </div>
 
-      <div className="flex-1 text-[13px] leading-[1.3] grid grid-cols-[220px_auto] gap-y-1 font-serif uppercase tracking-wide">
-        <div className="font-bold">APPLICANT</div><div className="font-bold">: {data.applicant}</div>
-        <div className="font-bold">ADDRESS</div><div>: {data.address}</div>
-        <div className="font-bold">PHONE #</div><div>: {data.phone}</div>
-        <div className="font-bold">SAMPLE DESCRIPTION</div><div>: {data.sampleDescription}</div>
-        <div className="font-bold">SAMPLE</div><div>: {data.sample}</div>
-        <div className="font-bold">SHAPE</div><div>: {data.shape}</div>
-        <div className="font-bold">SAMPLE DATE</div><div>: {data.sampleDate}</div>
-        <div className="font-bold">ORDER NO.</div><div>: {data.orderNo}</div>
-        <div className="font-bold">COLOR</div><div>: {data.color}</div>
-        <div className="font-bold">SIZE</div><div>: {data.size}</div>
-        <div className="font-bold">FABRIC CONSTRUCTION</div><div>: {data.fabricConstruction}</div>
-        <div className="font-bold">FABRIC WEIGHT</div><div>: {data.fabricWeight}</div>
-        <div className="font-bold">FIBRE CONTENT</div><div>: {data.fibreContent}</div>
-        <div className="font-bold">END USE</div><div>: {data.endUse}</div>
-        <div className="font-bold">BUYER NAME</div><div>: {data.buyerName}</div>
-        <div className="font-bold">BUYING HOUSE</div><div>: {data.buyingHouse}</div>
-        <div className="font-bold">MANUFACTURER</div><div>: {data.manufacturer}</div>
-        <div className="font-bold">PREVIOUS REPORT #</div><div>: {data.previousReportNo}</div>
-        <div className="font-bold">SAMPLE RECEIVING DATE</div><div>: {data.sampleReceivingDate}</div>
-        <div className="font-bold">SAMPLE REPORTING DATE</div><div>: {data.sampleReportingDate}</div>
-        <div className="font-bold">CARE LABEL SYMBOLS</div><div>: {data.careLabelSymbols}</div>
+      {/* Grid Layout */}
+      <div className="flex flex-col gap-[3px] w-full">
+        {fields.map((field, idx) => (
+          <div key={idx} className="flex w-full leading-tight">
+            {/* Left Column - 35% */}
+            <div className="w-[35%] uppercase tracking-wide">
+              {field.label}
+            </div>
+            
+            {/* Right Column - 65% with exactly aligned colon */}
+            <div className="w-[65%] flex">
+              <span className="mr-2 font-bold">:</span>
+              <span className={`uppercase ${field.bold ? 'font-bold' : ''}`}>
+                {field.value}
+              </span>
+            </div>
+          </div>
+        ))}
         
-        <div className="col-span-2 h-4"></div>
-        
-        <div className="font-bold">TEST RESULT</div><div>: PLEASE REFER TO THE NEXT PAGE(S)</div>
+        {/* Empty row spacing */}
+        <div className="h-4"></div>
+
+        {/* Test Result Row */}
+        <div className="flex w-full leading-tight">
+          <div className="w-[35%] uppercase tracking-wide font-bold">
+            TEST RESULT
+          </div>
+          <div className="w-[65%] flex font-bold">
+            <span className="mr-2">:</span>
+            <span className="uppercase">PLEASE REFER TO THE NEXT PAGE(S)</span>
+          </div>
+        </div>
+
       </div>
-    </>
+
+      {/* Full width border line ending the section */}
+      <div className="w-full border-b-[1.5px] border-black mt-3"></div>
+
+    </div>
   );
 }

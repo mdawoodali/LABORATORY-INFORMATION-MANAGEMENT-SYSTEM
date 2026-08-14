@@ -13,6 +13,9 @@
 }
 
 @layer utilities {
+  .font-gothic {
+    font-family: "Old English Text MT", "Engravers Old English BT", "Diploma", "Blackletter", serif;
+  }
   .a4-page {
     width: 210mm;
     height: 297mm;
