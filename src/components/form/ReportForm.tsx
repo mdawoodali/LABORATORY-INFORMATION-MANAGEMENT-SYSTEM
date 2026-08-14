@@ -1,6 +1,7 @@
 import React from 'react';
 import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save } from 'lucide-react';
 import { ReportFormData, TestRow } from '@/types';
+import DropdownInput from './DropdownInput';
 
 interface ReportFormProps {
   formData: ReportFormData;
@@ -88,15 +89,15 @@ export default function ReportForm({
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Applicant</label>
-              <input type="text" value={formData.applicant} onChange={e => updateField('applicant', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="applicant" value={formData.applicant} onChange={val => updateField('applicant', val)} className="w-full border border-slate-300 rounded p-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Address</label>
-              <input type="text" value={formData.address} onChange={e => updateField('address', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="address" value={formData.address} onChange={val => updateField('address', val)} className="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Phone #</label>
-              <input type="text" value={formData.phone} onChange={e => updateField('phone', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="phone" value={formData.phone} onChange={val => updateField('phone', val)} className="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
           </div>
         </section>
@@ -129,7 +130,7 @@ export default function ReportForm({
             ].map((f) => (
               <div key={f.key} className={f.key === 'sampleDescription' ? 'col-span-2' : 'col-span-1'}>
                 <label className="block text-[11px] font-semibold text-slate-500 mb-1">{f.label}</label>
-                <input type="text" value={(formData as any)[f.key]} onChange={e => updateField(f.key as keyof ReportFormData, e.target.value)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                <DropdownInput fieldKey={f.key} value={(formData as any)[f.key]} onChange={val => updateField(f.key as keyof ReportFormData, val)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
               </div>
             ))}
           </div>
@@ -148,23 +149,23 @@ export default function ReportForm({
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 1 Header</label>
-              <input type="text" value={formData.tableHeader1} onChange={e => updateField('tableHeader1', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader1" value={formData.tableHeader1} onChange={val => updateField('tableHeader1', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 2 Header</label>
-              <input type="text" value={formData.tableHeader2} onChange={e => updateField('tableHeader2', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader2" value={formData.tableHeader2} onChange={val => updateField('tableHeader2', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 3 Header</label>
-              <input type="text" value={formData.tableHeader3} onChange={e => updateField('tableHeader3', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader3" value={formData.tableHeader3} onChange={val => updateField('tableHeader3', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 4 Header</label>
-              <input type="text" value={formData.tableHeader4} onChange={e => updateField('tableHeader4', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader4" value={formData.tableHeader4} onChange={val => updateField('tableHeader4', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-2 mb-2">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Table Footer Text</label>
-                <input type="text" value={formData.footerText} onChange={e => updateField('footerText', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                <DropdownInput fieldKey="footerText" value={formData.footerText} onChange={val => updateField('footerText', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
           </div>
           
@@ -177,19 +178,19 @@ export default function ReportForm({
                 <div className="grid grid-cols-2 gap-3 mb-2">
                   <div className="col-span-2">
                     <label className="text-[10px] uppercase font-bold text-slate-400">Test Name</label>
-                    <input placeholder="Test Name" value={test.test} onChange={e => updateTest(test.id, 'test', e.target.value)} className="w-full border-b border-slate-300 bg-transparent text-sm font-semibold py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                    <DropdownInput fieldKey="testName" placeholder="Test Name" value={test.test} onChange={val => updateTest(test.id, 'test', val)} className="w-full border-b border-slate-300 bg-transparent text-sm font-semibold py-1 focus:outline-none focus:border-blue-500 transition-colors" />
                   </div>
                   <div>
                     <label className="text-[10px] uppercase font-bold text-slate-400">Unit</label>
-                    <input placeholder="Unit" value={test.unit} onChange={e => updateTest(test.id, 'unit', e.target.value)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                    <DropdownInput fieldKey="testUnit" placeholder="Unit" value={test.unit} onChange={val => updateTest(test.id, 'unit', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
                   </div>
                   <div>
                     <label className="text-[10px] uppercase font-bold text-slate-400">ASTM Standard</label>
-                    <input placeholder="Standard" value={test.standard} onChange={e => updateTest(test.id, 'standard', e.target.value)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                    <DropdownInput fieldKey="testStandard" placeholder="Standard" value={test.standard} onChange={val => updateTest(test.id, 'standard', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
                   </div>
                   <div className="col-span-2 mt-2">
                     <label className="text-[10px] uppercase font-bold text-slate-400">Actual Result</label>
-                    <input placeholder="Actual Result" value={test.result} onChange={e => updateTest(test.id, 'result', e.target.value)} className="w-full bg-white border border-slate-300 rounded text-sm p-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold" />
+                    <DropdownInput fieldKey="testResult" placeholder="Actual Result" value={test.result} onChange={val => updateTest(test.id, 'result', val)} className="w-full bg-white border border-slate-300 rounded text-sm p-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold" />
                   </div>
                 </div>
               </div>
