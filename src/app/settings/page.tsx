@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { AppSettings, DEFAULT_SETTINGS } from '@/types';
-import { ArrowLeft, Download, Upload, Shield, Database, Save, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Download, Upload, Shield, Database, Save, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function SettingsPage() {
@@ -13,6 +13,7 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [importStatus, setImportStatus] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const savedSettings = localStorage.getItem('sr_settings');
@@ -141,12 +142,21 @@ export default function SettingsPage() {
             </div>
             <div>
               <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Default PDF Password</label>
-              <input
-                type="text"
-                value={settings.defaultPassword}
-                onChange={e => setSettings(s => ({ ...s, defaultPassword: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg p-3 text-sm font-mono focus:ring-2 focus:ring-[#2b579a] outline-none transition-all"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={settings.defaultPassword}
+                  onChange={e => setSettings(s => ({ ...s, defaultPassword: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-lg p-3 pr-12 text-sm font-mono focus:ring-2 focus:ring-[#2b579a] outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <div>
