@@ -71,7 +71,7 @@ export default function ReportForm({
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-1 text-xs"
               title="Save as Template"
             >
-              <Save size={14} /> Template
+              <Save size={14} /> Make Template
             </button>
           )}
         </div>
