@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   title: "S. R. LABORATORIES",
   description: "Report Management System",
   icons: {
-    icon: '/icon.png?v=3',
+    icon: '/icon.jpg?v=4',
   },
 };
 
