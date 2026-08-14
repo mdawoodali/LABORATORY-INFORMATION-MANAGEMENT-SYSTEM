@@ -30,4 +30,9 @@ export interface ReportFormData {
   sampleReportingDate: string;
   careLabelSymbols: string;
   sampleDetails: string;
+  tableHeader1: string;
+  tableHeader2: string;
+  tableHeader3: string;
+  tableHeader4: string;
+  footerText: string;
 }

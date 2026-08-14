@@ -47,7 +47,12 @@ export default function Home() {
     sampleReceivingDate: '',
     sampleReportingDate: '',
     careLabelSymbols: '',
-    sampleDetails: ''
+    sampleDetails: '',
+    tableHeader1: 'Test',
+    tableHeader2: 'Unit',
+    tableHeader3: 'ASTM Standard',
+    tableHeader4: 'Actual Results',
+    footerText: 'Average readings are reported.'
   });
 
   const [tests, setTests] = useState<TestRow[]>([

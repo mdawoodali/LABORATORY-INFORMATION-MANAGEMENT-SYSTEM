@@ -1,37 +1,30 @@
 import React from 'react';
-import { TestRow } from '@/types';
+import { TestRow, ReportFormData } from '@/types';
 
-interface TestTableProps {
-  sampleDetails: string;
-  tests: TestRow[];
-}
-
-export default function TestTable({ sampleDetails, tests }: TestTableProps) {
+export default function TestTable({ tests, data }: { tests: TestRow[], data: ReportFormData }) {
   return (
-    <div className="w-full px-6 mt-6 font-sans text-[12px]">
-      
-      {/* Table Intro */}
-      <div className="mb-4 text-[13px]">
+    <div className="flex flex-col flex-1 pl-12 pr-12 pt-6">
+      <div className="text-[13px] mb-6">
         <div className="flex gap-2">
           <span className="font-bold w-32">Test Conducted</span>
           <span>:</span>
         </div>
         <div className="flex gap-2 mt-1">
           <span className="font-bold w-32">Sample Details</span>
-          <span className="flex-1">: A Sample of <span className="font-bold">Recycled Material</span>, tested for Density, Melt Flow Index, Shape and Filteration Level LDPE Content.</span>
+          <span className="flex-1">: {data.sampleDetails}</span>
         </div>
       </div>
 
-      <div className="font-bold text-[13px] mb-1">Average readings are reported.</div>
+      <div className="font-bold text-[13px] mb-1">{data.footerText}</div>
 
       {/* Main Table */}
       <table className="w-full border-collapse border border-black text-center mb-6">
         <thead>
           <tr className="border-b border-black">
-            <th className="border border-black p-2 font-bold w-[35%]">Test</th>
-            <th className="border border-black p-2 font-bold w-[20%]">Unit</th>
-            <th className="border border-black p-2 font-bold w-[25%]">ASTM Standard</th>
-            <th className="border border-black p-2 font-bold w-[20%]">Actual Results</th>
+            <th className="border border-black p-2 font-bold w-[35%]">{data.tableHeader1}</th>
+            <th className="border border-black p-2 font-bold w-[20%]">{data.tableHeader2}</th>
+            <th className="border border-black p-2 font-bold w-[25%]">{data.tableHeader3}</th>
+            <th className="border border-black p-2 font-bold w-[20%]">{data.tableHeader4}</th>
           </tr>
         </thead>
         <tbody>
@@ -47,11 +40,10 @@ export default function TestTable({ sampleDetails, tests }: TestTableProps) {
       </table>
 
       {/* End of Report Line */}
-      <div className="flex items-center w-full">
+      <div className="flex items-center w-full mt-4">
         <div className="border-b-[1.5px] border-black flex-1"></div>
         <div className="font-bold pl-4">End of Report</div>
       </div>
-      
     </div>
   );
 }

@@ -116,9 +116,32 @@ export default function ReportForm({
         {/* Test Details */}
         <section>
           <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Page 2 Tests</h3>
-          <div className="col-span-2 mb-4">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Testing Sentence</label>
-              <textarea value={formData.sampleDetails} onChange={e => updateField('sampleDetails', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm resize-y focus:ring-2 focus:ring-blue-500 outline-none transition-all" rows={3} />
+          
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="col-span-2">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Testing Sentence</label>
+                <textarea value={formData.sampleDetails} onChange={e => updateField('sampleDetails', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm resize-y focus:ring-2 focus:ring-blue-500 outline-none transition-all" rows={2} />
+            </div>
+            <div className="col-span-1">
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 1 Header</label>
+              <input type="text" value={formData.tableHeader1} onChange={e => updateField('tableHeader1', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            </div>
+            <div className="col-span-1">
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 2 Header</label>
+              <input type="text" value={formData.tableHeader2} onChange={e => updateField('tableHeader2', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            </div>
+            <div className="col-span-1">
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 3 Header</label>
+              <input type="text" value={formData.tableHeader3} onChange={e => updateField('tableHeader3', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            </div>
+            <div className="col-span-1">
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 4 Header</label>
+              <input type="text" value={formData.tableHeader4} onChange={e => updateField('tableHeader4', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            </div>
+            <div className="col-span-2 mb-2">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Table Footer Text</label>
+                <input type="text" value={formData.footerText} onChange={e => updateField('footerText', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            </div>
           </div>
           
           <div className="space-y-3">
