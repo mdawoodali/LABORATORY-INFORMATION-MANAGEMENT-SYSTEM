@@ -121,7 +121,9 @@ function EditorContent() {
       };
 
       // Dynamically import pdfmake to avoid SSR/window issues in Next.js
+      // @ts-ignore
       const pdfMakeModule = await import('pdfmake/build/pdfmake');
+      // @ts-ignore
       const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
       
       const pdfMake = pdfMakeModule.default || pdfMakeModule;
