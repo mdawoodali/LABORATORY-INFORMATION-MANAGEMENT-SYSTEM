@@ -1,5 +1,5 @@
 import React from 'react';
-import Barcode from 'react-barcode';
+import QRCode from 'react-qr-code';
 
 interface SubHeaderProps {
   reportNo: string;
@@ -8,6 +8,8 @@ interface SubHeaderProps {
 }
 
 export default function SubHeader({ reportNo, pageNum, totalPages }: SubHeaderProps) {
+  const verifyUrl = `https://sr-laboratories-nine.vercel.app/verify/${reportNo}`;
+
   return (
     <div className="absolute right-6 top-[110px] flex flex-col items-end z-20">
       
@@ -21,16 +23,13 @@ export default function SubHeader({ reportNo, pageNum, totalPages }: SubHeaderPr
         </div>
       </div>
 
-      {/* Barcode perfectly right aligned below Report # */}
+      {/* QR Code perfectly right aligned below Report # */}
       <div className="flex justify-end pt-1 pr-2">
-        <Barcode 
-          value={reportNo}
-          width={1.2}
-          height={25}
-          fontSize={10}
-          margin={0}
-          background="transparent"
-          displayValue={false}
+        <QRCode 
+          value={verifyUrl} 
+          size={50}
+          level="L"
+          style={{ height: "auto", maxWidth: "100%", width: "50px" }}
         />
       </div>
       
