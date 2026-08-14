@@ -22,11 +22,11 @@ export default function SubHeader({ reportNo, pageNum, totalPages }: SubHeaderPr
       </div>
 
       {/* Barcode perfectly right aligned below Report # */}
-      <div className="flex justify-end pt-2 pr-6">
+      <div className="flex justify-end pt-1 pr-2">
         <Barcode 
-          value={`https://srlaboratories.vercel.app/verify/${reportNo}`}
+          value={reportNo}
           width={1.2}
-          height={30}
+          height={25}
           fontSize={10}
           margin={0}
           background="transparent"

@@ -18,7 +18,7 @@ import { supabase } from '@/lib/supabase';
 
 // Initialize PDF fonts
 if (pdfMake.vfs === undefined) {
-  pdfMake.vfs = pdfFonts.pdfMake.vfs;
+  pdfMake.vfs = (pdfFonts as any).pdfMake ? (pdfFonts as any).pdfMake.vfs : (pdfFonts as any).vfs;
 }
 
 export default function Home() {
@@ -160,7 +160,8 @@ export default function Home() {
         handlePrint={handlePrint}
       />
 
-      <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible">
+
+        <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible">
         
         {/* PAGE 1 */}
         <div className="a4-page flex flex-col pt-[15mm] relative">
@@ -214,9 +215,9 @@ export default function Home() {
                <div className="font-sans font-bold text-[26px] tracking-wider pr-10">TEST REPORT</div>
             </div>
 
-            <div className="flex-1 flex justify-center items-start pt-10 border-t-[1.5px] border-black">
+            <div className="flex-1 flex justify-center items-start pt-10 border-t-[1.5px] border-black mx-[20px]">
               {sampleImage ? (
-                <img src={sampleImage} alt="Sample" className="max-w-[80%] max-h-[600px] object-contain shadow-sm" />
+                <img src={sampleImage} alt="Sample" className="max-w-[80%] max-h-[600px] object-contain shadow-sm border border-gray-200 p-2" />
               ) : (
                 <div className="text-slate-400 italic mt-20 font-sans">No sample image attached.</div>
               )}
