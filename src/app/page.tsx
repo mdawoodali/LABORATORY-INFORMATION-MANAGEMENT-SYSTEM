@@ -1,227 +1,210 @@
 "use client";
 
-import React, { useState } from 'react';
-import html2canvas from 'html2canvas';
-// @ts-ignore
-import pdfMake from 'pdfmake/build/pdfmake';
-// @ts-ignore
-import pdfFonts from 'pdfmake/build/vfs_fonts';
-import ReportForm from '@/components/form/ReportForm';
-import SubHeader from '@/components/report/SubHeader';
-import PageOneData from '@/components/report/PageOneData';
-import TestTable from '@/components/report/TestTable';
-import Signature from '@/components/report/Signature';
-import { ReportFormData, TestRow } from '@/types';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
+import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout } from 'lucide-react';
 
-// Initialize PDF fonts
-if (pdfMake.vfs === undefined) {
-  pdfMake.vfs = (pdfFonts as any).pdfMake ? (pdfFonts as any).pdfMake.vfs : (pdfFonts as any).vfs;
-}
+export default function HomePage() {
+  const router = useRouter();
+  const [recentReports, setRecentReports] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function Home() {
-  const [formData, setFormData] = useState<ReportFormData>({
-    reportNo: String(Math.floor(100000 + Math.random() * 900000)),
-    applicant: '',
-    address: '',
-    phone: '',
-    sampleDescription: '',
-    sample: '',
-    shape: '',
-    sampleDate: '',
-    orderNo: '',
-    color: '',
-    size: '',
-    fabricConstruction: '',
-    fabricWeight: '',
-    fibreContent: '',
-    endUse: '',
-    buyerName: '',
-    buyingHouse: '',
-    manufacturer: '',
-    previousReportNo: '',
-    sampleReceivingDate: '',
-    sampleReportingDate: '',
-    careLabelSymbols: '',
-    sampleDetails: '',
-    tableHeader1: 'Test',
-    tableHeader2: 'Unit',
-    tableHeader3: 'ASTM Standard',
-    tableHeader4: 'Actual Results',
-    footerText: 'Average readings are reported.'
-  });
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const [tests, setTests] = useState<TestRow[]>([
-    { id: '1', test: 'Density', unit: 'g / cm³', standard: 'ASTM D792 - A', result: '0.90' },
-    { id: '2', test: 'Melt Flow Index\n@190 °C & 2.16 kg', unit: 'g / 10min.', standard: 'ASTM D1238', result: '1.400' },
-    { id: '3', test: 'Visual Inspection', unit: '-', standard: '-', result: 'Pellet/Beige' },
-    { id: '4', test: 'Filteration level\nLDPE Content', unit: '%', standard: '-', result: '99.30' }
-  ]);
+  const loadData = async () => {
+    setIsLoading(true);
 
-  const [sampleImage, setSampleImage] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const totalPages = sampleImage ? 3 : 2;
-  
-  const handlePrint = async (password?: string) => {
-    if (!password) {
-      alert("Please enter a password to lock the PDF.");
-      return;
-    }
-    
-    setIsGenerating(true);
-
+    // Load recent reports from Supabase
     try {
-      // 1. Save receipt to Supabase database
-      const { error } = await supabase
+      const { data: reports } = await supabase
         .from('receipts')
-        .upsert({
-          id: formData.reportNo,
-          password: password,
-          data: { formData, tests, sampleImage }
-        });
-        
-      if (error) {
-        console.error("Supabase Error:", error);
-        alert("Warning: Could not save to database. Check the console for details.");
+        .select('id, data, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (reports) {
+        setRecentReports(reports.map(r => ({
+          id: r.id,
+          reportNo: r.id,
+          applicant: r.data?.formData?.applicant || 'Untitled',
+          date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
+        })));
       }
+    } catch (e) {
+      console.error('Failed to load reports:', e);
+    }
 
-      // 2. Capture pages as high-res images
-      const pages = document.querySelectorAll('.a4-page');
-      const content = [];
-
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 2, useCORS: true });
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        content.push({
-          image: imgData,
-          width: 595.28,
-          height: 841.89,
-          margin: [0, 0, 0, 0]
-        });
+    // Load templates from localStorage
+    const savedTemplates = localStorage.getItem('sr_templates');
+    if (savedTemplates) {
+      try {
+        setTemplates(JSON.parse(savedTemplates));
+      } catch (e) {
+        console.error('Failed to parse templates:', e);
       }
-
-      const docDefinition = {
-        pageSize: 'A4' as const,
-        pageMargins: [0, 0, 0, 0] as [number, number, number, number],
-        content: content,
-        userPassword: password,
-        ownerPassword: password,
-        permissions: { printing: 'high', modifying: false, copying: false }
-      };
-
-      // @ts-ignore
-      pdfMake.createPdf(docDefinition).download(`SR_Lab_Report_${formData.reportNo}.pdf`);
-    } catch (err) {
-      console.error(err);
-      alert("An error occurred during generation.");
-    } finally {
-      setIsGenerating(false);
     }
+
+    setIsLoading(false);
   };
 
-  const updateField = (field: keyof ReportFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const deleteTemplate = (id: string) => {
+    const updated = templates.filter(t => t.id !== id);
+    setTemplates(updated);
+    localStorage.setItem('sr_templates', JSON.stringify(updated));
   };
 
-  const addTest = () => {
-    setTests([...tests, { id: Date.now().toString(), test: 'New Test', unit: '-', standard: '-', result: '-' }]);
+  const handleNewReport = () => {
+    router.push('/editor');
   };
 
-  const updateTest = (id: string, field: keyof TestRow, value: string) => {
-    setTests(tests.map(t => t.id === id ? { ...t, [field]: value } : t));
+  const handleOpenTemplate = (template: Template) => {
+    // Store template data in sessionStorage so editor can pick it up
+    sessionStorage.setItem('sr_template_data', JSON.stringify(template));
+    router.push('/editor?template=' + template.id);
   };
 
-  const removeTest = (id: string) => {
-    setTests(tests.filter(t => t.id !== id));
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSampleImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleOpenReport = (reportNo: string) => {
+    router.push('/editor?report=' + reportNo);
   };
 
   return (
-    <div className="flex h-screen bg-slate-200 overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#f3f3f3] font-sans">
       
-      <ReportForm 
-        formData={formData}
-        updateField={updateField}
-        tests={tests}
-        addTest={addTest}
-        updateTest={updateTest}
-        removeTest={removeTest}
-        sampleImage={sampleImage}
-        handleImageUpload={handleImageUpload}
-        removeImage={() => setSampleImage(null)}
-        handlePrint={handlePrint}
-      />
+      {/* Top Bar */}
+      <div className="bg-[#2b579a] text-white px-8 py-4 flex justify-between items-center shadow-lg">
+        <div className="flex items-center gap-3">
+          <FileText size={28} />
+          <div>
+            <h1 className="text-xl font-bold tracking-wide">S. R. LABORATORIES</h1>
+            <p className="text-blue-200 text-xs tracking-wider">Report Management System</p>
+          </div>
+        </div>
+        <button
+          onClick={() => router.push('/settings')}
+          className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all text-sm"
+        >
+          <Settings size={16} />
+          Settings
+        </button>
+      </div>
 
-        <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible items-center">
-        
-        {/* PAGE 1 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-          {/* Background Frame */}
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
+      <div className="max-w-6xl mx-auto px-8 py-10">
 
-          {/* Content overlay */}
-          <div className="relative z-10 w-full h-full flex flex-col">
-            {/* Page/Report # bar positioned right below the header area */}
-            <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
+        {/* NEW REPORT Section */}
+        <div className="mb-12">
+          <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-5">New</h2>
+          <div className="flex gap-5 flex-wrap">
             
-            {/* Push content below the frame header (PNAC + S.R. LABS + ISO/IEC + TEST REPORT) */}
-            <div className="pt-[175px]">
-              <PageOneData data={formData} />
-            </div>
-            
-            <div className="flex-1"></div>
-            
-            {/* Signature & disclaimer above the frame footer */}
-            <div className="pb-[55px]">
-              <Signature />
-            </div>
+            {/* Blank Report Card */}
+            <button
+              onClick={handleNewReport}
+              className="group w-[180px] h-[240px] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col justify-center items-center gap-3 hover:border-[#2b579a] hover:shadow-lg transition-all cursor-pointer"
+            >
+              <div className="w-16 h-16 rounded-full bg-[#2b579a]/10 flex items-center justify-center group-hover:bg-[#2b579a]/20 transition-all">
+                <Plus size={28} className="text-[#2b579a]" />
+              </div>
+              <span className="text-sm font-bold text-gray-600 group-hover:text-[#2b579a] transition-colors">Blank Report</span>
+            </button>
+
+            {/* Template Cards */}
+            {templates.map(template => (
+              <div key={template.id} className="relative group">
+                <button
+                  onClick={() => handleOpenTemplate(template)}
+                  className="w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg flex flex-col justify-between p-4 hover:shadow-lg hover:border-[#2b579a] transition-all cursor-pointer"
+                >
+                  <div className="w-full h-[140px] bg-gradient-to-b from-gray-50 to-gray-100 rounded flex items-center justify-center border border-gray-100">
+                    <Layout size={36} className="text-gray-300" />
+                  </div>
+                  <div className="mt-3">
+                    <div className="text-sm font-bold text-gray-700 truncate">{template.name}</div>
+                    <div className="text-[10px] text-gray-400 mt-0.5">{new Date(template.createdAt).toLocaleDateString()}</div>
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteTemplate(template.id); }}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ))}
+
+            {/* Add Template Card */}
+            <button
+              onClick={() => {
+                const name = prompt('Enter template name:');
+                if (name) {
+                  const newTemplate: Template = {
+                    id: Date.now().toString(),
+                    name,
+                    formData: { ...DEFAULT_FORM_DATA, reportNo: '' },
+                    tests: [...DEFAULT_TESTS],
+                    createdAt: new Date().toISOString(),
+                  };
+                  const updated = [...templates, newTemplate];
+                  setTemplates(updated);
+                  localStorage.setItem('sr_templates', JSON.stringify(updated));
+                }
+              }}
+              className="group w-[180px] h-[240px] bg-white/50 border border-dashed border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 hover:border-gray-400 hover:bg-white transition-all cursor-pointer"
+            >
+              <Plus size={20} className="text-gray-400 group-hover:text-gray-600" />
+              <span className="text-xs text-gray-400 group-hover:text-gray-600 font-semibold">Add Template</span>
+            </button>
           </div>
         </div>
 
-        {/* PAGE 2 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
+        {/* RECENT REPORTS Section */}
+        <div>
+          <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-5 flex items-center gap-2">
+            <Clock size={14} />
+            Recent Reports
+          </h2>
 
-          <div className="relative z-10 w-full h-full flex flex-col">
-            <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
-            <div className="pt-[175px] flex-1 flex flex-col">
-              <TestTable tests={tests} data={formData} />
-              <div className="flex-1"></div>
-              <div className="pb-[55px]">
-                <Signature />
-              </div>
+          {isLoading ? (
+            <div className="bg-white rounded-lg p-10 text-center text-gray-400 text-sm">Loading...</div>
+          ) : recentReports.length === 0 ? (
+            <div className="bg-white rounded-lg border border-gray-200 p-10 text-center text-gray-400">
+              <FileText size={40} className="mx-auto mb-3 text-gray-300" />
+              <p className="text-sm">No reports yet. Click <strong>"Blank Report"</strong> to create one.</p>
             </div>
-          </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200 text-left text-xs text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 font-semibold">Report #</th>
+                    <th className="px-6 py-3 font-semibold">Applicant</th>
+                    <th className="px-6 py-3 font-semibold">Date</th>
+                    <th className="px-6 py-3 font-semibold text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentReports.map((report, idx) => (
+                    <tr
+                      key={report.id}
+                      className={`border-b border-gray-100 hover:bg-blue-50/50 transition-colors cursor-pointer ${idx % 2 === 1 ? 'bg-gray-50/30' : ''}`}
+                      onClick={() => handleOpenReport(report.reportNo)}
+                    >
+                      <td className="px-6 py-4 font-mono font-bold text-[#2b579a]">{report.reportNo}</td>
+                      <td className="px-6 py-4 text-gray-700">{report.applicant}</td>
+                      <td className="px-6 py-4 text-gray-500">{report.date}</td>
+                      <td className="px-6 py-4 text-right">
+                        <ChevronRight size={16} className="text-gray-400 inline" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
-
-        {/* PAGE 3 - Sample Image (only if uploaded) */}
-        {sampleImage && (
-          <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-            <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
-
-            <div className="relative z-10 w-full h-full flex flex-col">
-              <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
-              <div className="pt-[175px] flex-1 flex justify-center items-start px-10">
-                <img src={sampleImage} alt="Sample" className="max-w-[85%] max-h-[550px] object-contain border border-gray-200 p-2 mt-4" />
-              </div>
-              <div className="pb-[55px]">
-                <Signature />
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
     </div>
   );

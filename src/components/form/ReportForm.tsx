@@ -1,5 +1,5 @@
 import React from 'react';
-import { Printer, Plus, Trash2, Image as ImageIcon, X } from 'lucide-react';
+import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save } from 'lucide-react';
 import { ReportFormData, TestRow } from '@/types';
 
 interface ReportFormProps {
@@ -13,6 +13,8 @@ interface ReportFormProps {
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   removeImage: () => void;
   handlePrint: (password?: string) => void;
+  onSaveTemplate?: () => void;
+  onGoHome?: () => void;
 }
 
 export default function ReportForm({
@@ -25,13 +27,24 @@ export default function ReportForm({
   sampleImage,
   handleImageUpload,
   removeImage,
-  handlePrint
+  handlePrint,
+  onSaveTemplate,
+  onGoHome
 }: ReportFormProps) {
   const [password, setPassword] = React.useState('1234');
   return (
     <div className="w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full">
-      <div className="p-4 border-b bg-slate-900 text-white flex flex-col gap-4 shrink-0">
-        <h2 className="font-bold text-lg tracking-wider">Report Generator</h2>
+      <div className="p-4 border-b bg-slate-900 text-white flex flex-col gap-3 shrink-0">
+        
+        {/* Top row: Back + Title */}
+        <div className="flex items-center gap-3">
+          {onGoHome && (
+            <button onClick={onGoHome} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all">
+              <ArrowLeft size={16} />
+            </button>
+          )}
+          <h2 className="font-bold text-lg tracking-wider flex-1">Report Generator</h2>
+        </div>
         
         <div className="flex flex-col gap-1">
           <label className="text-[10px] uppercase font-bold text-slate-400">PDF Password Lock</label>
@@ -44,12 +57,23 @@ export default function ReportForm({
           />
         </div>
 
-        <button 
-          onClick={() => handlePrint(password)}
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
-        >
-          <Printer size={16} /> Generate Locked PDF
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => handlePrint(password)}
+            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+          >
+            <Printer size={16} /> Generate PDF
+          </button>
+          {onSaveTemplate && (
+            <button 
+              onClick={onSaveTemplate}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-1 text-xs"
+              title="Save as Template"
+            >
+              <Save size={14} /> Template
+            </button>
+          )}
+        </div>
       </div>
       
       <div className="p-4 overflow-y-auto flex-1 pb-20 space-y-6">
@@ -59,8 +83,8 @@ export default function ReportForm({
           <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">General Info</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Report #</label>
-              <input type="text" value={formData.reportNo} onChange={e => updateField('reportNo', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Report # <span className="text-slate-400 font-normal">(Auto-generated)</span></label>
+              <input type="text" value={formData.reportNo} readOnly disabled className="w-full border border-slate-200 rounded p-2 text-sm font-mono bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Applicant</label>

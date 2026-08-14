@@ -36,3 +36,73 @@ export interface ReportFormData {
   tableHeader4: string;
   footerText: string;
 }
+
+export interface Template {
+  id: string;
+  name: string;
+  formData: ReportFormData;
+  tests: TestRow[];
+  createdAt: string;
+}
+
+export interface SavedReport {
+  id: string;
+  reportNo: string;
+  applicant: string;
+  date: string;
+  password: string;
+  data: {
+    formData: ReportFormData;
+    tests: TestRow[];
+    sampleImage: string | null;
+  };
+}
+
+export interface AppSettings {
+  autoBackup: boolean;
+  defaultPassword: string;
+  companyName: string;
+  backupLocation: string;
+}
+
+export const DEFAULT_FORM_DATA: ReportFormData = {
+  reportNo: '',
+  applicant: '',
+  address: '',
+  phone: '',
+  sampleDescription: '',
+  sample: '',
+  shape: '',
+  sampleDate: '',
+  orderNo: '',
+  color: '',
+  size: '',
+  fabricConstruction: '',
+  fabricWeight: '',
+  fibreContent: '',
+  endUse: '',
+  buyerName: '',
+  buyingHouse: '',
+  manufacturer: '',
+  previousReportNo: '',
+  sampleReceivingDate: '',
+  sampleReportingDate: '',
+  careLabelSymbols: '',
+  sampleDetails: '',
+  tableHeader1: 'Test',
+  tableHeader2: 'Unit',
+  tableHeader3: 'ASTM Standard',
+  tableHeader4: 'Actual Results',
+  footerText: 'Average readings are reported.'
+};
+
+export const DEFAULT_TESTS: TestRow[] = [
+  { id: '1', test: 'New Test', unit: '-', standard: '-', result: '-' },
+];
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  autoBackup: true,
+  defaultPassword: '1234',
+  companyName: 'S. R. Laboratories',
+  backupLocation: 'Supabase Cloud',
+};
