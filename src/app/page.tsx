@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from 'react';
+import html2canvas from 'html2canvas';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 import ReportForm from '@/components/form/ReportForm';
 import Header from '@/components/report/Header';
 import SubHeader from '@/components/report/SubHeader';
@@ -10,6 +13,11 @@ import Signature from '@/components/report/Signature';
 import Footer from '@/components/report/Footer';
 import PnacLogo from '@/components/report/PnacLogo';
 import { ReportFormData, TestRow } from '@/types';
+
+// Initialize PDF fonts
+if (pdfMake.vfs === undefined) {
+  pdfMake.vfs = pdfFonts.pdfMake.vfs;
+}
 
 export default function Home() {
   const [formData, setFormData] = useState<ReportFormData>({
@@ -49,8 +57,38 @@ export default function Home() {
 
   const totalPages = 3;
   
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async (password?: string) => {
+    if (!password) {
+      alert("Please enter a password to lock the PDF.");
+      return;
+    }
+
+    // Capture pages as high-res images
+    const pages = document.querySelectorAll('.a4-page');
+    const content = [];
+
+    for (let i = 0; i < pages.length; i++) {
+      const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      content.push({
+        image: imgData,
+        width: 595.28, // A4 Width in points
+        height: 841.89, // A4 Height in points
+        margin: [0, 0, 0, 0]
+      });
+    }
+
+    const docDefinition = {
+      pageSize: 'A4' as const,
+      pageMargins: [0, 0, 0, 0] as [number, number, number, number],
+      content: content,
+      userPassword: password, // Locks the PDF!
+      ownerPassword: password,
+      permissions: { printing: 'high', modifying: false, copying: false }
+    };
+
+    // @ts-ignore
+    pdfMake.createPdf(docDefinition).download(`SR_Lab_Report_${formData.reportNo}.pdf`);
   };
 
   const updateField = (field: keyof ReportFormData, value: string) => {

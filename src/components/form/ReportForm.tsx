@@ -12,18 +12,43 @@ interface ReportFormProps {
   sampleImage: string | null;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   removeImage: () => void;
-  handlePrint: () => void;
+  handlePrint: (password?: string) => void;
 }
 
 export default function ReportForm({
-  formData, updateField, tests, addTest, updateTest, removeTest, sampleImage, handleImageUpload, removeImage, handlePrint
+  formData,
+  updateField,
+  tests,
+  addTest,
+  updateTest,
+  removeTest,
+  sampleImage,
+  handleImageUpload,
+  removeImage,
+  handlePrint
 }: ReportFormProps) {
+  const [password, setPassword] = React.useState('1234');
   return (
     <div className="w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full">
-      <div className="p-4 border-b bg-slate-900 text-white flex justify-between items-center shrink-0">
+      <div className="p-4 border-b bg-slate-900 text-white flex flex-col gap-4 shrink-0">
         <h2 className="font-bold text-lg tracking-wider">Report Generator</h2>
-        <button onClick={handlePrint} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-500 flex items-center gap-2 text-sm font-semibold shadow-sm transition-all active:scale-95">
-          <Printer size={16} /> Print PDF
+        
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] uppercase font-bold text-slate-400">PDF Password Lock</label>
+          <input
+            type="text"
+            className="border border-slate-600 bg-slate-800 rounded p-2 text-sm w-full text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter password to lock PDF"
+          />
+        </div>
+
+        <button 
+          onClick={() => handlePrint(password)}
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+        >
+          <Printer size={16} /> Generate Locked PDF
         </button>
       </div>
       
