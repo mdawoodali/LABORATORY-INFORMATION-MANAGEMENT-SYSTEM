@@ -103,12 +103,13 @@ export default function HomePage() {
             {/* Default Template Card */}
             <button
               onClick={handleNewReport}
-              className="group w-[180px] h-[240px] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col justify-center items-center gap-3 hover:border-[#2b579a] hover:shadow-lg transition-all cursor-pointer"
+              className="group relative w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-[#2b579a] hover:shadow-lg transition-all cursor-pointer flex flex-col justify-end"
             >
-              <div className="w-16 h-16 rounded-full bg-[#2b579a]/10 flex items-center justify-center group-hover:bg-[#2b579a]/20 transition-all">
-                <Plus size={28} className="text-[#2b579a]" />
+              <div className="absolute inset-0 bg-[url('/template_preview.png')] bg-cover bg-top bg-no-repeat opacity-80 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/10 to-transparent"></div>
+              <div className="relative z-10 p-3 w-full text-center bg-white/80 backdrop-blur-sm border-t border-gray-100">
+                <span className="text-sm font-bold text-gray-700 group-hover:text-[#2b579a] transition-colors">Default</span>
               </div>
-              <span className="text-sm font-bold text-gray-600 group-hover:text-[#2b579a] transition-colors">Default</span>
             </button>
 
             {/* Template Cards */}

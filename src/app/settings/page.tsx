@@ -172,12 +172,30 @@ export default function SettingsPage() {
           <div className="p-6 space-y-5">
             <div>
               <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Backup Location</label>
-              <input
-                type="text"
-                value={settings.backupLocation}
-                onChange={e => setSettings(s => ({ ...s, backupLocation: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#2b579a] outline-none transition-all bg-gray-50"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={settings.backupLocation}
+                  onChange={e => setSettings(s => ({ ...s, backupLocation: e.target.value }))}
+                  className="flex-1 border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#2b579a] outline-none transition-all bg-gray-50"
+                  placeholder="Select a folder..."
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      // @ts-ignore
+                      const dirHandle = await window.showDirectoryPicker();
+                      setSettings(s => ({ ...s, backupLocation: dirHandle.name }));
+                    } catch (err) {
+                      console.error("Folder selection cancelled or not supported", err);
+                    }
+                  }}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 rounded-lg transition-colors text-sm border border-gray-300"
+                >
+                  Browse...
+                </button>
+              </div>
             </div>
 
             <div className="flex gap-3">
