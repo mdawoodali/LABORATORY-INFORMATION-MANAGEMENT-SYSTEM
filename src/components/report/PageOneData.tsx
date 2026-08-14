@@ -25,57 +25,50 @@ export default function PageOneData({ data }: PageOneDataProps) {
     { label: 'BUYING HOUSE', value: data.buyingHouse },
     { label: 'MANUFACTURER', value: data.manufacturer },
     { label: 'PREVIOUS REPORT #', value: data.previousReportNo },
-    { label: 'SAMPLE RECEIVING DATE', value: data.sampleReceivingDate },
+    { label: 'SAMPLE RECEIVING  DATE ', value: data.sampleReceivingDate },
     { label: 'SAMPLE REPORTING DATE', value: data.sampleReportingDate },
     { label: 'CARE LABEL SYMBOLS', value: data.careLabelSymbols },
   ];
 
   return (
-    <div className="flex flex-col w-full text-[12px] font-sans font-medium px-4 mt-6">
+    <div className="flex flex-col w-full font-sans px-10 mt-2" style={{ fontSize: '11.5px' }}>
       
       {/* Top Label */}
-      <div className="font-bold mb-3 uppercase text-[12.5px] tracking-wide">
+      <div className="font-bold mb-2 uppercase" style={{ fontSize: '11.5px', letterSpacing: '0.02em' }}>
         SAMPLE SUBMITTED AND DESCRIBED BY CLIENT AS:
       </div>
 
-      {/* Grid Layout */}
-      <div className="flex flex-col gap-[3px] w-full">
+      {/* Field Rows - matching DOCX exactly */}
+      <div className="flex flex-col w-full">
         {fields.map((field, idx) => (
-          <div key={idx} className="flex w-full leading-tight">
-            {/* Left Column - 35% */}
-            <div className="w-[35%] uppercase tracking-wide">
+          <div key={idx} className="flex w-full" style={{ lineHeight: '1.65' }}>
+            {/* Label column - fixed width to align all colons */}
+            <div className="uppercase font-bold shrink-0" style={{ width: '220px' }}>
               {field.label}
             </div>
             
-            {/* Right Column - 65% with exactly aligned colon */}
-            <div className="w-[65%] flex">
-              <span className="mr-2 font-bold">:</span>
-              <span className={`uppercase ${field.bold ? 'font-bold' : ''}`}>
-                {field.value}
-              </span>
+            {/* Colon */}
+            <div className="font-bold shrink-0 mr-1">:</div>
+            
+            {/* Value */}
+            <div className={field.bold ? 'font-bold' : ''}>
+              {field.value || '-'}
             </div>
           </div>
         ))}
         
-        {/* Empty row spacing */}
-        <div className="h-4"></div>
+        {/* Spacer */}
+        <div style={{ height: '8px' }}></div>
 
-        {/* Test Result Row */}
-        <div className="flex w-full leading-tight">
-          <div className="w-[35%] uppercase tracking-wide font-bold">
+        {/* TEST RESULT row */}
+        <div className="flex w-full" style={{ lineHeight: '1.65' }}>
+          <div className="uppercase font-bold shrink-0" style={{ width: '220px' }}>
             TEST RESULT
           </div>
-          <div className="w-[65%] flex font-bold">
-            <span className="mr-2">:</span>
-            <span className="uppercase">PLEASE REFER TO THE NEXT PAGE(S)</span>
-          </div>
+          <div className="font-bold shrink-0 mr-1">:</div>
+          <div className="font-bold uppercase">PLEASE REFER TO THE NEXT PAGE(S)</div>
         </div>
-
       </div>
-
-      {/* Full width border line ending the section */}
-      <div className="w-full border-b-[1.5px] border-black mt-3"></div>
-
     </div>
   );
 }

@@ -6,15 +6,11 @@ import html2canvas from 'html2canvas';
 import pdfMake from 'pdfmake/build/pdfmake';
 // @ts-ignore
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import Barcode from 'react-barcode';
 import ReportForm from '@/components/form/ReportForm';
-import Header from '@/components/report/Header';
 import SubHeader from '@/components/report/SubHeader';
 import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
-import Footer from '@/components/report/Footer';
-import PnacLogo from '@/components/report/PnacLogo';
 import { ReportFormData, TestRow } from '@/types';
 import { supabase } from '@/lib/supabase';
 
@@ -65,7 +61,7 @@ export default function Home() {
   const [sampleImage, setSampleImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const totalPages = 3;
+  const totalPages = sampleImage ? 3 : 2;
   
   const handlePrint = async (password?: string) => {
     if (!password) {
@@ -87,7 +83,7 @@ export default function Home() {
         
       if (error) {
         console.error("Supabase Error:", error);
-        alert("Warning: Could not save to database. Have you created the 'receipts' table in Supabase yet? Check the console for details.");
+        alert("Warning: Could not save to database. Check the console for details.");
       }
 
       // 2. Capture pages as high-res images
@@ -99,8 +95,8 @@ export default function Home() {
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
         content.push({
           image: imgData,
-          width: 595.28, // A4 Width in points
-          height: 841.89, // A4 Height in points
+          width: 595.28,
+          height: 841.89,
           margin: [0, 0, 0, 0]
         });
       }
@@ -109,7 +105,7 @@ export default function Home() {
         pageSize: 'A4' as const,
         pageMargins: [0, 0, 0, 0] as [number, number, number, number],
         content: content,
-        userPassword: password, // Locks the PDF!
+        userPassword: password,
         ownerPassword: password,
         permissions: { printing: 'high', modifying: false, copying: false }
       };
@@ -167,67 +163,64 @@ export default function Home() {
         handlePrint={handlePrint}
       />
 
-
         <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible items-center">
         
         {/* PAGE 1 */}
-        <div className="a4-page relative overflow-hidden flex flex-col shadow-2xl print:shadow-none print:my-0 my-8">
+        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
           {/* Background Frame */}
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none" />
+          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
 
-          {/* Foreground Content */}
+          {/* Content overlay */}
           <div className="relative z-10 w-full h-full flex flex-col">
+            {/* Page/Report # bar positioned right below the header area */}
             <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
-            <div className="pt-[160px]">
+            
+            {/* Push content below the frame header (PNAC + S.R. LABS + ISO/IEC + TEST REPORT) */}
+            <div className="pt-[175px]">
               <PageOneData data={formData} />
             </div>
+            
             <div className="flex-1"></div>
-            <div className="pb-8">
+            
+            {/* Signature & disclaimer above the frame footer */}
+            <div className="pb-[55px]">
               <Signature />
             </div>
           </div>
         </div>
 
         {/* PAGE 2 */}
-        <div className="a4-page relative overflow-hidden flex flex-col shadow-2xl print:shadow-none print:my-0 my-8">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none" />
+        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
+          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
 
           <div className="relative z-10 w-full h-full flex flex-col">
             <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
-            <div className="pt-[160px] h-full flex flex-col">
+            <div className="pt-[175px] flex-1 flex flex-col">
               <TestTable tests={tests} data={formData} />
               <div className="flex-1"></div>
-              <div className="pb-8">
+              <div className="pb-[55px]">
                 <Signature />
               </div>
             </div>
           </div>
         </div>
 
-        {/* PAGE 3 */}
-        <div className="a4-page flex flex-col pt-[15mm] relative">
-          <Header />
-          <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
-          
-          <div className="border-[1.5px] border-black rounded-[2rem] flex-1 flex flex-col relative mt-2 pb-2">
-            <PnacLogo />
-            
-            <div className="flex justify-between items-end px-8 pt-10 mb-6">
-               <div className="font-sans font-bold text-[14px]">ISO/IEC 17025:2017 Accredited Lab</div>
-               <div className="font-sans font-bold text-[26px] tracking-wider pr-10">TEST REPORT</div>
-            </div>
+        {/* PAGE 3 - Sample Image (only if uploaded) */}
+        {sampleImage && (
+          <div className="a4-page relative overflow-hidden flex flex-col bg-white">
+            <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
 
-            <div className="flex-1 flex justify-center items-start pt-10 border-t-[1.5px] border-black mx-[20px]">
-              {sampleImage ? (
-                <img src={sampleImage} alt="Sample" className="max-w-[80%] max-h-[600px] object-contain shadow-sm border border-gray-200 p-2" />
-              ) : (
-                <div className="text-slate-400 italic mt-20 font-sans">No sample image attached.</div>
-              )}
+            <div className="relative z-10 w-full h-full flex flex-col">
+              <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
+              <div className="pt-[175px] flex-1 flex justify-center items-start px-10">
+                <img src={sampleImage} alt="Sample" className="max-w-[85%] max-h-[550px] object-contain border border-gray-200 p-2 mt-4" />
+              </div>
+              <div className="pb-[55px]">
+                <Signature />
+              </div>
             </div>
           </div>
-
-          <Footer />
-        </div>
+        )}
 
       </div>
     </div>

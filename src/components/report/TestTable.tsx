@@ -3,46 +3,54 @@ import { TestRow, ReportFormData } from '@/types';
 
 export default function TestTable({ tests, data }: { tests: TestRow[], data: ReportFormData }) {
   return (
-    <div className="flex flex-col flex-1 pl-12 pr-12 pt-6">
-      <div className="text-[13px] mb-6">
-        <div className="flex gap-2">
-          <span className="font-bold w-32">Test Conducted</span>
-          <span>:</span>
+    <div className="flex flex-col px-10 pt-4 font-sans" style={{ fontSize: '12px' }}>
+      
+      {/* Test Conducted / Sample Details */}
+      <div className="mb-4">
+        <div className="flex" style={{ lineHeight: '1.6' }}>
+          <span className="font-bold underline" style={{ width: '130px' }}>Test Conducted</span>
+          <span className="font-bold">:</span>
         </div>
-        <div className="flex gap-2 mt-1">
-          <span className="font-bold w-32">Sample Details</span>
-          <span className="flex-1">: {data.sampleDetails}</span>
+        <div className="mt-1">
+          <span className="font-bold underline">Sample  Details</span>
+          <span className="font-bold ml-1">:</span>
+        </div>
+        <div className="mt-0.5" style={{ lineHeight: '1.5' }}>
+          {data.sampleDetails}
         </div>
       </div>
 
-      <div className="font-bold text-[13px] mb-1">{data.footerText}</div>
+      {/* Footer text above table */}
+      <div className="border border-black inline-block px-2 py-0.5 mb-0 font-bold" style={{ fontSize: '11px', width: 'fit-content' }}>
+        {data.footerText}
+      </div>
 
       {/* Main Table */}
-      <table className="w-full border-collapse border-t border-b border-black text-center mb-6">
+      <table className="w-full border-collapse text-center" style={{ fontSize: '12px' }}>
         <thead>
-          <tr className="border-b border-black">
-            <th className="p-2 font-bold w-[35%]">{data.tableHeader1}</th>
-            <th className="p-2 font-bold w-[20%] border-l border-black">{data.tableHeader2}</th>
-            <th className="p-2 font-bold w-[25%] border-l border-black">{data.tableHeader3}</th>
-            <th className="p-2 font-bold w-[20%] border-l border-black">{data.tableHeader4}</th>
+          <tr>
+            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '30%' }}>{data.tableHeader1}</th>
+            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '18%' }}>{data.tableHeader2}</th>
+            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '27%' }}>{data.tableHeader3}</th>
+            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader4}</th>
           </tr>
         </thead>
         <tbody>
           {tests.map((test, idx) => (
             <tr key={test.id || idx}>
-              <td className="p-2 text-left px-3 whitespace-pre-wrap">{test.test}</td>
-              <td className="p-2 border-l border-black">{test.unit}</td>
-              <td className="p-2 border-l border-black">{test.standard}</td>
-              <td className="p-2 border-l border-black">{test.result}</td>
+              <td className="border border-black p-1.5 text-center whitespace-pre-wrap">{test.test}</td>
+              <td className="border border-black p-1.5 text-center">{test.unit}</td>
+              <td className="border border-black p-1.5 text-center">{test.standard}</td>
+              <td className="border border-black p-1.5 text-center">{test.result}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* End of Report Line */}
-      <div className="flex items-center w-full mt-4">
-        <div className="border-b-[1.5px] border-black flex-1"></div>
-        <div className="font-bold pl-4">End of Report</div>
+      {/* End of Report */}
+      <div className="flex items-center w-full mt-8">
+        <div className="border-b border-black flex-1"></div>
+        <div className="font-bold pl-3" style={{ fontSize: '12px' }}>End of Report</div>
       </div>
     </div>
   );
