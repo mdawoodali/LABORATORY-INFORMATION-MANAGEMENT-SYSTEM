@@ -24,13 +24,14 @@ export default function SubHeader({ reportNo, pageNum, totalPages }: SubHeaderPr
       </div>
 
       {/* QR Code perfectly right aligned below Report # */}
-      <div className="flex justify-end pt-1 pr-2">
+      <div className="flex flex-col items-center pt-1 pr-2">
         <QRCode 
           value={verifyUrl} 
           size={50}
           level="L"
           style={{ height: "auto", maxWidth: "100%", width: "50px" }}
         />
+        <span className="text-[8px] font-bold font-sans tracking-[0.1em] text-gray-700 mt-[2px]">SCAN ME</span>
       </div>
       
     </div>
