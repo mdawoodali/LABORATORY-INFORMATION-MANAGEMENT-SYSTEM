@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import html2canvas from 'html2canvas';
+// @ts-ignore
 import pdfMake from 'pdfmake/build/pdfmake';
+// @ts-ignore
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import Barcode from 'react-barcode';
 import ReportForm from '@/components/form/ReportForm';

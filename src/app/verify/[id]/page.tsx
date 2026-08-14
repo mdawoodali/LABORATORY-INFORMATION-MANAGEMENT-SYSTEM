@@ -58,19 +58,66 @@ export default function VerifyPage() {
 
   if (receiptData) {
     const { formData, tests, sampleImage } = receiptData;
-    // We only render Page 1 for the online verification preview
+    const totalPages = 3;
+    
     return (
-      <div className="min-h-screen bg-slate-200 flex justify-center py-10 font-gothic">
-        <div className="a4-page relative overflow-hidden bg-white shadow-xl mx-auto border-[3px] border-black rounded-[2rem]">
-          <div className="px-[38px] pt-8">
-            <Header />
-            <SubHeader reportNo={formData.reportNo} />
+      <div className="min-h-screen bg-slate-200 flex flex-col items-center gap-8 py-10 font-sans print:bg-white print:p-0 print:gap-0">
+        
+        {/* PAGE 1 */}
+        <div className="a4-page flex flex-col pt-[15mm] relative bg-white shadow-xl border-[3px] border-black rounded-[2rem] no-print-shadow">
+          <Header />
+          <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
+          
+          <div className="border-[1.5px] border-black rounded-[2rem] flex-1 flex flex-col relative mt-2 pb-2 mx-[38px] mb-[38px]">
+            <div className="flex justify-between items-end px-8 pt-10">
+               <div className="font-sans font-bold text-[14px]">ISO/IEC 17025:2017 Accredited Lab</div>
+               <div className="font-sans font-bold text-[26px] tracking-wider pr-10">TEST REPORT</div>
+            </div>
+
             <PageOneData data={formData} />
-            <TestTable tests={tests} />
             <Signature />
-            <Footer />
           </div>
+          <Footer />
         </div>
+
+        {/* PAGE 2 */}
+        <div className="a4-page flex flex-col pt-[15mm] relative bg-white shadow-xl border-[3px] border-black rounded-[2rem] no-print-shadow">
+          <Header />
+          <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
+          
+          <div className="border-[1.5px] border-black rounded-[2rem] flex-1 flex flex-col relative mt-2 pb-2 mx-[38px] mb-[38px]">
+            <div className="flex justify-between items-end px-8 pt-10">
+               <div className="font-sans font-bold text-[14px]">ISO/IEC 17025:2017 Accredited Lab</div>
+               <div className="font-sans font-bold text-[26px] tracking-wider pr-10">TEST REPORT</div>
+            </div>
+
+            <TestTable sampleDetails={formData.sampleDetails} tests={tests} />
+          </div>
+          <Footer />
+        </div>
+
+        {/* PAGE 3 */}
+        <div className="a4-page flex flex-col pt-[15mm] relative bg-white shadow-xl border-[3px] border-black rounded-[2rem] no-print-shadow">
+          <Header />
+          <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
+          
+          <div className="border-[1.5px] border-black rounded-[2rem] flex-1 flex flex-col relative mt-2 pb-2 mx-[38px] mb-[38px]">
+            <div className="flex justify-between items-end px-8 pt-10 mb-6">
+               <div className="font-sans font-bold text-[14px]">ISO/IEC 17025:2017 Accredited Lab</div>
+               <div className="font-sans font-bold text-[26px] tracking-wider pr-10">TEST REPORT</div>
+            </div>
+
+            <div className="flex-1 flex justify-center items-start pt-10 border-t-[1.5px] border-black mx-[20px]">
+              {sampleImage ? (
+                <img src={sampleImage} alt="Sample" className="max-w-[80%] max-h-[600px] object-contain shadow-sm border border-gray-200 p-2" />
+              ) : (
+                <div className="text-slate-400 italic mt-20 font-sans">No sample image attached.</div>
+              )}
+            </div>
+          </div>
+          <Footer />
+        </div>
+
       </div>
     );
   }
