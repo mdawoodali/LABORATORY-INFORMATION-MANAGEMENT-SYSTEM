@@ -183,7 +183,7 @@ export default function HomePage() {
                     <div className="text-sm font-bold text-gray-700 truncate">{template.name}</div>
                     <div className="text-[10px] text-gray-400 mt-0.5">{new Date(template.createdAt).toLocaleDateString()}</div>
                   </div>
-                </button>
+                </motion.button>
                 
                 {template.fileData && (
                   <a
