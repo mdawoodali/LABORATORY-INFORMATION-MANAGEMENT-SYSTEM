@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import ReportForm from '@/components/form/ReportForm';
 import SubHeader from '@/components/report/SubHeader';
 import PageOneData from '@/components/report/PageOneData';
