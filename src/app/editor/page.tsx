@@ -8,6 +8,7 @@ import SubHeader from '@/components/report/SubHeader';
 import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
+import CanvaImage from '@/components/report/CanvaImage';
 import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -119,7 +120,8 @@ function EditorContent() {
       const content = [];
 
       for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 2, useCORS: true });
+        // Increased scale from 2 to 4 for ultra-high resolution PDF output
+        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 4, useCORS: true });
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
         content.push({
           image: imgData,
@@ -268,8 +270,13 @@ function EditorContent() {
             <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
             <div className="relative z-10 w-full h-full flex flex-col">
               <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
-              <div className="pt-[175px] flex-1 flex justify-center items-start px-10">
-                <img src={sampleImage} alt="Sample" className="max-w-[85%] max-h-[550px] object-contain border border-gray-200 p-2 mt-4" />
+              <div className="pt-[175px] flex-1 flex justify-center items-start px-10 relative">
+                <CanvaImage 
+                  src={sampleImage} 
+                  defaultWidth={400} 
+                  defaultHeight={400} 
+                  className="border border-gray-200 shadow-sm bg-white p-2"
+                />
               </div>
               <div className="pb-[55px] relative">
                 <Signature />

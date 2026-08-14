@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Rnd } from 'react-rnd';
 import { AppSettings, DEFAULT_SETTINGS } from '@/types';
+import CanvaImage from './CanvaImage';
 
 export default function Signature() {
   const [signatureImage, setSignatureImage] = useState<string | null>(null);
@@ -37,44 +37,25 @@ export default function Signature() {
         </div>
         
         {/* Draggable/Resizable Signature image from DOCX or Settings */}
-        <div className="relative w-full h-[90px] flex items-center justify-center -mt-2 mb-1">
-          <Rnd
-            default={{
-              x: 0,
-              y: 0,
-              width: 150,
-              height: 90,
+        <div className="w-full h-[90px] flex items-center justify-center -mt-2 mb-1 z-50">
+          <CanvaImage 
+            src={signatureImage || "/docx_images/image2.png"}
+            defaultWidth={150}
+            defaultHeight={90}
+            onReplace={(newSrc) => {
+              setSignatureImage(newSrc);
+              // Save to localStorage
+              const savedSettings = localStorage.getItem('sr_settings');
+              const settings = savedSettings ? JSON.parse(savedSettings) : DEFAULT_SETTINGS;
+              localStorage.setItem('sr_settings', JSON.stringify({ ...settings, signatureImage: newSrc }));
             }}
-            bounds="parent"
-            className="group"
-            enableResizing={{
-              bottom: true, bottomLeft: true, bottomRight: true,
-              left: true, right: true, top: true, topLeft: true, topRight: true
+            onRemove={() => {
+              setSignatureImage("/docx_images/image2.png");
+              const savedSettings = localStorage.getItem('sr_settings');
+              const settings = savedSettings ? JSON.parse(savedSettings) : DEFAULT_SETTINGS;
+              localStorage.setItem('sr_settings', JSON.stringify({ ...settings, signatureImage: undefined }));
             }}
-          >
-            <div className="w-full h-full relative group hover:ring-2 hover:ring-blue-400 hover:ring-dashed transition-all cursor-move">
-              <img 
-                src={signatureImage || "/docx_images/image2.png"} 
-                alt="Signature" 
-                className="w-full h-full object-contain opacity-90 mix-blend-multiply pointer-events-none" 
-              />
-              {/* This class hides handles during generation */}
-              <style jsx global>{`
-                .is-generating-pdf .react-draggable {
-                  border: none !important;
-                  outline: none !important;
-                  ring: none !important;
-                }
-                .is-generating-pdf .react-draggable:hover, .is-generating-pdf .group:hover {
-                  box-shadow: none !important;
-                  ring: none !important;
-                }
-                .is-generating-pdf [class*="react-resizable-handle"] {
-                  display: none !important;
-                }
-              `}</style>
-            </div>
-          </Rnd>
+          />
         </div>
 
         <div className="text-center font-bold underline" style={{ fontSize: '12px' }}>
