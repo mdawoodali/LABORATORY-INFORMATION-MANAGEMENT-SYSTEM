@@ -99,7 +99,7 @@ export default function Home() {
       <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible">
         
         {/* PAGE 1 */}
-        <div className="a4-page flex flex-col pt-[15mm]">
+        <div className="a4-page flex flex-col pt-[15mm] relative">
           <Header />
           <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
           
@@ -119,7 +119,7 @@ export default function Home() {
         </div>
 
         {/* PAGE 2 */}
-        <div className="a4-page flex flex-col pt-[15mm]">
+        <div className="a4-page flex flex-col pt-[15mm] relative">
           <Header />
           <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
           
@@ -138,7 +138,7 @@ export default function Home() {
         </div>
 
         {/* PAGE 3 */}
-        <div className="a4-page flex flex-col pt-[15mm]">
+        <div className="a4-page flex flex-col pt-[15mm] relative">
           <Header />
           <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
           

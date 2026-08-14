@@ -11,8 +11,8 @@ export default function Header() {
       </div>
 
       {/* Main Title Area */}
-      <div className="flex flex-col items-center z-10 w-full pl-32">
-        <h1 className="font-gothic text-[44px] text-blue-900 tracking-widest leading-none font-medium" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.4)', WebkitTextStroke: '0.5px #1E3A8A' }}>
+      <div className="flex flex-col items-center z-10 w-full pl-20">
+        <h1 className="font-gothic text-[36px] text-blue-900 tracking-widest leading-none font-medium" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.4)', WebkitTextStroke: '0.5px #1E3A8A' }}>
           S. R. LABORATORIES
         </h1>
         <div className="font-sans font-bold italic text-[14px] text-slate-800 tracking-widest mt-1">
