@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import html2canvas from 'html2canvas-pro';
 import ReportForm from '@/components/form/ReportForm';
 import SubHeader from '@/components/report/SubHeader';
+import Header from '@/components/report/Header';
+import Footer from '@/components/report/Footer';
 import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
@@ -227,36 +229,40 @@ function EditorContent() {
       <div className={`flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible items-center ${isGenerating ? 'is-generating-pdf' : ''}`}>
         
         {/* PAGE 1 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
-          <div className="relative z-10 w-full h-full flex flex-col">
+        <div className="a4-page relative flex flex-col bg-white">
+          <div className="absolute inset-[15px] border-[1px] border-[#1e3b8a] rounded-3xl z-0 pointer-events-none"></div>
+          <div className="relative z-10 w-full h-full flex flex-col pt-4">
+            <Header />
             <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
-            <div className="pt-[175px]">
+            <div className="pt-[15px]">
               <PageOneData data={formData} />
             </div>
             <div className="flex-1"></div>
-            <div className="pb-[55px] relative">
+            <div className="pb-[40px] relative">
               <Signature />
-              <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                This document was generated digitally and doesn't require a signature
-              </div>
+            </div>
+            <Footer />
+            <div className="absolute bottom-[2px] left-0 w-full text-center text-[6px] text-gray-500 font-sans tracking-wide">
+              This document was generated digitally and doesn't require a signature
             </div>
           </div>
         </div>
 
         {/* PAGE 2 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
-          <div className="relative z-10 w-full h-full flex flex-col">
+        <div className="a4-page relative flex flex-col bg-white">
+          <div className="absolute inset-[15px] border-[1px] border-[#1e3b8a] rounded-3xl z-0 pointer-events-none"></div>
+          <div className="relative z-10 w-full h-full flex flex-col pt-4">
+            <Header />
             <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
-            <div className="pt-[175px] flex-1 flex flex-col">
+            <div className="pt-[15px] flex-1 flex flex-col">
               <TestTable tests={tests} data={formData} />
               <div className="flex-1"></div>
-              <div className="pb-[55px] relative">
+              <div className="pb-[40px] relative">
                 <Signature />
-                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                  This document was generated digitally and doesn't require a signature
-                </div>
+              </div>
+              <Footer />
+              <div className="absolute bottom-[2px] left-0 w-full text-center text-[6px] text-gray-500 font-sans tracking-wide">
+                This document was generated digitally and doesn't require a signature
               </div>
             </div>
           </div>
@@ -264,18 +270,20 @@ function EditorContent() {
 
         {/* PAGE 3 - Sample Image */}
         {sampleImage && (
-          <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-            <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
-            <div className="relative z-10 w-full h-full flex flex-col">
+          <div className="a4-page relative flex flex-col bg-white">
+            <div className="absolute inset-[15px] border-[1px] border-[#1e3b8a] rounded-3xl z-0 pointer-events-none"></div>
+            <div className="relative z-10 w-full h-full flex flex-col pt-4">
+              <Header />
               <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
-              <div className="pt-[175px] flex-1 flex justify-center items-start px-10">
+              <div className="pt-[15px] flex-1 flex justify-center items-start px-10">
                 <img src={sampleImage} alt="Sample" className="max-w-[85%] max-h-[550px] object-contain border border-gray-200 p-2 mt-4" />
               </div>
-              <div className="pb-[55px] relative">
+              <div className="pb-[40px] relative">
                 <Signature />
-                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                  This document was generated digitally and doesn't require a signature
-                </div>
+              </div>
+              <Footer />
+              <div className="absolute bottom-[2px] left-0 w-full text-center text-[6px] text-gray-500 font-sans tracking-wide">
+                This document was generated digitally and doesn't require a signature
               </div>
             </div>
           </div>
