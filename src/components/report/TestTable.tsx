@@ -18,22 +18,22 @@ export default function TestTable({ tests, data }: { tests: TestRow[], data: Rep
       <div className="font-bold text-[13px] mb-1">{data.footerText}</div>
 
       {/* Main Table */}
-      <table className="w-full border-collapse border border-black text-center mb-6">
+      <table className="w-full border-collapse border-t border-b border-black text-center mb-6">
         <thead>
           <tr className="border-b border-black">
-            <th className="border border-black p-2 font-bold w-[35%]">{data.tableHeader1}</th>
-            <th className="border border-black p-2 font-bold w-[20%]">{data.tableHeader2}</th>
-            <th className="border border-black p-2 font-bold w-[25%]">{data.tableHeader3}</th>
-            <th className="border border-black p-2 font-bold w-[20%]">{data.tableHeader4}</th>
+            <th className="p-2 font-bold w-[35%]">{data.tableHeader1}</th>
+            <th className="p-2 font-bold w-[20%] border-l border-black">{data.tableHeader2}</th>
+            <th className="p-2 font-bold w-[25%] border-l border-black">{data.tableHeader3}</th>
+            <th className="p-2 font-bold w-[20%] border-l border-black">{data.tableHeader4}</th>
           </tr>
         </thead>
         <tbody>
           {tests.map((test, idx) => (
             <tr key={test.id || idx}>
-              <td className="border border-black p-2 text-left px-3 whitespace-pre-wrap">{test.test}</td>
-              <td className="border border-black p-2">{test.unit}</td>
-              <td className="border border-black p-2">{test.standard}</td>
-              <td className="border border-black p-2">{test.result}</td>
+              <td className="p-2 text-left px-3 whitespace-pre-wrap">{test.test}</td>
+              <td className="p-2 border-l border-black">{test.unit}</td>
+              <td className="p-2 border-l border-black">{test.standard}</td>
+              <td className="p-2 border-l border-black">{test.result}</td>
             </tr>
           ))}
         </tbody>
