@@ -86,16 +86,22 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
 
       {isOpen && (
         <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
-          {showCreateNew && (
-            <button
-              onClick={() => saveNewOption(value)}
-              className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 font-medium flex items-center gap-2 border-b border-slate-100"
-            >
-              <Plus size={14} /> Create new "{value}"
-            </button>
-          )}
+          {/* Always show the Create New option at the top */}
+          <button
+            onClick={() => {
+              if (value.trim() && showCreateNew) {
+                saveNewOption(value);
+              } else {
+                const newVal = prompt("Enter new option:");
+                if (newVal) saveNewOption(newVal);
+              }
+            }}
+            className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 font-medium flex items-center gap-2 border-b border-slate-100"
+          >
+            <Plus size={14} /> {value.trim() && showCreateNew ? `Create new "${value}"` : 'Create new option...'}
+          </button>
           
-          {options.length === 0 && !showCreateNew ? (
+          {options.length === 0 ? (
             <div className="px-3 py-2 text-sm text-slate-400 italic">No saved options yet</div>
           ) : (
             options.map((opt, idx) => (
