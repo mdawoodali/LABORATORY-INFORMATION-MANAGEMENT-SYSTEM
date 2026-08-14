@@ -46,7 +46,7 @@ export default function Home() {
 
   const [sampleImage, setSampleImage] = useState<string | null>(null);
 
-  const totalPages = sampleImage ? 3 : 2;
+  const totalPages = 3;
   
   const handlePrint = () => {
     window.print();
@@ -116,19 +116,21 @@ export default function Home() {
           <Footer />
         </div>
 
-        {/* PAGE 3 (Optional Image) */}
-        {sampleImage && (
-          <div className="a4-page flex flex-col">
-            <Header />
-            <div className="flex justify-end mb-8 mt-4">
-              <div className="bg-gray-200 px-4 py-1 text-base font-sans font-bold">Report # {formData.reportNo}</div>
-            </div>
-            <div className="flex-1 flex justify-center items-start pt-10 border-t border-black">
-               <img src={sampleImage} alt="Sample" className="max-w-[80%] max-h-[600px] object-contain shadow-sm" />
-            </div>
-            <Footer />
+        {/* PAGE 3 (Image Page) */}
+        <div className="a4-page flex flex-col">
+          <Header />
+          <div className="flex justify-end mb-8 mt-4">
+            <div className="bg-gray-200 px-4 py-1 text-base font-sans font-bold">Report # {formData.reportNo}</div>
           </div>
-        )}
+          <div className="flex-1 flex justify-center items-start pt-10 border-t border-black">
+            {sampleImage ? (
+              <img src={sampleImage} alt="Sample" className="max-w-[80%] max-h-[600px] object-contain shadow-sm" />
+            ) : (
+              <div className="text-slate-400 italic mt-20">No sample image uploaded.</div>
+            )}
+          </div>
+          <Footer />
+        </div>
 
       </div>
     </div>
