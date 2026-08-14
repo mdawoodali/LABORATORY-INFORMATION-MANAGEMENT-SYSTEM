@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
-import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download } from 'lucide-react';
+import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, Activity } from 'lucide-react';
 import TemplateModal from '@/components/TemplateModal';
 import { toast } from 'react-hot-toast';
 
@@ -103,11 +103,19 @@ export default function HomePage() {
       
       {/* Top Bar */}
       <div className="bg-white px-8 py-4 flex justify-between items-center shadow-sm border-b border-gray-200">
-        <div className="flex items-center gap-4">
-          <img src="/site_logo.jpg" alt="S.R. Laboratories Logo" className="h-16 w-auto object-contain mix-blend-multiply scale-[2.0] origin-left ml-4" />
-          <div className="ml-12">
-            <h1 className="text-xl font-bold tracking-wide hidden sm:block text-[#2b579a]">Report Management System</h1>
-            <p className="text-[#2b579a]/70 text-xs tracking-wider">Internal Portal</p>
+        <div className="flex items-center gap-6">
+          {/* Typographic Logo */}
+          <div className="flex items-center gap-2 text-[#2b579a]">
+            <Activity size={32} strokeWidth={2.5} />
+            <div className="font-[family-name:var(--font-montserrat)] tracking-tight leading-none">
+              <span className="text-2xl font-black">S.R.</span>
+              <span className="text-xl font-bold ml-1 opacity-90">LABORATORIES</span>
+            </div>
+          </div>
+          
+          <div className="ml-8 pl-8 border-l border-gray-200 hidden md:block">
+            <h1 className="text-lg font-bold tracking-wide text-gray-700">Report Management System</h1>
+            <p className="text-gray-400 text-xs tracking-wider uppercase font-semibold">Internal Portal</p>
           </div>
         </div>
         <button
