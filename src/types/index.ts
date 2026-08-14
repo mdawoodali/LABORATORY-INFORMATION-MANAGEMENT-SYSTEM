@@ -65,6 +65,7 @@ export interface AppSettings {
   defaultPassword: string;
   companyName: string;
   backupLocation: string;
+  signatureImage?: string;
 }
 
 export const DEFAULT_FORM_DATA: ReportFormData = {

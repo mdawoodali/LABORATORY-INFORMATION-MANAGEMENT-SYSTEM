@@ -8,7 +8,7 @@ import SubHeader from '@/components/report/SubHeader';
 import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
-import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
+import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 
@@ -81,22 +81,40 @@ function EditorContent() {
     setIsGenerating(true);
 
     try {
-      const { error } = await supabase
-        .from('receipts')
-        .upsert({
-          id: formData.reportNo,
-          password: password,
-          data: { formData, tests, sampleImage }
-        });
-        
-      if (error) {
-        console.error("Supabase Error:", error);
-        toast.error("Database save failed: " + error.message);
-        // Continue generation even if save fails, but user is warned
-      } else {
-        toast.success("Saved securely to cloud.");
+      // 1. Try to save to DB (Handle RLS gracefully based on settings)
+      const savedSettings = localStorage.getItem('sr_settings');
+      let autoBackup = true;
+      if (savedSettings) {
+        try {
+          autoBackup = JSON.parse(savedSettings).autoBackup;
+        } catch(e){}
       }
 
+      if (autoBackup) {
+        const { error } = await supabase
+          .from('receipts')
+          .upsert({
+            id: formData.reportNo,
+            password: password,
+            data: { formData, tests, sampleImage }
+          });
+          
+        if (error) {
+          console.error("Supabase Error:", error);
+          if (error.message.includes('row-level security')) {
+            toast.error("Cloud Backup Failed: Row Level Security is enabled but no public policy exists. Please add a policy in Supabase or turn off Auto Backup in Settings.", { duration: 6000 });
+          } else {
+            toast.error("Database save failed: " + error.message);
+          }
+        } else {
+          toast.success("Saved securely to cloud.");
+        }
+      }
+
+      // Wait a tick for isGenerating state to apply CSS class hiding handles
+      await new Promise(r => setTimeout(r, 300));
+
+      // 2. Generate Canvas screenshots
       const pages = document.querySelectorAll('.a4-page');
       const content = [];
 
@@ -111,6 +129,7 @@ function EditorContent() {
         });
       }
 
+      // 3. Build PDF
       const docDefinition = {
         pageSize: 'A4' as const,
         pageMargins: [0, 0, 0, 0] as [number, number, number, number],
@@ -120,11 +139,9 @@ function EditorContent() {
         permissions: { printing: 'high', modifying: false, copying: false }
       };
 
-      // Dynamically import pdfmake to avoid SSR/window issues in Next.js
-      // @ts-ignore
-      const pdfMakeModule = await import('pdfmake/build/pdfmake');
-      // @ts-ignore
-      const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
+      // Ensure pdfmake handles client side imports safely
+      const pdfMakeModule = await import('pdfmake/build/pdfmake.js');
+      const pdfFontsModule = await import('pdfmake/build/vfs_fonts.js');
       
       const pdfMake = pdfMakeModule.default || pdfMakeModule;
       const pdfFonts = pdfFontsModule.default || pdfFontsModule;
@@ -133,9 +150,9 @@ function EditorContent() {
 
       pdfMake.createPdf(docDefinition).download(`SR_Lab_Report_${formData.reportNo}.pdf`);
       toast.success("PDF generated successfully!");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("An error occurred during PDF generation.");
+      toast.error(`PDF generation failed: ${err.message || 'Unknown error'}`);
     } finally {
       setIsGenerating(false);
     }
@@ -205,7 +222,7 @@ function EditorContent() {
         onGoHome={() => router.push('/')}
       />
 
-      <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible items-center">
+      <div className={`flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible items-center ${isGenerating ? 'is-generating-pdf' : ''}`}>
         
         {/* PAGE 1 */}
         <div className="a4-page relative overflow-hidden flex flex-col bg-white">
@@ -216,8 +233,11 @@ function EditorContent() {
               <PageOneData data={formData} />
             </div>
             <div className="flex-1"></div>
-            <div className="pb-[55px]">
+            <div className="pb-[55px] relative">
               <Signature />
+              <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
+                This document was generated digitally and doesn't require a signature
+              </div>
             </div>
           </div>
         </div>
@@ -230,8 +250,11 @@ function EditorContent() {
             <div className="pt-[175px] flex-1 flex flex-col">
               <TestTable tests={tests} data={formData} />
               <div className="flex-1"></div>
-              <div className="pb-[55px]">
+              <div className="pb-[55px] relative">
                 <Signature />
+                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
+                  This document was generated digitally and doesn't require a signature
+                </div>
               </div>
             </div>
           </div>
@@ -246,8 +269,11 @@ function EditorContent() {
               <div className="pt-[175px] flex-1 flex justify-center items-start px-10">
                 <img src={sampleImage} alt="Sample" className="max-w-[85%] max-h-[550px] object-contain border border-gray-200 p-2 mt-4" />
               </div>
-              <div className="pb-[55px]">
+              <div className="pb-[55px] relative">
                 <Signature />
+                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
+                  This document was generated digitally and doesn't require a signature
+                </div>
               </div>
             </div>
           </div>

@@ -158,20 +158,58 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-bold text-gray-700">Auto Cloud Backup</div>
-                <div className="text-xs text-gray-400 mt-0.5">Automatically save every report to Supabase when generating PDF</div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-bold text-gray-700">Auto Cloud Backup</div>
+                  <div className="text-xs text-gray-400 mt-0.5">Automatically save every report to Supabase when generating PDF</div>
+                </div>
+                <button
+                  onClick={() => setSettings(s => ({ ...s, autoBackup: !s.autoBackup }))}
+                  className={`w-12 h-6 rounded-full transition-all relative ${settings.autoBackup ? 'bg-[#2b579a]' : 'bg-gray-300'}`}
+                >
+                  <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow ${settings.autoBackup ? 'left-6' : 'left-0.5'}`} />
+                </button>
               </div>
-              <button
-                onClick={() => setSettings(s => ({ ...s, autoBackup: !s.autoBackup }))}
-                className={`w-12 h-6 rounded-full transition-all relative ${settings.autoBackup ? 'bg-[#2b579a]' : 'bg-gray-300'}`}
-              >
-                <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow ${settings.autoBackup ? 'left-6' : 'left-0.5'}`} />
-              </button>
+
+              {/* Signature Photo Picker */}
+              <div className="pt-4 border-t border-gray-100">
+                <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Custom Signature</label>
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-12 border border-gray-200 rounded flex items-center justify-center bg-gray-50 overflow-hidden relative group">
+                    {settings.signatureImage ? (
+                      <img src={settings.signatureImage} alt="Signature" className="object-contain w-full h-full" />
+                    ) : (
+                      <span className="text-xs text-gray-400">Default</span>
+                    )}
+                  </div>
+                  <label className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-4 py-2 rounded-lg cursor-pointer transition-colors border border-gray-200">
+                    Upload Signature
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => setSettings(s => ({ ...s, signatureImage: reader.result as string }));
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                  {settings.signatureImage && (
+                    <button 
+                      onClick={() => setSettings(s => ({ ...s, signatureImage: undefined }))}
+                      className="text-xs text-red-500 hover:text-red-700 underline"
+                    >
+                      Reset Default
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
         {/* Backup & Restore */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">

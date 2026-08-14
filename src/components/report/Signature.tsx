@@ -1,6 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Rnd } from 'react-rnd';
+import { AppSettings, DEFAULT_SETTINGS } from '@/types';
 
 export default function Signature() {
+  const [signatureImage, setSignatureImage] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('sr_settings');
+    if (savedSettings) {
+      try {
+        const settings: AppSettings = JSON.parse(savedSettings);
+        if (settings.signatureImage) {
+          setSignatureImage(settings.signatureImage);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
   return (
     <div className="flex justify-between items-end px-10 mt-auto pb-6 font-sans" style={{ fontSize: '11px' }}>
       
@@ -19,8 +36,46 @@ export default function Signature() {
           S. R. Laboratories ( Pvt. ) Ltd.
         </div>
         
-        {/* Signature image from DOCX */}
-        <img src="/docx_images/image2.png" alt="Signature" className="h-[90px] w-auto object-contain -mt-2 mb-1 opacity-90 mix-blend-multiply" />
+        {/* Draggable/Resizable Signature image from DOCX or Settings */}
+        <div className="relative w-full h-[90px] flex items-center justify-center -mt-2 mb-1">
+          <Rnd
+            default={{
+              x: 0,
+              y: 0,
+              width: 150,
+              height: 90,
+            }}
+            bounds="parent"
+            className="group"
+            enableResizing={{
+              bottom: true, bottomLeft: true, bottomRight: true,
+              left: true, right: true, top: true, topLeft: true, topRight: true
+            }}
+          >
+            <div className="w-full h-full relative group hover:ring-2 hover:ring-blue-400 hover:ring-dashed transition-all cursor-move">
+              <img 
+                src={signatureImage || "/docx_images/image2.png"} 
+                alt="Signature" 
+                className="w-full h-full object-contain opacity-90 mix-blend-multiply pointer-events-none" 
+              />
+              {/* This class hides handles during generation */}
+              <style jsx global>{`
+                .is-generating-pdf .react-draggable {
+                  border: none !important;
+                  outline: none !important;
+                  ring: none !important;
+                }
+                .is-generating-pdf .react-draggable:hover, .is-generating-pdf .group:hover {
+                  box-shadow: none !important;
+                  ring: none !important;
+                }
+                .is-generating-pdf [class*="react-resizable-handle"] {
+                  display: none !important;
+                }
+              `}</style>
+            </div>
+          </Rnd>
+        </div>
 
         <div className="text-center font-bold underline" style={{ fontSize: '12px' }}>
           Zulfiqar Ali
