@@ -3,10 +3,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import html2canvas from 'html2canvas';
-// @ts-ignore
-import pdfMake from 'pdfmake/build/pdfmake';
-// @ts-ignore
-import pdfFonts from 'pdfmake/build/vfs_fonts';
 import ReportForm from '@/components/form/ReportForm';
 import SubHeader from '@/components/report/SubHeader';
 import PageOneData from '@/components/report/PageOneData';
@@ -15,11 +11,6 @@ import Signature from '@/components/report/Signature';
 import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
-
-// Initialize PDF fonts
-if (pdfMake.vfs === undefined) {
-  pdfMake.vfs = (pdfFonts as any).pdfMake ? (pdfFonts as any).pdfMake.vfs : (pdfFonts as any).vfs;
-}
 
 function EditorContent() {
   const router = useRouter();
@@ -129,7 +120,15 @@ function EditorContent() {
         permissions: { printing: 'high', modifying: false, copying: false }
       };
 
-      // @ts-ignore
+      // Dynamically import pdfmake to avoid SSR/window issues in Next.js
+      const pdfMakeModule = await import('pdfmake/build/pdfmake');
+      const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
+      
+      const pdfMake = pdfMakeModule.default || pdfMakeModule;
+      const pdfFonts = pdfFontsModule.default || pdfFontsModule;
+      
+      pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts.vfs;
+
       pdfMake.createPdf(docDefinition).download(`SR_Lab_Report_${formData.reportNo}.pdf`);
       toast.success("PDF generated successfully!");
     } catch (err) {
