@@ -20,7 +20,7 @@ export default function Signature() {
         </div>
         
         {/* Signature image from DOCX */}
-        <img src="/docx_images/image2.png" alt="Signature" className="h-[50px] w-auto object-contain mb-1 opacity-90 mix-blend-multiply" />
+        <img src="/docx_images/image2.png" alt="Signature" className="h-[90px] w-auto object-contain -mt-2 mb-1 opacity-90 mix-blend-multiply" />
 
         <div className="text-center font-bold underline" style={{ fontSize: '12px' }}>
           Zulfiqar Ali
