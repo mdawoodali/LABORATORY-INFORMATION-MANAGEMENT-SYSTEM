@@ -78,7 +78,7 @@ export default function HomePage() {
       {/* Top Bar */}
       <div className="bg-[#2b579a] text-white px-8 py-4 flex justify-between items-center shadow-lg">
         <div className="flex items-center gap-4">
-          <img src="/logo_cropped.png" alt="S.R. Laboratories Logo" className="h-10 object-contain" />
+          <img src="/logo_transparent.png" alt="S.R. Laboratories Logo" className="h-10 object-contain" />
           <div>
             <h1 className="text-xl font-bold tracking-wide hidden sm:block">Report Management System</h1>
             <p className="text-blue-200 text-xs tracking-wider">Internal Portal</p>
