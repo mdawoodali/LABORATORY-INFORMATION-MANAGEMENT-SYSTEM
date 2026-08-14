@@ -76,17 +76,17 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#f3f3f3] font-sans">
       
       {/* Top Bar */}
-      <div className="bg-[#2b579a] text-white px-8 py-4 flex justify-between items-center shadow-lg">
+      <div className="bg-white px-8 py-4 flex justify-between items-center shadow-sm border-b border-gray-200">
         <div className="flex items-center gap-4">
           <img src="/logo_transparent.png" alt="S.R. Laboratories Logo" className="h-10 object-contain" />
           <div>
-            <h1 className="text-xl font-bold tracking-wide hidden sm:block">Report Management System</h1>
-            <p className="text-blue-200 text-xs tracking-wider">Internal Portal</p>
+            <h1 className="text-xl font-bold tracking-wide hidden sm:block text-[#2b579a]">Report Management System</h1>
+            <p className="text-[#2b579a]/70 text-xs tracking-wider">Internal Portal</p>
           </div>
         </div>
         <button
           onClick={() => router.push('/settings')}
-          className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all text-sm"
+          className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-all text-sm text-gray-700"
         >
           <Settings size={16} />
           Settings

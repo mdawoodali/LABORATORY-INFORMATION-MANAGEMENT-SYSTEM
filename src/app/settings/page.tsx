@@ -112,14 +112,14 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-[#f3f3f3] font-sans">
       
       {/* Top Bar */}
-      <div className="bg-[#2b579a] text-white px-8 py-4 flex items-center gap-4 shadow-lg">
+      <div className="bg-white px-8 py-4 flex items-center gap-4 shadow-sm border-b border-gray-200">
         <button
           onClick={() => router.push('/')}
-          className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all"
+          className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all"
         >
           <ArrowLeft size={18} />
         </button>
-        <h1 className="text-xl font-bold tracking-wide">Settings</h1>
+        <h1 className="text-xl font-bold tracking-wide text-[#2b579a]">Settings</h1>
       </div>
 
       <div className="max-w-3xl mx-auto px-8 py-10 space-y-8">
