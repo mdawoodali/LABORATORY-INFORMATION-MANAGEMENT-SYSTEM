@@ -107,7 +107,7 @@ export default function HomePage() {
         <div className="flex items-center gap-6">
           {/* Typographic Logo */}
           <div className="flex items-center gap-2 text-[#2b579a]">
-            <FlaskConical size={32} strokeWidth={2.5} />
+            <img src="/lab_icon.jpg" alt="Logo Mark" className="w-12 h-12 object-contain mix-blend-multiply" />
             <div className="font-[family-name:var(--font-montserrat)] tracking-tight leading-none">
               <span className="text-2xl font-black">S.R.</span>
               <span className="text-xl font-bold ml-1 opacity-90">LABORATORIES</span>
