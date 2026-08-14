@@ -4,13 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
-import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout } from 'lucide-react';
+import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download } from 'lucide-react';
+import TemplateModal from '@/components/TemplateModal';
+import { toast } from 'react-hot-toast';
 
 export default function HomePage() {
   const router = useRouter();
   const [recentReports, setRecentReports] = useState<any[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -56,6 +59,29 @@ export default function HomePage() {
     const updated = templates.filter(t => t.id !== id);
     setTemplates(updated);
     localStorage.setItem('sr_templates', JSON.stringify(updated));
+    toast.success('Template deleted');
+  };
+
+  const handleSaveTemplate = (name: string, docxBase64?: string, thumbnailBase64?: string) => {
+    try {
+      const newTemplate: Template = {
+        id: Date.now().toString(),
+        name,
+        formData: { ...DEFAULT_FORM_DATA, reportNo: '' },
+        tests: [...DEFAULT_TESTS],
+        createdAt: new Date().toISOString(),
+        fileData: docxBase64,
+        thumbnail: thumbnailBase64,
+      };
+      
+      const updated = [...templates, newTemplate];
+      setTemplates(updated);
+      localStorage.setItem('sr_templates', JSON.stringify(updated));
+      toast.success('Template added successfully!');
+    } catch (error) {
+      toast.error('Failed to save template. File might be too large for browser storage.');
+      console.error(error);
+    }
   };
 
   const handleNewReport = () => {
@@ -114,22 +140,42 @@ export default function HomePage() {
 
             {/* Template Cards */}
             {templates.map(template => (
-              <div key={template.id} className="relative group">
+              <div key={template.id} className="relative group flex flex-col gap-2">
                 <button
                   onClick={() => handleOpenTemplate(template)}
-                  className="w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg flex flex-col justify-between p-4 hover:shadow-lg hover:border-[#2b579a] transition-all cursor-pointer"
+                  className="w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg flex flex-col justify-between p-4 hover:shadow-lg hover:border-[#2b579a] transition-all cursor-pointer relative overflow-hidden"
                 >
-                  <div className="w-full h-[140px] bg-gradient-to-b from-gray-50 to-gray-100 rounded flex items-center justify-center border border-gray-100">
-                    <Layout size={36} className="text-gray-300" />
-                  </div>
-                  <div className="mt-3">
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/40 to-transparent z-10 pointer-events-none" />
+                  
+                  {template.thumbnail ? (
+                    <div className="absolute inset-0 bg-cover bg-top opacity-60 group-hover:opacity-100 transition-opacity" style={{ backgroundImage: `url(${template.thumbnail})` }} />
+                  ) : (
+                    <div className="w-full h-[140px] bg-gradient-to-b from-gray-50 to-gray-100 rounded flex items-center justify-center border border-gray-100 relative z-0 mt-2">
+                      <Layout size={36} className="text-gray-300" />
+                    </div>
+                  )}
+
+                  <div className="mt-auto relative z-20 bg-white/80 backdrop-blur-sm p-2 -mx-2 rounded">
                     <div className="text-sm font-bold text-gray-700 truncate">{template.name}</div>
                     <div className="text-[10px] text-gray-400 mt-0.5">{new Date(template.createdAt).toLocaleDateString()}</div>
                   </div>
                 </button>
+                
+                {template.fileData && (
+                  <a
+                    href={template.fileData}
+                    download={`${template.name}.docx`}
+                    className="absolute top-2 left-2 z-30 bg-[#2b579a] text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#1e4178] shadow"
+                    title="Download DOCX"
+                  >
+                    <Download size={12} />
+                  </a>
+                )}
+                
                 <button
                   onClick={(e) => { e.stopPropagation(); deleteTemplate(template.id); }}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow"
+                  className="absolute top-2 right-2 z-30 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow"
+                  title="Delete Template"
                 >
                   <Trash2 size={12} />
                 </button>
@@ -138,25 +184,13 @@ export default function HomePage() {
 
             {/* Add Template Card */}
             <button
-              onClick={() => {
-                const name = prompt('Enter template name:');
-                if (name) {
-                  const newTemplate: Template = {
-                    id: Date.now().toString(),
-                    name,
-                    formData: { ...DEFAULT_FORM_DATA, reportNo: '' },
-                    tests: [...DEFAULT_TESTS],
-                    createdAt: new Date().toISOString(),
-                  };
-                  const updated = [...templates, newTemplate];
-                  setTemplates(updated);
-                  localStorage.setItem('sr_templates', JSON.stringify(updated));
-                }
-              }}
-              className="group w-[180px] h-[240px] bg-white/50 border border-dashed border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 hover:border-gray-400 hover:bg-white transition-all cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+              className="group w-[180px] h-[240px] bg-white/50 border border-dashed border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 hover:border-[#2b579a] hover:bg-blue-50/30 transition-all cursor-pointer"
             >
-              <Plus size={20} className="text-gray-400 group-hover:text-gray-600" />
-              <span className="text-xs text-gray-400 group-hover:text-gray-600 font-semibold">Add Template</span>
+              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                <Plus size={20} className="text-gray-400 group-hover:text-[#2b579a]" />
+              </div>
+              <span className="text-xs text-gray-400 group-hover:text-[#2b579a] font-bold">Add Template</span>
             </button>
           </div>
         </div>
@@ -207,6 +241,13 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <TemplateModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSave={handleSaveTemplate} 
+      />
     </div>
   );
 }

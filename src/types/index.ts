@@ -43,6 +43,8 @@ export interface Template {
   formData: ReportFormData;
   tests: TestRow[];
   createdAt: string;
+  fileData?: string; // Base64 of the uploaded DOCX file
+  thumbnail?: string; // Base64 of the thumbnail image
 }
 
 export interface SavedReport {
