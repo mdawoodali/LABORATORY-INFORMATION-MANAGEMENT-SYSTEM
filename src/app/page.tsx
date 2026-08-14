@@ -100,7 +100,7 @@ export default function HomePage() {
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-5">New</h2>
           <div className="flex gap-5 flex-wrap">
             
-            {/* Blank Report Card */}
+            {/* Default Template Card */}
             <button
               onClick={handleNewReport}
               className="group w-[180px] h-[240px] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col justify-center items-center gap-3 hover:border-[#2b579a] hover:shadow-lg transition-all cursor-pointer"
@@ -108,7 +108,7 @@ export default function HomePage() {
               <div className="w-16 h-16 rounded-full bg-[#2b579a]/10 flex items-center justify-center group-hover:bg-[#2b579a]/20 transition-all">
                 <Plus size={28} className="text-[#2b579a]" />
               </div>
-              <span className="text-sm font-bold text-gray-600 group-hover:text-[#2b579a] transition-colors">Blank Report</span>
+              <span className="text-sm font-bold text-gray-600 group-hover:text-[#2b579a] transition-colors">Default</span>
             </button>
 
             {/* Template Cards */}
@@ -172,7 +172,7 @@ export default function HomePage() {
           ) : recentReports.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-10 text-center text-gray-400">
               <FileText size={40} className="mx-auto mb-3 text-gray-300" />
-              <p className="text-sm">No reports yet. Click <strong>"Blank Report"</strong> to create one.</p>
+              <p className="text-sm">No reports yet. Click <strong>"Default"</strong> to create one.</p>
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
