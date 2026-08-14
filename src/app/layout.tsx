@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "S. R. LABORATORIES",
   description: "Report Management System",
+  icons: {
+    icon: '/icon.jpg?v=2',
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
