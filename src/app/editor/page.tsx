@@ -140,7 +140,9 @@ function EditorContent() {
       };
 
       // Ensure pdfmake handles client side imports safely
+      // @ts-ignore
       const pdfMakeModule = await import('pdfmake/build/pdfmake.js');
+      // @ts-ignore
       const pdfFontsModule = await import('pdfmake/build/vfs_fonts.js');
       
       const pdfMake = pdfMakeModule.default || pdfMakeModule;
