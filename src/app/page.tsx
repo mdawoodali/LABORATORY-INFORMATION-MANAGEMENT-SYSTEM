@@ -7,6 +7,7 @@ import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
 import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, Activity } from 'lucide-react';
 import TemplateModal from '@/components/TemplateModal';
 import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -130,12 +131,19 @@ export default function HomePage() {
       <div className="max-w-6xl mx-auto px-8 py-10">
 
         {/* NEW REPORT Section */}
-        <div className="mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-12"
+        >
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-5">New</h2>
           <div className="flex gap-5 flex-wrap">
             
             {/* Default Template Card */}
-            <button
+            <motion.button
+              whileHover={{ y: -5 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleNewReport}
               className="group relative w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-[#2b579a] hover:shadow-lg transition-all cursor-pointer flex flex-col justify-end"
             >
@@ -144,12 +152,20 @@ export default function HomePage() {
               <div className="relative z-10 p-3 w-full text-center bg-white/80 backdrop-blur-sm border-t border-gray-100">
                 <span className="text-sm font-bold text-gray-700 group-hover:text-[#2b579a] transition-colors">Default</span>
               </div>
-            </button>
+            </motion.button>
 
             {/* Template Cards */}
-            {templates.map(template => (
-              <div key={template.id} className="relative group flex flex-col gap-2">
-                <button
+            {templates.map((template, idx) => (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                key={template.id} 
+                className="relative group flex flex-col gap-2"
+              >
+                <motion.button
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => handleOpenTemplate(template)}
                   className="w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg flex flex-col justify-between p-4 hover:shadow-lg hover:border-[#2b579a] transition-all cursor-pointer relative overflow-hidden"
                 >
@@ -187,11 +203,13 @@ export default function HomePage() {
                 >
                   <Trash2 size={12} />
                 </button>
-              </div>
+              </motion.div>
             ))}
 
             {/* Add Template Card */}
-            <button
+            <motion.button
+              whileHover={{ y: -5 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setIsModalOpen(true)}
               className="group w-[180px] h-[240px] bg-white/50 border border-dashed border-gray-200 rounded-lg flex flex-col justify-center items-center gap-2 hover:border-[#2b579a] hover:bg-blue-50/30 transition-all cursor-pointer"
             >
@@ -199,12 +217,16 @@ export default function HomePage() {
                 <Plus size={20} className="text-gray-400 group-hover:text-[#2b579a]" />
               </div>
               <span className="text-xs text-gray-400 group-hover:text-[#2b579a] font-bold">Add Template</span>
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         {/* RECENT REPORTS Section */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-5 flex items-center gap-2">
             <Clock size={14} />
             Recent Reports
@@ -247,7 +269,7 @@ export default function HomePage() {
               </table>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {/* Modals */}
