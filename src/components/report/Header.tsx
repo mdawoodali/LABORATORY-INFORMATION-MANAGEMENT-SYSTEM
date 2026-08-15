@@ -1,13 +1,13 @@
 import React from 'react';
 
-export default function Header({ logoBase64 }: { logoBase64?: string }) {
+export default function Header() {
   return (
-    <div className="w-full flex justify-center pb-4">
-      {logoBase64 ? (
-        <img src={logoBase64} alt="Company Header" className="w-full max-h-[150px] object-contain" />
-      ) : (
-        <img src="/docx_images/image1.jpeg" alt="Default Header" className="w-full max-h-[150px] object-contain" />
-      )}
+    <div className="w-full flex justify-center pb-4 shrink-0" style={{ height: '166px' }}>
+      {/* 
+        The overlay image has been removed because it was rendering on top of the background frame template.
+        We keep this empty div to maintain the exact same vertical spacing (150px image + 16px pb-4) 
+        so the rest of the PDF content doesn't shift upwards.
+      */}
     </div>
   );
 }
