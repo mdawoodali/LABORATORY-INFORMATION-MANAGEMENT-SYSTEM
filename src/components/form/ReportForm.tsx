@@ -1,5 +1,5 @@
 import React from 'react';
-import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save, Settings } from 'lucide-react';
+import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save, Settings, ChevronDown } from 'lucide-react';
 import { ReportFormData, TestRow, migrateToDynamicFields } from '@/types';
 import DropdownInput from './DropdownInput';
 
@@ -43,6 +43,7 @@ export default function ReportForm({
   removeDynamicField
 }: ReportFormProps) {
   const [password, setPassword] = React.useState('');
+  const [isPage1FieldsOpen, setIsPage1FieldsOpen] = React.useState(false);
   return (
     <div className="w-full md:w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full md:h-screen">
       <div className="p-4 border-b bg-slate-900 text-white flex flex-col gap-3 shrink-0">
@@ -129,7 +130,10 @@ export default function ReportForm({
         {/* Sample Details */}
         <section>
           <div className="flex justify-between items-center mb-2">
-            <h3 className="font-bold text-xs text-slate-400 uppercase tracking-widest">Page 1 Fields</h3>
+            <button onClick={() => setIsPage1FieldsOpen(!isPage1FieldsOpen)} className="flex items-center gap-1 font-bold text-xs text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors">
+              <ChevronDown size={14} className={`transform transition-transform ${isPage1FieldsOpen ? 'rotate-180' : ''}`} />
+              Page 1 Fields
+            </button>
             <button onClick={() => {
               const label = prompt("Enter field name:");
               if (label) addDynamicField?.(label, '', false);
@@ -137,7 +141,8 @@ export default function ReportForm({
               <Plus size={12} /> Add Field
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
+          {isPage1FieldsOpen && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
             {migrateToDynamicFields(formData).map((f) => (
               <div key={f.id} className={f.label === 'SAMPLE DESCRIPTION' ? 'col-span-2 group relative' : 'col-span-1 group relative'}>
                 <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">
@@ -159,7 +164,8 @@ export default function ReportForm({
                 />
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </section>
 
         <hr className="border-slate-200" />
