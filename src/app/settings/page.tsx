@@ -233,8 +233,8 @@ export default function SettingsPage() {
             <div>
               <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Backup Location</label>
               {!isTauri ? (
-                <div className="bg-gray-100 text-gray-600 p-3 rounded-lg text-sm border border-gray-200">
-                  Cannot change backup location on Web version. Backups will be downloaded.
+                <div className="bg-slate-100 text-slate-500 italic p-3 rounded-lg text-sm border border-gray-200 text-center w-full">
+                  Backup folder can be decided on .exe only
                 </div>
               ) : (
                 <div className="flex gap-2">
