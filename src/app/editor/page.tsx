@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import html2canvas from 'html2canvas-pro';
 import SettingsModal from '@/components/SettingsModal';
 import ReportForm from '@/components/form/ReportForm';
 import SubHeader from '@/components/report/SubHeader';
@@ -153,6 +152,8 @@ function EditorContent() {
       const content = [];
 
       for (let i = 0; i < pages.length; i++) {
+        // Dynamically import html2canvas to prevent blocking initial load
+        const html2canvas = (await import('html2canvas-pro')).default;
         // Increased scale from 2 to 4 for ultra-high resolution PDF output
         const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 4, useCORS: true });
         // Use PNG to prevent JPEG compression ringing artifacts around text and logos

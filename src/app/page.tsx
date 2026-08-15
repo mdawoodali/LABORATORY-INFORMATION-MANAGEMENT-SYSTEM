@@ -8,35 +8,34 @@ import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download
 import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 
 export default function HomePage() {
   const router = useRouter();
-  const [recentReports, setRecentReports] = useState<{ id: string; reportNo: string; applicant: string; date: string }[]>([]);
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  async function loadData() {
-    setIsLoading(true);
-
-    // Load recent reports from Supabase
-    try {
-      const { data: reports } = await supabase
+  const { data: recentReports = [], isLoading: reportsLoading } = useQuery({
+    queryKey: ['recentReports'],
+    queryFn: async () => {
+      const { data: reports, error } = await supabase
         .from('receipts')
         .select('id, data, created_at')
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (reports) {
-        setRecentReports(reports.map(r => ({
-          id: r.id,
-          reportNo: r.id,
-          applicant: r.data?.formData?.applicant || 'Untitled',
-          date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
-        })));
-      }
-    } catch {
-      console.error('Failed to load reports');
+      if (error || !reports) return [];
+
+      return reports.map(r => ({
+        id: r.id,
+        reportNo: r.id,
+        applicant: r.data?.formData?.applicant || 'Untitled',
+        date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
+      }));
     }
+  });
+
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
+
+  async function loadData() {
 
     // Load templates from localStorage
     const savedTemplates = localStorage.getItem('sr_templates');
@@ -47,15 +46,15 @@ export default function HomePage() {
         console.error('Failed to parse templates');
       }
     }
-
-    setIsLoading(false);
+    setTemplatesLoading(false);
   }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const isLoading = reportsLoading || templatesLoading;
 
   const deleteTemplate = (id: string) => {
     const updated = templates.filter(t => t.id !== id);

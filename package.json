@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
+    "@tanstack/react-query": "^5.101.4",
     "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-dialog": "^2.7.2",
     "@tauri-apps/plugin-fs": "^2.5.1",
@@ -30,14 +31,17 @@
     "react-rnd": "^10.4.13"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.3.1",
     "@tailwindcss/postcss": "^4",
     "@tauri-apps/cli": "^2.11.4",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
+    "million": "^3.1.11",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

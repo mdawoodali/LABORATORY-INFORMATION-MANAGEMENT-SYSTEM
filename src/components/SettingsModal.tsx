@@ -20,7 +20,6 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
         const parsed = JSON.parse(saved);
         // eslint-disable-next-line react-hooks/set-state-in-effect
         if (parsed.autoBackup !== undefined) setAutoBackup(parsed.autoBackup);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (parsed.defaultPassword) setDefaultPassword(parsed.defaultPassword);
       } catch {}
     }
