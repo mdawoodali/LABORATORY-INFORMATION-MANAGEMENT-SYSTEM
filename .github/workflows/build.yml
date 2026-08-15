@@ -1,0 +1,37 @@
+name: "Build Tauri App"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-tauri:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: "v0.1.0-alpha.${{ github.run_number }}" # Creates a unique tag for every build
+          releaseName: "SR-LAB Windows Executable (Build ${{ github.run_number }})"
+          releaseBody: "Automated build triggered by a push to main."
+          releaseDraft: false
+          prerelease: true
+          args: "--target x86_64-pc-windows-msvc"
