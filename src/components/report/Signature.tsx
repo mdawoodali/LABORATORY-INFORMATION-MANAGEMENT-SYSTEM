@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AppSettings, DEFAULT_SETTINGS } from '@/types';
 import CanvaImage from './CanvaImage';
 
-export default function Signature() {
+export default function Signature({ companyName }: { companyName?: string }) {
   const [signatureImage, setSignatureImage] = useState<string | null>(null);
   
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function Signature() {
       <div className="flex flex-col items-center" style={{ width: '35%' }}>
         <div className="text-center mb-6" style={{ fontSize: '11px' }}>
           Signed for and on behalf of<br/>
-          S. R. Laboratories ( Pvt. ) Ltd.
+          {companyName || "S. R. Laboratories ( Pvt. ) Ltd."}
         </div>
         
         {/* Draggable/Resizable Signature image from DOCX or Settings */}

@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SettingsModal from '@/components/SettingsModal';
 import ReportForm from '@/components/form/ReportForm';
+import Header from '@/components/report/Header';
 import SubHeader from '@/components/report/SubHeader';
 import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
@@ -328,13 +329,14 @@ function EditorContent() {
         <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0">
           <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
           <div className="relative z-10 w-full h-full flex flex-col">
+            <Header logoBase64={brandSettings.logoBase64} />
             <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
             <div className="pt-[175px]">
               <PageOneData data={formData} />
             </div>
             <div className="flex-1"></div>
             <div className="pb-[55px] relative">
-              <Signature />
+              <Signature companyName={brandSettings.companyName} />
               <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
                 This document was generated digitally and doesn't require a signature
               </div>
@@ -346,12 +348,13 @@ function EditorContent() {
         <div className="a4-page relative overflow-hidden flex flex-col bg-white">
           <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
           <div className="relative z-10 w-full h-full flex flex-col">
+            <Header logoBase64={brandSettings.logoBase64} />
             <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
             <div className="pt-[175px] flex-1 flex flex-col">
               <TestTable tests={tests} data={formData} />
               <div className="flex-1"></div>
               <div className="pb-[55px] relative">
-                <Signature />
+                <Signature companyName={brandSettings.companyName} />
                 <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
                   This document was generated digitally and doesn&apos;t require a signature
                 </div>
@@ -365,7 +368,8 @@ function EditorContent() {
           <div className="a4-page relative overflow-hidden flex flex-col bg-white">
             <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
             <div className="relative z-10 w-full h-full flex flex-col">
-              <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
+              <Header logoBase64={brandSettings.logoBase64} />
+            <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
               <div className="pt-[175px] flex-1 flex justify-center items-start px-10 relative">
                 <CanvaImage 
                   src={sampleImage} 
@@ -375,7 +379,7 @@ function EditorContent() {
                 />
               </div>
               <div className="pb-[55px] relative">
-                <Signature />
+                <Signature companyName={brandSettings.companyName} />
                 <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
                   This document was generated digitally and doesn&apos;t require a signature
                 </div>
