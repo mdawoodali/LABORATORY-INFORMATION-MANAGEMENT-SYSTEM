@@ -44,6 +44,8 @@ export default function ReportForm({
 }: ReportFormProps) {
   const [password, setPassword] = React.useState('');
   const [isPage1FieldsOpen, setIsPage1FieldsOpen] = React.useState(false);
+  const [isPage2TestsOpen, setIsPage2TestsOpen] = React.useState(false);
+  const [isPage3AppendixOpen, setIsPage3AppendixOpen] = React.useState(false);
   return (
     <div className="w-full md:w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full md:h-screen">
       <div className="p-4 border-b bg-slate-900 text-white flex flex-col gap-3 shrink-0">
@@ -172,8 +174,14 @@ export default function ReportForm({
 
         {/* Test Details */}
         <section>
-          <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Page 2 Tests</h3>
-          
+          <div className="flex justify-between items-center mb-2">
+            <button onClick={() => setIsPage2TestsOpen(!isPage2TestsOpen)} className="flex items-center gap-1 font-bold text-xs text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors">
+              <ChevronDown size={14} className={`transform transition-transform ${isPage2TestsOpen ? 'rotate-180' : ''}`} />
+              Page 2 Tests
+            </button>
+          </div>
+          {isPage2TestsOpen && (
+            <>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="col-span-2">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Testing Sentence</label>
@@ -229,13 +237,22 @@ export default function ReportForm({
             ))}
           </div>
           <button onClick={addTest} className="mt-4 w-full border-2 border-dashed border-slate-300 text-slate-600 rounded-lg py-3 text-sm font-bold hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex justify-center items-center gap-2"><Plus size={16}/> ADD TEST ROW</button>
+            </>
+          )}
         </section>
 
         <hr className="border-slate-200" />
 
         {/* Image Upload */}
         <section>
-          <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Page 3 Appendix</h3>
+          <div className="flex justify-between items-center mb-2">
+            <button onClick={() => setIsPage3AppendixOpen(!isPage3AppendixOpen)} className="flex items-center gap-1 font-bold text-xs text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors">
+              <ChevronDown size={14} className={`transform transition-transform ${isPage3AppendixOpen ? 'rotate-180' : ''}`} />
+              Page 3 Appendix
+            </button>
+          </div>
+          {isPage3AppendixOpen && (
+            <>
           <label className="w-full flex flex-col items-center px-4 py-8 bg-slate-50 rounded-lg shadow-sm tracking-wide border-dashed border-2 border-slate-300 cursor-pointer hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-all">
               <ImageIcon size={28} className="text-slate-400 mb-3" />
               <span className="text-sm font-bold text-slate-600">Select Image Proof</span>
@@ -247,6 +264,8 @@ export default function ReportForm({
               <img src={sampleImage} alt="Sample" className="w-full h-40 object-cover rounded-lg border shadow-sm" />
               <button onClick={removeImage} className="absolute top-2 right-2 bg-slate-900 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"><X size={14}/></button>
             </div>
+          )}
+            </>
           )}
         </section>
 
