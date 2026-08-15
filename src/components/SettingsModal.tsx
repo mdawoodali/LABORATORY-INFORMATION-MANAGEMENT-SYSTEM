@@ -124,7 +124,7 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
           </div>
 
           {/* Auto Backup Path */}
-          {('__TAURI_INTERNALS__' in window || '__TAURI__' in window) && (
+          {typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window) ? (
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Auto Backup Folder (Desktop App)</label>
               <div className="flex gap-2">
@@ -155,6 +155,13 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
                 </button>
               </div>
               <p className="text-[11px] text-slate-500 mt-2">Reports are automatically saved to SR_LAB_BACKUP inside this folder every 15 seconds after changes.</p>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Auto Backup Folder (Desktop App)</label>
+              <div className="w-full border border-slate-200 rounded-lg p-2.5 text-sm bg-slate-100 text-slate-500 italic text-center">
+                Backup folder can be decided on .exe only
+              </div>
             </div>
           )}
         </div>
