@@ -375,20 +375,20 @@ function EditorContent() {
       <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
         
         {/* Floating Toolbar */}
-        <div className="fixed top-4 right-4 md:top-6 md:right-8 z-50 flex gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print">
+        <div className="fixed top-4 right-4 md:top-6 md:right-6 z-50 flex flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print items-center">
           <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 transition-all text-slate-700" title="Undo">
             <Undo2 size={18} />
           </button>
           <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 transition-all text-slate-700" title="Redo">
             <Redo2 size={18} />
           </button>
-          <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
-          <button onClick={() => setZoom(z => Math.max(0.4, z - 0.1))} className="p-2 rounded-lg hover:bg-slate-100 transition-all text-slate-700" title="Zoom Out">
-            <ZoomOut size={18} />
-          </button>
-          <span className="text-xs font-mono text-slate-500 self-center w-12 text-center">{Math.round(zoom * 100)}%</span>
+          <div className="w-6 h-px bg-slate-300 my-1 self-center" />
           <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} className="p-2 rounded-lg hover:bg-slate-100 transition-all text-slate-700" title="Zoom In">
             <ZoomIn size={18} />
+          </button>
+          <span className="text-[10px] font-bold font-mono text-slate-500 self-center text-center leading-none">{Math.round(zoom * 100)}%</span>
+          <button onClick={() => setZoom(z => Math.max(0.4, z - 0.1))} className="p-2 rounded-lg hover:bg-slate-100 transition-all text-slate-700" title="Zoom Out">
+            <ZoomOut size={18} />
           </button>
         </div>
 
