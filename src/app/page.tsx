@@ -108,15 +108,12 @@ export default function HomePage() {
           {/* Typographic Logo */}
           <div className="flex items-center gap-4 text-[#2b579a]">
             <img src="/lab_icon.jpg" alt="Logo Mark" className="w-20 h-20 object-contain mix-blend-multiply contrast-125 brightness-110 scale-125 origin-left" />
-            <div className="font-[family-name:var(--font-montserrat)] tracking-tight leading-none">
-              <span className="text-2xl font-black">S.R.</span>
-              <span className="text-xl font-bold ml-1 opacity-90">LABORATORIES</span>
+            <div className="font-[family-name:var(--font-montserrat)] tracking-tight leading-none flex items-center">
+              <span className="text-2xl font-black text-gray-800">L.I.M.S</span>
+              <span className="text-xs font-semibold ml-3 text-gray-500 uppercase tracking-widest hidden md:inline-block">
+                Laboratory Information Management System
+              </span>
             </div>
-          </div>
-          
-          <div className="ml-8 pl-8 border-l border-gray-200 hidden md:block">
-            <h1 className="text-lg font-bold tracking-wide text-gray-700">Report Management System</h1>
-            <p className="text-gray-400 text-xs tracking-wider uppercase font-semibold">Internal Portal</p>
           </div>
         </div>
         <button

@@ -359,7 +359,7 @@ function EditorContent() {
               <div className="pb-[55px] relative">
                 <Signature />
                 <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                  This document was generated digitally and doesn't require a signature
+                  This document was generated digitally and doesn&apos;t require a signature
                 </div>
               </div>
             </div>
