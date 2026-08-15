@@ -18,6 +18,8 @@ const montserrat = Montserrat({
   subsets: ["latin"],
 });
 
+import SecurityShield from "@/components/SecurityShield";
+
 export const metadata: Metadata = {
   title: "S. R. LABORATORIES",
   description: "Report Management System",
@@ -32,8 +34,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col select-none">
         <Toaster position="top-center" />
+        <SecurityShield />
         {children}
       </body>
     </html>

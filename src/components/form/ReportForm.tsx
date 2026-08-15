@@ -32,7 +32,7 @@ export default function ReportForm({
   onSaveTemplate,
   onGoHome
 }: ReportFormProps) {
-  const [password, setPassword] = React.useState('1234');
+  const [password, setPassword] = React.useState('');
   return (
     <div className="w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full">
       <div className="p-4 border-b bg-slate-900 text-white flex flex-col gap-3 shrink-0">
@@ -54,6 +54,10 @@ export default function ReportForm({
             className="border border-slate-600 bg-slate-800 rounded p-2 text-sm w-full text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onPaste={(e) => {
+              e.preventDefault();
+              import('react-hot-toast').then(mod => mod.default.error("Pasting disabled for security reasons."));
+            }}
             placeholder="Enter password to lock PDF"
           />
         </div>
