@@ -61,11 +61,6 @@ export default function ReportForm({
              <img src={brandSettings.logoBase64} alt="Logo" className="w-8 h-8 object-contain rounded-md bg-white p-0.5" />
           )}
           <h2 className="font-bold text-lg tracking-wider flex-1 truncate">L.I.M.S</h2>
-          {onOpenSettings && (
-            <button onClick={onOpenSettings} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all text-slate-300 hover:text-white" title="Settings">
-              <Settings size={16} />
-            </button>
-          )}
         </div>
         
         <div className="flex flex-col gap-1">
