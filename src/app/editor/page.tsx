@@ -238,7 +238,7 @@ function EditorContent() {
       // Save using Tauri natively, or fallback to browser download
       const { saveSilentBackup } = await import('@/utils/exportManager');
       pdfGenerator.getBlob(async (blob: Blob) => {
-        await saveSilentBackup(formData.reportNo, blob);
+        await saveSilentBackup(formData.reportNo, blob, isSilent);
         if (!isSilent) toast.success("PDF generated and secured successfully!");
       });
       

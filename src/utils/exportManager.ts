@@ -2,7 +2,7 @@ import { saveAs } from 'file-saver';
 import toast from 'react-hot-toast';
 import { ensureBackupFolder } from './backupValidator';
 
-export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob) => {
+export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent: boolean = true) => {
   const isTauri = '__TAURI_INTERNALS__' in window || '__TAURI__' in window;
 
   try {
@@ -38,8 +38,12 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob) => {
       
       console.log(`Auto-saved backup strictly to: ${reportFolderPath}`);
     } else {
-      // Web Fallback
-      saveAs(pdfBlob, `Report_${reportNo}.pdf`);
+      // Web Fallback: Only download if it's NOT a silent auto-backup (which happens every 15s)
+      // We don't want to spam the user's Downloads folder with PDFs while they are typing.
+      // If it IS a silent backup, the data is already saved to Supabase Cloud via page.tsx!
+      if (!isSilent) {
+        saveAs(pdfBlob, `Report_${reportNo}.pdf`);
+      }
     }
 
     return true;
