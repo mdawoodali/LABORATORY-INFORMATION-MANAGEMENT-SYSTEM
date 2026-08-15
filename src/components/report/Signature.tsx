@@ -11,10 +11,11 @@ export default function Signature() {
       try {
         const settings: AppSettings = JSON.parse(savedSettings);
         if (settings.signatureImage) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setSignatureImage(settings.signatureImage);
         }
-      } catch (e) {
-        console.error(e);
+      } catch {
+        console.error("Failed to parse settings for signature");
       }
     }
   }, []);

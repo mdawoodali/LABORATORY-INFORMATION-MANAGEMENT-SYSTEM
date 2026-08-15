@@ -4,22 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
-import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, FlaskConical } from 'lucide-react';
+import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
   const router = useRouter();
-  const [recentReports, setRecentReports] = useState<any[]>([]);
+  const [recentReports, setRecentReports] = useState<{ id: string; reportNo: string; applicant: string; date: string }[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  async function loadData() {
     setIsLoading(true);
 
     // Load recent reports from Supabase
@@ -38,8 +34,8 @@ export default function HomePage() {
           date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
         })));
       }
-    } catch (e) {
-      console.error('Failed to load reports:', e);
+    } catch {
+      console.error('Failed to load reports');
     }
 
     // Load templates from localStorage
@@ -47,13 +43,19 @@ export default function HomePage() {
     if (savedTemplates) {
       try {
         setTemplates(JSON.parse(savedTemplates));
-      } catch (e) {
-        console.error('Failed to parse templates:', e);
+      } catch {
+        console.error('Failed to parse templates');
       }
     }
 
     setIsLoading(false);
-  };
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const deleteTemplate = (id: string) => {
     const updated = templates.filter(t => t.id !== id);
@@ -236,7 +238,7 @@ export default function HomePage() {
           ) : recentReports.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-10 text-center text-gray-400">
               <FileText size={40} className="mx-auto mb-3 text-gray-300" />
-              <p className="text-sm">No reports yet. Click <strong>"Default"</strong> to create one.</p>
+              <p className="text-sm">No reports yet. Click <strong>&quot;Default&quot;</strong> to create one.</p>
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">

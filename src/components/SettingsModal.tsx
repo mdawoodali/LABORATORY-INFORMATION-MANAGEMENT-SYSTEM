@@ -18,9 +18,11 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (parsed.autoBackup !== undefined) setAutoBackup(parsed.autoBackup);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (parsed.defaultPassword) setDefaultPassword(parsed.defaultPassword);
-      } catch (e) {}
+      } catch {}
     }
   }, []);
 
@@ -145,7 +147,7 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
                         // Force re-render of this input
                         setLocalSettings({...localSettings});
                       }
-                    } catch (err) {
+                    } catch {
                       toast.error("Failed to open folder picker.");
                     }
                   }}

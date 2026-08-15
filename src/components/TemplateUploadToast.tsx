@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast, Toast } from 'react-hot-toast';
-import { X, Upload, FileText } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 
 interface TemplateUploadToastProps {
   t: Toast;

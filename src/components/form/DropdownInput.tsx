@@ -19,8 +19,9 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
     const saved = localStorage.getItem(`sr_options_${fieldKey}`);
     if (saved) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setOptions(JSON.parse(saved));
-      } catch (e) {
+      } catch {
         console.error("Failed to parse options for", fieldKey);
       }
     }

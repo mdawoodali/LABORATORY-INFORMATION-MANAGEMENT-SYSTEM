@@ -1,4 +1,4 @@
-export const ensureBackupFolder = async (basePath: string, isSecondary: boolean = false) => {
+export const ensureBackupFolder = async (basePath: string) => {
   if (!('__TAURI_INTERNALS__' in window) && !('__TAURI__' in window)) {
     return true; 
   }

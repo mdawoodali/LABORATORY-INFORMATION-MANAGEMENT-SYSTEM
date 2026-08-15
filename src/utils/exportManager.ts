@@ -23,7 +23,7 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob) => {
         try { basePath = await desktopDir(); } catch { basePath = 'D:\\'; }
       }
       
-      const primaryTarget = await ensureBackupFolder(basePath, false); 
+      const primaryTarget = await ensureBackupFolder(basePath); 
       if (!primaryTarget) {
         throw new Error("Primary backup location is inaccessible. Backup aborted.");
       }
@@ -43,9 +43,10 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob) => {
     }
 
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to save report backup', error);
-    toast.error(`Backup Failed: ${error.message || (typeof error === 'string' ? error : 'Unknown error')}`);
+    const err = error as Error;
+    toast.error(`Backup Failed: ${err.message || (typeof err === 'string' ? err : 'Unknown error')}`);
     return false;
   }
 };

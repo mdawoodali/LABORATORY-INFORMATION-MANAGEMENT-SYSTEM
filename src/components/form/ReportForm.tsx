@@ -153,7 +153,7 @@ export default function ReportForm({
                   value={f.value} 
                   onChange={val => {
                     if (updateDynamicField) updateDynamicField(f.id, val);
-                    else updateField(f.id as any, val); // fallback
+                    else updateField(f.id as keyof ReportFormData, val); // fallback
                   }} 
                   className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
                 />

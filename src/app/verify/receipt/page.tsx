@@ -46,8 +46,9 @@ function VerifyPage() {
         return;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setReceiptData(data.data as any);
-    } catch (err) {
+    } catch {
       setError('An error occurred during verification.');
     } finally {
       setIsLoading(false);

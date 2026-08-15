@@ -19,9 +19,10 @@ export default function SettingsPage() {
     const savedSettings = localStorage.getItem('sr_settings');
     if (savedSettings) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSettings(JSON.parse(savedSettings));
-      } catch (e) {
-        console.error('Failed to load settings:', e);
+      } catch {
+        console.error('Failed to load settings');
       }
     }
   }, []);
@@ -232,11 +233,11 @@ export default function SettingsPage() {
                   type="button"
                   onClick={async () => {
                     try {
-                      // @ts-ignore
+                      // @ts-expect-error Web File System Access API
                       const dirHandle = await window.showDirectoryPicker();
                       setSettings(s => ({ ...s, backupLocation: dirHandle.name }));
-                    } catch (err) {
-                      console.error("Folder selection cancelled or not supported", err);
+                    } catch {
+                      console.error("Folder selection cancelled or not supported");
                     }
                   }}
                   className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 rounded-lg transition-colors text-sm border border-gray-300"

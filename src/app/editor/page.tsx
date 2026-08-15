@@ -41,11 +41,12 @@ function EditorContent() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setBrandSettings(parsed);
         if (parsed.companyName) {
           document.title = parsed.companyName;
         }
-      } catch(e) {}
+      } catch {}
     }
   }, []);
 
@@ -65,19 +66,22 @@ function EditorContent() {
       if (templateData) {
         try {
           const template: Template = JSON.parse(templateData);
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setFormData({
             ...template.formData,
             reportNo: String(Math.floor(100000 + Math.random() * 900000)),
           });
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setTests(template.tests);
           sessionStorage.removeItem('sr_template_data');
-        } catch (e) {
+        } catch (e: unknown) {
           console.error('Failed to load template:', e);
         }
       }
     } else if (reportId) {
       loadReport(reportId);
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
   }, [templateId, reportId]);
 
@@ -378,7 +382,7 @@ function EditorContent() {
               <div className="pb-[55px] relative">
                 <Signature />
                 <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                  This document was generated digitally and doesn't require a signature
+                  This document was generated digitally and doesn&apos;t require a signature
                 </div>
               </div>
             </div>
