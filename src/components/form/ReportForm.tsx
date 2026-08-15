@@ -1,6 +1,6 @@
 import React from 'react';
 import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save, Settings, ChevronDown } from 'lucide-react';
-import { ReportFormData, TestRow, migrateToDynamicFields } from '@/types';
+import { ReportFormData, TestRow, migrateToDynamicFields, ExtraPage } from '@/types';
 import DropdownInput from './DropdownInput';
 
 interface ReportFormProps {
@@ -21,6 +21,8 @@ interface ReportFormProps {
   updateDynamicField?: (id: string, value: string) => void;
   addDynamicField?: (label: string, value: string, bold: boolean) => void;
   removeDynamicField?: (id: string) => void;
+  extraPages?: ExtraPage[];
+  setExtraPages?: (pages: ExtraPage[]) => void;
 }
 
 export default function ReportForm({
@@ -40,7 +42,9 @@ export default function ReportForm({
   brandSettings,
   updateDynamicField,
   addDynamicField,
-  removeDynamicField
+  removeDynamicField,
+  extraPages,
+  setExtraPages
 }: ReportFormProps) {
   const [password, setPassword] = React.useState('');
   const [isPage1FieldsOpen, setIsPage1FieldsOpen] = React.useState(false);
@@ -273,6 +277,55 @@ export default function ReportForm({
             </>
           )}
         </section>
+
+        {/* Extra Pages */}
+        {extraPages?.map((page, index) => {
+          const pageName = `Page ${sampleImage ? 4 + index : 3 + index} Appendix`;
+          return (
+            <section key={page.id} className="pt-4 border-t mt-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-bold text-xs text-slate-400 uppercase tracking-widest">{pageName}</span>
+                <button onClick={() => setExtraPages?.(extraPages.filter(p => p.id !== page.id))} className="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded transition-colors" title="Delete Page"><Trash2 size={14}/></button>
+              </div>
+              <div className="flex flex-col gap-3">
+                <label className="w-full flex flex-col items-center px-4 py-4 bg-slate-50 rounded-lg shadow-sm tracking-wide border-dashed border-2 border-slate-300 cursor-pointer hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-all">
+                    <ImageIcon size={20} className="text-slate-400 mb-2" />
+                    <span className="text-xs font-bold text-slate-600">Upload Image Proof</span>
+                    <input type='file' className="hidden" accept="image/*" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setExtraPages?.(extraPages.map(p => p.id === page.id ? { ...p, image: reader.result as string } : p));
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                </label>
+                {page.image && (
+                  <div className="relative group">
+                    <img src={page.image} alt="Appendix" className="w-full h-32 object-cover rounded-lg border shadow-sm" />
+                    <button onClick={() => setExtraPages?.(extraPages.map(p => p.id === page.id ? { ...p, image: null } : p))} className="absolute top-2 right-2 bg-slate-900 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"><X size={12}/></button>
+                  </div>
+                )}
+                
+                <textarea 
+                  placeholder="Or type appendix text here..."
+                  className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] transition-colors"
+                  value={page.text}
+                  onChange={(e) => setExtraPages?.(extraPages.map(p => p.id === page.id ? { ...p, text: e.target.value } : p))}
+                />
+              </div>
+            </section>
+          );
+        })}
+
+        <button 
+          onClick={() => setExtraPages?.([...(extraPages || []), { id: Date.now().toString(), image: null, text: '' }])}
+          className="w-full mt-6 py-3 flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg font-bold text-sm hover:bg-blue-100 transition-all shadow-sm active:scale-95"
+        >
+          <Plus size={16} /> ADD PAGE
+        </button>
 
       </div>
     </div>

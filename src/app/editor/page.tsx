@@ -10,7 +10,7 @@ import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
 import CanvaImage from '@/components/report/CanvaImage';
-import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields } from '@/types';
+import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut } from 'lucide-react';
@@ -28,6 +28,7 @@ function EditorContent() {
 
   const [tests, setTests] = useState<TestRow[]>([...DEFAULT_TESTS]);
   const [sampleImage, setSampleImage] = useState<string | null>(null);
+  const [extraPages, setExtraPages] = useState<ExtraPage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -65,7 +66,7 @@ function EditorContent() {
     }
   }, [brandSettings.companyName]);
 
-  const totalPages = sampleImage ? 3 : 2;
+  const totalPages = (sampleImage ? 3 : 2) + extraPages.length;
 
   // Load template or existing report
   useEffect(() => {
@@ -101,7 +102,7 @@ function EditorContent() {
       return;
     }
     const timer = setTimeout(() => {
-      const stateStr = JSON.stringify({ formData, tests });
+      const stateStr = JSON.stringify({ formData, tests, extraPages });
       setHistory(prev => {
         const newHistory = prev.slice(0, historyIndex + 1);
         if (newHistory.length > 0 && newHistory[newHistory.length - 1] === stateStr) return prev;
@@ -122,6 +123,7 @@ function EditorContent() {
       const parsed = JSON.parse(history[newIndex]);
       setFormData(parsed.formData);
       setTests(parsed.tests);
+      setExtraPages(parsed.extraPages || []);
     }
   };
 
@@ -133,6 +135,7 @@ function EditorContent() {
       const parsed = JSON.parse(history[newIndex]);
       setFormData(parsed.formData);
       setTests(parsed.tests);
+      setExtraPages(parsed.extraPages || []);
     }
   };
 
@@ -149,6 +152,7 @@ function EditorContent() {
         setFormData(reportData.formData);
         setTests(reportData.tests);
         if (reportData.sampleImage) setSampleImage(reportData.sampleImage);
+        if (reportData.extraPages) setExtraPages(reportData.extraPages);
       }
     } catch (e) {
       console.error('Failed to load report:', e);
@@ -173,7 +177,7 @@ function EditorContent() {
           .upsert({
             id: formData.reportNo,
             password: password || '1234',
-            data: { formData, tests, sampleImage }
+            data: { formData, tests, sampleImage, extraPages }
           });
           
         if (error) {
@@ -256,7 +260,7 @@ function EditorContent() {
     let syncInterval: any;
     if (isLoaded && typeof window !== 'undefined') {
        syncInterval = setInterval(() => {
-          const currentData = JSON.stringify({ formData, tests });
+          const currentData = JSON.stringify({ formData, tests, extraPages });
           if (currentData !== lastBackedUpDataRef.current && lastBackedUpDataRef.current !== '') {
              // Silent background auto-sync without UI interruption
              const password = localStorage.getItem('sr_settings') ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword : '1234';
@@ -269,7 +273,7 @@ function EditorContent() {
        }, 15000); // 15 seconds
     }
     return () => clearInterval(syncInterval);
-  }, [isLoaded, formData, tests]);
+  }, [isLoaded, formData, tests, extraPages]);
 
   const updateField = (field: keyof ReportFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -370,6 +374,8 @@ function EditorContent() {
         onGoHome={() => router.push('/')}
         onOpenSettings={() => setShowSettings(true)}
         brandSettings={brandSettings}
+        extraPages={extraPages}
+        setExtraPages={setExtraPages}
       />
 
       <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
@@ -456,6 +462,40 @@ function EditorContent() {
             </div>
           </div>
         )}
+
+        {/* Extra Pages */}
+        {extraPages.map((page, index) => {
+          const pageNum = (sampleImage ? 4 : 3) + index;
+          return (
+            <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 mt-8" style={{ width: '794px', height: '1123px' }}>
+              <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
+              <div className="relative z-10 w-full h-full flex flex-col">
+                <SubHeader reportNo={formData.reportNo} pageNum={pageNum} totalPages={totalPages} />
+                <div className="pt-[175px] flex-1 flex flex-col px-10 relative">
+                  {page.image && (
+                    <div className="flex-1 flex justify-center items-start mb-4">
+                      <CanvaImage 
+                        src={page.image}
+                        className="max-w-full max-h-[850px] object-contain"
+                      />
+                    </div>
+                  )}
+                  {page.text && (
+                    <div className="whitespace-pre-wrap font-sans text-sm pb-10">
+                      {page.text}
+                    </div>
+                  )}
+                </div>
+                <div className="pb-[55px] relative">
+                  <Signature companyName={brandSettings.companyName} />
+                  <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
+                    This document was generated digitally and doesn&apos;t require a signature
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
         </div>
       </div>
     </div>

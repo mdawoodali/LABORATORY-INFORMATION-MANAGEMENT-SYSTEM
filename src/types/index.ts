@@ -14,6 +14,12 @@ export interface TestRow {
   result: string;
 }
 
+export interface ExtraPage {
+  id: string;
+  image: string | null;
+  text: string;
+}
+
 export interface ReportFormData {
   dynamicFields?: DynamicField[];
   reportNo: string;
@@ -52,6 +58,7 @@ export interface Template {
   name: string;
   formData: ReportFormData;
   tests: TestRow[];
+  extraPages?: ExtraPage[];
   createdAt: string;
   fileData?: string; // Base64 of the uploaded DOCX file
   thumbnail?: string; // Base64 of the thumbnail image
@@ -67,6 +74,7 @@ export interface SavedReport {
     formData: ReportFormData;
     tests: TestRow[];
     sampleImage: string | null;
+    extraPages?: ExtraPage[];
   };
 }
 
