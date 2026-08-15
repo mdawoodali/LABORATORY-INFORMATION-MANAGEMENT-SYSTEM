@@ -7,6 +7,8 @@ import { AppSettings, DEFAULT_SETTINGS } from '@/types';
 import { ArrowLeft, Download, Upload, Shield, Database, Save, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
 export default function SettingsPage() {
   const router = useRouter();
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
@@ -17,18 +19,39 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const savedSettings = localStorage.getItem('sr_settings');
+    const srBackupPath = localStorage.getItem('sr_backuppath');
+    let parsedSettings = { ...DEFAULT_SETTINGS };
+
     if (savedSettings) {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSettings(JSON.parse(savedSettings));
+        parsedSettings = JSON.parse(savedSettings);
       } catch {
         console.error('Failed to load settings');
       }
+    }
+    
+    if (srBackupPath) {
+      parsedSettings.backupLocation = srBackupPath;
+    }
+    
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSettings(parsedSettings);
+
+    if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window && !srBackupPath) {
+      import('@tauri-apps/api/path').then(({ desktopDir }) => {
+        desktopDir().then(dir => {
+          setSettings(prev => ({...prev, backupLocation: dir}));
+          localStorage.setItem('sr_backuppath', dir);
+        }).catch(() => {});
+      }).catch(() => {});
     }
   }, []);
 
   const handleSave = () => {
     localStorage.setItem('sr_settings', JSON.stringify(settings));
+    if (settings.backupLocation) {
+      localStorage.setItem('sr_backuppath', settings.backupLocation);
+    }
     setSaved(true);
     toast.success("Settings saved successfully!");
     setTimeout(() => setSaved(false), 2000);
@@ -209,30 +232,41 @@ export default function SettingsPage() {
           <div className="p-6 space-y-5">
             <div>
               <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Backup Location</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={settings.backupLocation}
-                  onChange={e => setSettings(s => ({ ...s, backupLocation: e.target.value }))}
-                  className="flex-1 border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#2b579a] outline-none transition-all bg-gray-50"
-                  placeholder="Select a folder..."
-                />
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      // @ts-expect-error Web File System Access API
-                      const dirHandle = await window.showDirectoryPicker();
-                      setSettings(s => ({ ...s, backupLocation: dirHandle.name }));
-                    } catch {
-                      console.error("Folder selection cancelled or not supported");
-                    }
-                  }}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 rounded-lg transition-colors text-sm border border-gray-300"
-                >
-                  Browse...
-                </button>
-              </div>
+              {!isTauri ? (
+                <div className="bg-gray-100 text-gray-600 p-3 rounded-lg text-sm border border-gray-200">
+                  Cannot change backup location on Web version. Backups will be downloaded.
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={settings.backupLocation}
+                    onChange={e => setSettings(s => ({ ...s, backupLocation: e.target.value }))}
+                    className="flex-1 border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#2b579a] outline-none transition-all bg-gray-50"
+                    placeholder="Select a folder..."
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const { open } = await import('@tauri-apps/plugin-dialog');
+                        const selected = await open({
+                          directory: true,
+                          multiple: false,
+                        });
+                        if (selected && !Array.isArray(selected)) {
+                          setSettings(s => ({ ...s, backupLocation: selected }));
+                        }
+                      } catch (err) {
+                        console.error("Folder selection cancelled or failed", err);
+                      }
+                    }}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 rounded-lg transition-colors text-sm border border-gray-300"
+                  >
+                    Browse...
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3">
