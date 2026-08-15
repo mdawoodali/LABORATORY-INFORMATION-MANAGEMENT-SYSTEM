@@ -1,13 +1,13 @@
 import React from 'react';
 
-export default function Footer() {
+export default function Footer({ companyName }: { companyName?: string }) {
   return (
     <div className="flex items-center justify-between w-full mt-2 pt-1 border-t-0 font-sans">
       
       {/* Left Blue Title */}
       <div className="w-[45%] text-left">
         <div className="font-gothic text-[22px] text-blue-900 leading-none tracking-widest font-medium" style={{ WebkitTextStroke: '0.2px #1E3A8A' }}>
-          S. R. LABORATORIES <span className="text-[14px]">(PVT.) LIMITED</span>
+          {companyName || 'S. R. LABORATORIES'} <span className="text-[14px]">(PVT.) LIMITED</span>
         </div>
       </div>
 

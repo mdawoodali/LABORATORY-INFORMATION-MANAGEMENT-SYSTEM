@@ -91,7 +91,7 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
               type="text"
               value={localSettings.companyName}
               onChange={e => setLocalSettings({ ...localSettings, companyName: e.target.value })}
-              placeholder="e.g. S.R. LABORATORIES"
+              placeholder="e.g. L.I.M.S"
               className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <p className="text-[11px] text-slate-500 mt-2">This text will appear in the footer copyright notice.</p>

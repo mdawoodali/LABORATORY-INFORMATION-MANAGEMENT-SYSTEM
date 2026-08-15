@@ -114,7 +114,7 @@ export const DEFAULT_TESTS: TestRow[] = [
 export const DEFAULT_SETTINGS: AppSettings = {
   autoBackup: true,
   defaultPassword: '1234',
-  companyName: 'S. R. Laboratories',
+  companyName: 'L.I.M.S',
   backupLocation: 'Supabase Cloud',
 };
 

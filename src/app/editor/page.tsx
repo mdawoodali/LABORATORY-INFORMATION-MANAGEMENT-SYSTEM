@@ -33,7 +33,7 @@ function EditorContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [brandSettings, setBrandSettings] = useState({
     logoBase64: '',
-    companyName: 'S.R. LABORATORIES'
+    companyName: 'L.I.M.S'
   });
 
   useEffect(() => {
