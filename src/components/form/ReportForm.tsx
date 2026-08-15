@@ -175,23 +175,23 @@ export default function ReportForm({
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 1 Header</label>
-              <DropdownInput fieldKey="tableHeader1" value={formData.tableHeader1} onChange={val => updateField('tableHeader1', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader1" placeholder="Test" value={formData.tableHeader1} onChange={val => updateField('tableHeader1', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 2 Header</label>
-              <DropdownInput fieldKey="tableHeader2" value={formData.tableHeader2} onChange={val => updateField('tableHeader2', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader2" placeholder="Unit" value={formData.tableHeader2} onChange={val => updateField('tableHeader2', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 3 Header</label>
-              <DropdownInput fieldKey="tableHeader3" value={formData.tableHeader3} onChange={val => updateField('tableHeader3', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader3" placeholder="ASTM Standard" value={formData.tableHeader3} onChange={val => updateField('tableHeader3', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 4 Header</label>
-              <DropdownInput fieldKey="tableHeader4" value={formData.tableHeader4} onChange={val => updateField('tableHeader4', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader4" placeholder="Actual Results" value={formData.tableHeader4} onChange={val => updateField('tableHeader4', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-2 mb-2">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Table Footer Text</label>
-                <DropdownInput fieldKey="footerText" value={formData.footerText} onChange={val => updateField('footerText', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                <DropdownInput fieldKey="footerText" placeholder="Average readings are reported." value={formData.footerText} onChange={val => updateField('footerText', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
           </div>
           

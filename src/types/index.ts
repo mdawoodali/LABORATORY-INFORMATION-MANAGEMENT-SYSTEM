@@ -100,11 +100,11 @@ export const DEFAULT_FORM_DATA: ReportFormData = {
   sampleReportingDate: '',
   careLabelSymbols: '',
   sampleDetails: '',
-  tableHeader1: 'Test',
-  tableHeader2: 'Unit',
-  tableHeader3: 'ASTM Standard',
-  tableHeader4: 'Actual Results',
-  footerText: 'Average readings are reported.'
+  tableHeader1: '',
+  tableHeader2: '',
+  tableHeader3: '',
+  tableHeader4: '',
+  footerText: ''
 };
 
 export const DEFAULT_TESTS: TestRow[] = [

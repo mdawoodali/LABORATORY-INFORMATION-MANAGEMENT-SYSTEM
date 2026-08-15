@@ -22,17 +22,17 @@ export default function TestTable({ tests, data }: { tests: TestRow[], data: Rep
 
       {/* Footer text above table */}
       <div className="border border-black inline-block px-2 py-0.5 mb-0 font-bold" style={{ fontSize: '11px', width: 'fit-content' }}>
-        {data.footerText}
+        {data.footerText || "Average readings are reported."}
       </div>
 
       {/* Main Table */}
       <table className="w-full border-collapse text-center" style={{ fontSize: '12px' }}>
         <thead>
           <tr>
-            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '30%' }}>{data.tableHeader1}</th>
-            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '18%' }}>{data.tableHeader2}</th>
-            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '27%' }}>{data.tableHeader3}</th>
-            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader4}</th>
+            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '30%' }}>{data.tableHeader1 || 'Test'}</th>
+            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '18%' }}>{data.tableHeader2 || 'Unit'}</th>
+            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '27%' }}>{data.tableHeader3 || 'ASTM Standard'}</th>
+            <th className="border border-black p-1.5 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader4 || 'Actual Results'}</th>
           </tr>
         </thead>
         <tbody>
