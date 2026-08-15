@@ -97,19 +97,6 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
             <p className="text-[11px] text-slate-500 mt-2">This text will appear in the footer copyright notice.</p>
           </div>
 
-          {/* Cloud Auto Backup */}
-          <div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={autoBackup}
-                onChange={e => setAutoBackup(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-              />
-              <span className="text-sm font-semibold text-slate-700">Enable Cloud Auto Backup</span>
-            </label>
-            <p className="text-[11px] text-slate-500 mt-1 pl-6">Automatically save encrypted backups to Supabase when you click Make Template or Generate PDF.</p>
-          </div>
 
           {/* Default Password */}
           <div>

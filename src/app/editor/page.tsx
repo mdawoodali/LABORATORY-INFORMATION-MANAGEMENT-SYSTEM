@@ -113,14 +113,8 @@ function EditorContent() {
 
     try {
       // 1. Try to save to DB (Handle RLS gracefully based on settings)
-      const savedSettings = localStorage.getItem('sr_settings');
-      let autoBackup = true;
-      if (savedSettings) {
-        try {
-          autoBackup = JSON.parse(savedSettings).autoBackup;
-        } catch(e){}
-      }
-
+      // Force auto backup to always be enabled
+      const autoBackup = true;
       if (autoBackup) {
         const { error } = await supabase
           .from('receipts')

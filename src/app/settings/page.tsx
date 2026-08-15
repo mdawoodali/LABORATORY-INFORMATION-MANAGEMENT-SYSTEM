@@ -159,18 +159,6 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-bold text-gray-700">Auto Cloud Backup</div>
-                  <div className="text-xs text-gray-400 mt-0.5">Automatically save every report to Supabase when generating PDF</div>
-                </div>
-                <button
-                  onClick={() => setSettings(s => ({ ...s, autoBackup: !s.autoBackup }))}
-                  className={`w-12 h-6 rounded-full transition-all relative ${settings.autoBackup ? 'bg-[#2b579a]' : 'bg-gray-300'}`}
-                >
-                  <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow ${settings.autoBackup ? 'left-6' : 'left-0.5'}`} />
-                </button>
-              </div>
 
               {/* Signature Photo Picker */}
               <div className="pt-4 border-t border-gray-100">
