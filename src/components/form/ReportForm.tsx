@@ -112,18 +112,6 @@ export default function ReportForm({
               <label className="block text-xs font-semibold text-slate-600 mb-1">Report # <span className="text-slate-400 font-normal">(Auto-generated)</span></label>
               <input type="text" value={formData.reportNo} readOnly disabled className="w-full border border-slate-200 rounded p-2 text-sm font-mono bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
-            <div className="col-span-2">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Applicant</label>
-              <DropdownInput fieldKey="applicant" value={formData.applicant} onChange={val => updateField('applicant', val)} className="w-full border border-slate-300 rounded p-2 text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Address</label>
-              <DropdownInput fieldKey="address" value={formData.address} onChange={val => updateField('address', val)} className="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-            </div>
-            <div className="col-span-1">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Phone #</label>
-              <DropdownInput fieldKey="phone" value={formData.phone} onChange={val => updateField('phone', val)} className="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-            </div>
           </div>
         </section>
 
@@ -145,7 +133,21 @@ export default function ReportForm({
           </div>
           {isPage1FieldsOpen && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
-            {migrateToDynamicFields(formData).map((f) => (
+              <div className="col-span-2">
+                <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">APPLICANT</label>
+                <DropdownInput fieldKey="applicant" value={formData.applicant} onChange={val => updateField('applicant', val)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white font-semibold focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              </div>
+              <div className="col-span-2">
+                <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">ADDRESS</label>
+                <DropdownInput fieldKey="address" value={formData.address} onChange={val => updateField('address', val)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              </div>
+              <div className="col-span-1">
+                <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">PHONE #</label>
+                <DropdownInput fieldKey="phone" value={formData.phone} onChange={val => updateField('phone', val)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              </div>
+            {migrateToDynamicFields(formData).map((f) => {
+              if (f.label === 'APPLICANT' || f.label === 'ADDRESS' || f.label === 'PHONE #') return null;
+              return (
               <div key={f.id} className={f.label === 'SAMPLE DESCRIPTION' ? 'col-span-2 group relative' : 'col-span-1 group relative'}>
                 <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">
                   {f.label}
@@ -165,7 +167,7 @@ export default function ReportForm({
                   className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
                 />
               </div>
-            ))}
+            )})}
             </div>
           )}
         </section>
