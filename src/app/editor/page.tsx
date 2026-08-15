@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import html2canvas from 'html2canvas-pro';
+import SettingsModal from '@/components/SettingsModal';
 import ReportForm from '@/components/form/ReportForm';
 import SubHeader from '@/components/report/SubHeader';
 import PageOneData from '@/components/report/PageOneData';
@@ -28,6 +29,32 @@ function EditorContent() {
   const [sampleImage, setSampleImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  
+  const [showSettings, setShowSettings] = useState(false);
+  const [brandSettings, setBrandSettings] = useState({
+    logoBase64: '',
+    companyName: 'S.R. LABORATORIES'
+  });
+
+  useEffect(() => {
+    const saved = localStorage.getItem('sr_brand_settings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setBrandSettings(parsed);
+        if (parsed.companyName) {
+          document.title = parsed.companyName;
+        }
+      } catch(e) {}
+    }
+  }, []);
+
+  // Sync title when brand settings change
+  useEffect(() => {
+    if (brandSettings.companyName) {
+      document.title = brandSettings.companyName;
+    }
+  }, [brandSettings.companyName]);
 
   const totalPages = sampleImage ? 3 : 2;
 
@@ -73,13 +100,13 @@ function EditorContent() {
     }
   };
 
-  const handlePrint = async (password?: string) => {
-    if (!password) {
+  const handlePrint = async (password?: string, isSilent: boolean = false) => {
+    if (!password && !isSilent) {
       toast.error("Please enter a password to lock the PDF.");
       return;
     }
     
-    setIsGenerating(true);
+    if (!isSilent) setIsGenerating(true);
 
     try {
       // 1. Try to save to DB (Handle RLS gracefully based on settings)
@@ -96,19 +123,21 @@ function EditorContent() {
           .from('receipts')
           .upsert({
             id: formData.reportNo,
-            password: password,
+            password: password || '1234',
             data: { formData, tests, sampleImage }
           });
           
         if (error) {
           console.error("Supabase Error:", error);
-          if (error.message.includes('row-level security')) {
-            toast.error("Cloud Backup Failed: Row Level Security is enabled but no public policy exists. Please add a policy in Supabase or turn off Auto Backup in Settings.", { duration: 6000 });
-          } else {
-            toast.error("Database save failed: " + error.message);
+          if (!isSilent) {
+            if (error.message.includes('row-level security')) {
+              toast.error("Cloud Backup Failed: Row Level Security is enabled but no public policy exists. Please add a policy in Supabase or turn off Auto Backup in Settings.", { duration: 6000 });
+            } else {
+              toast.error("Database save failed: " + error.message);
+            }
           }
         } else {
-          toast.success("Saved securely to cloud.");
+          if (!isSilent) toast.success("Saved securely to cloud.");
         }
       }
 
@@ -153,18 +182,72 @@ function EditorContent() {
       
       pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts.vfs;
 
-      pdfMake.createPdf(docDefinition).download(`SR_Lab_Report_${formData.reportNo}.pdf`);
-      toast.success("PDF generated successfully!");
+      const pdfGenerator = pdfMake.createPdf(docDefinition);
+
+      // Save using Tauri natively, or fallback to browser download
+      const { saveSilentBackup } = await import('@/utils/exportManager');
+      pdfGenerator.getBlob(async (blob: Blob) => {
+        await saveSilentBackup(formData.reportNo, blob);
+        if (!isSilent) toast.success("PDF generated and secured successfully!");
+      });
+      
     } catch (err: any) {
       console.error(err);
-      toast.error(`PDF generation failed: ${err.message || 'Unknown error'}`);
+      if (!isSilent) toast.error(`PDF generation failed: ${err.message || 'Unknown error'}`);
     } finally {
-      setIsGenerating(false);
+      if (!isSilent) setIsGenerating(false);
     }
   };
 
+  const lastBackedUpDataRef = React.useRef<string>('');
+
+  useEffect(() => {
+    let syncInterval: any;
+    if (isLoaded && typeof window !== 'undefined') {
+       syncInterval = setInterval(() => {
+          const currentData = JSON.stringify({ formData, tests });
+          if (currentData !== lastBackedUpDataRef.current && lastBackedUpDataRef.current !== '') {
+             // Silent background auto-sync without UI interruption
+             const password = localStorage.getItem('sr_settings') ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword : '1234';
+             handlePrint(password, true).then(() => {
+               lastBackedUpDataRef.current = currentData;
+             });
+          } else if (lastBackedUpDataRef.current === '') {
+             lastBackedUpDataRef.current = currentData;
+          }
+       }, 15000); // 15 seconds
+    }
+    return () => clearInterval(syncInterval);
+  }, [isLoaded, formData, tests]);
+
   const updateField = (field: keyof ReportFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const updateDynamicField = (id: string, value: string) => {
+    setFormData(prev => {
+      const dynamicFields = prev.dynamicFields ? [...prev.dynamicFields] : [];
+      const index = dynamicFields.findIndex(f => f.id === id);
+      if (index !== -1) {
+        dynamicFields[index] = { ...dynamicFields[index], value };
+      }
+      return { ...prev, dynamicFields };
+    });
+  };
+
+  const addDynamicField = (label: string, value: string, bold: boolean = false) => {
+    setFormData(prev => {
+      const dynamicFields = prev.dynamicFields ? [...prev.dynamicFields] : [];
+      dynamicFields.push({ id: `f_${Date.now()}`, label, value, bold });
+      return { ...prev, dynamicFields };
+    });
+  };
+
+  const removeDynamicField = (id: string) => {
+    setFormData(prev => {
+      if (!prev.dynamicFields) return prev;
+      return { ...prev, dynamicFields: prev.dynamicFields.filter(f => f.id !== id) };
+    });
   };
 
   const addTest = () => {
@@ -210,11 +293,20 @@ function EditorContent() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-200 overflow-hidden font-sans">
-      
+    <div className="flex h-screen w-full bg-slate-50 overflow-hidden font-sans">
+      {showSettings && (
+        <SettingsModal 
+          onClose={() => setShowSettings(false)}
+          brandSettings={brandSettings}
+          setBrandSettings={setBrandSettings}
+        />
+      )}
       <ReportForm 
         formData={formData}
         updateField={updateField}
+        updateDynamicField={updateDynamicField}
+        addDynamicField={addDynamicField}
+        removeDynamicField={removeDynamicField}
         tests={tests}
         addTest={addTest}
         updateTest={updateTest}
@@ -225,6 +317,8 @@ function EditorContent() {
         handlePrint={handlePrint}
         onSaveTemplate={handleSaveTemplate}
         onGoHome={() => router.push('/')}
+        onOpenSettings={() => setShowSettings(true)}
+        brandSettings={brandSettings}
       />
 
       <div className={`flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible items-center ${isGenerating ? 'is-generating-pdf' : ''}`}>

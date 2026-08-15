@@ -1,6 +1,6 @@
 import React from 'react';
-import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save } from 'lucide-react';
-import { ReportFormData, TestRow } from '@/types';
+import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save, Settings } from 'lucide-react';
+import { ReportFormData, TestRow, migrateToDynamicFields } from '@/types';
 import DropdownInput from './DropdownInput';
 
 interface ReportFormProps {
@@ -15,7 +15,11 @@ interface ReportFormProps {
   removeImage: () => void;
   handlePrint: (password?: string) => void;
   onSaveTemplate?: () => void;
-  onGoHome?: () => void;
+  onOpenSettings?: () => void;
+  brandSettings?: { logoBase64: string; companyName: string; };
+  updateDynamicField?: (id: string, value: string) => void;
+  addDynamicField?: (label: string, value: string, bold: boolean) => void;
+  removeDynamicField?: (id: string) => void;
 }
 
 export default function ReportForm({
@@ -30,7 +34,12 @@ export default function ReportForm({
   removeImage,
   handlePrint,
   onSaveTemplate,
-  onGoHome
+  onGoHome,
+  onOpenSettings,
+  brandSettings,
+  updateDynamicField,
+  addDynamicField,
+  removeDynamicField
 }: ReportFormProps) {
   const [password, setPassword] = React.useState('');
   return (
@@ -44,7 +53,15 @@ export default function ReportForm({
               <ArrowLeft size={16} />
             </button>
           )}
-          <h2 className="font-bold text-lg tracking-wider flex-1">Report Generator</h2>
+          {brandSettings?.logoBase64 && (
+             <img src={brandSettings.logoBase64} alt="Logo" className="w-8 h-8 object-contain rounded-md bg-white p-0.5" />
+          )}
+          <h2 className="font-bold text-lg tracking-wider flex-1 truncate">{brandSettings?.companyName || "Report Generator"}</h2>
+          {onOpenSettings && (
+            <button onClick={onOpenSettings} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all text-slate-300 hover:text-white" title="Settings">
+              <Settings size={16} />
+            </button>
+          )}
         </div>
         
         <div className="flex flex-col gap-1">
@@ -110,31 +127,35 @@ export default function ReportForm({
 
         {/* Sample Details */}
         <section>
-          <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Page 1 Fields</h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-xs text-slate-400 uppercase tracking-widest">Page 1 Fields</h3>
+            <button onClick={() => {
+              const label = prompt("Enter field name:");
+              if (label) addDynamicField?.(label, '', false);
+            }} className="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-1">
+              <Plus size={12} /> Add Field
+            </button>
+          </div>
           <div className="grid grid-cols-2 gap-x-3 gap-y-3">
-            {[
-              { key: 'sampleDescription', label: 'Sample Description' },
-              { key: 'sample', label: 'Sample' },
-              { key: 'shape', label: 'Shape' },
-              { key: 'sampleDate', label: 'Sample Date' },
-              { key: 'orderNo', label: 'Order No.' },
-              { key: 'color', label: 'Color' },
-              { key: 'size', label: 'Size' },
-              { key: 'fabricConstruction', label: 'Fabric Construction' },
-              { key: 'fabricWeight', label: 'Fabric Weight' },
-              { key: 'fibreContent', label: 'Fibre Content' },
-              { key: 'endUse', label: 'End Use' },
-              { key: 'buyerName', label: 'Buyer Name' },
-              { key: 'buyingHouse', label: 'Buying House' },
-              { key: 'manufacturer', label: 'Manufacturer' },
-              { key: 'previousReportNo', label: 'Previous Report #' },
-              { key: 'sampleReceivingDate', label: 'Sample Receiving Date' },
-              { key: 'sampleReportingDate', label: 'Sample Reporting Date' },
-              { key: 'careLabelSymbols', label: 'Care Label Symbols' },
-            ].map((f) => (
-              <div key={f.key} className={f.key === 'sampleDescription' ? 'col-span-2' : 'col-span-1'}>
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">{f.label}</label>
-                <DropdownInput fieldKey={f.key} value={(formData as any)[f.key]} onChange={val => updateField(f.key as keyof ReportFormData, val)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            {migrateToDynamicFields(formData).map((f) => (
+              <div key={f.id} className={f.label === 'SAMPLE DESCRIPTION' ? 'col-span-2 group relative' : 'col-span-1 group relative'}>
+                <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">
+                  {f.label}
+                  {f.id.startsWith('f_') && removeDynamicField && (
+                    <button onClick={() => removeDynamicField(f.id)} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" title="Remove Custom Field">
+                      <Trash2 size={12} />
+                    </button>
+                  )}
+                </label>
+                <DropdownInput 
+                  fieldKey={f.label} 
+                  value={f.value} 
+                  onChange={val => {
+                    if (updateDynamicField) updateDynamicField(f.id, val);
+                    else updateField(f.id as any, val); // fallback
+                  }} 
+                  className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                />
               </div>
             ))}
           </div>

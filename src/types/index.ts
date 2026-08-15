@@ -1,3 +1,10 @@
+export interface DynamicField {
+  id: string;
+  label: string;
+  value: string;
+  bold?: boolean;
+}
+
 export interface TestRow {
   id: string;
   test: string;
@@ -7,6 +14,7 @@ export interface TestRow {
 }
 
 export interface ReportFormData {
+  dynamicFields?: DynamicField[];
   reportNo: string;
   applicant: string;
   address: string;
@@ -108,4 +116,33 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultPassword: '1234',
   companyName: 'S. R. Laboratories',
   backupLocation: 'Supabase Cloud',
+};
+
+export const migrateToDynamicFields = (data: ReportFormData): DynamicField[] => {
+  if (data.dynamicFields && data.dynamicFields.length > 0) {
+    return data.dynamicFields;
+  }
+  return [
+    { id: 'f1', label: 'APPLICANT', value: data.applicant || '', bold: true },
+    { id: 'f2', label: 'ADDRESS', value: data.address || '' },
+    { id: 'f3', label: 'PHONE #', value: data.phone || '' },
+    { id: 'f4', label: 'SAMPLE DESCRIPTION', value: data.sampleDescription || '' },
+    { id: 'f5', label: 'SAMPLE', value: data.sample || '' },
+    { id: 'f6', label: 'SHAPE', value: data.shape || '' },
+    { id: 'f7', label: 'SAMPLE DATE', value: data.sampleDate || '' },
+    { id: 'f8', label: 'ORDER NO.', value: data.orderNo || '' },
+    { id: 'f9', label: 'COLOR', value: data.color || '' },
+    { id: 'f10', label: 'SIZE', value: data.size || '' },
+    { id: 'f11', label: 'FABRIC CONSTRUCTION', value: data.fabricConstruction || '' },
+    { id: 'f12', label: 'FABRIC WEIGHT', value: data.fabricWeight || '' },
+    { id: 'f13', label: 'FIBRE CONTENT', value: data.fibreContent || '' },
+    { id: 'f14', label: 'END USE', value: data.endUse || '' },
+    { id: 'f15', label: 'BUYER NAME', value: data.buyerName || '' },
+    { id: 'f16', label: 'BUYING HOUSE', value: data.buyingHouse || '' },
+    { id: 'f17', label: 'MANUFACTURER', value: data.manufacturer || '' },
+    { id: 'f18', label: 'PREVIOUS REPORT #', value: data.previousReportNo || '' },
+    { id: 'f19', label: 'SAMPLE RECEIVING  DATE ', value: data.sampleReceivingDate || '' },
+    { id: 'f20', label: 'SAMPLE REPORTING DATE', value: data.sampleReportingDate || '' },
+    { id: 'f21', label: 'CARE LABEL SYMBOLS', value: data.careLabelSymbols || '' },
+  ];
 };
