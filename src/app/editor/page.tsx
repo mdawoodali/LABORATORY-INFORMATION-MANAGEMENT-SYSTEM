@@ -293,7 +293,7 @@ function EditorContent() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden font-sans">
+    <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
       {showSettings && (
         <SettingsModal 
           onClose={() => setShowSettings(false)}
@@ -321,10 +321,12 @@ function EditorContent() {
         brandSettings={brandSettings}
       />
 
-      <div className={`flex-1 overflow-y-auto p-8 flex flex-col gap-8 print:p-0 print:gap-0 print:overflow-visible items-center ${isGenerating ? 'is-generating-pdf' : ''}`}>
+      <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center ${isGenerating ? 'is-generating-pdf' : ''}`}>
+        
+        <div className="w-full max-w-[794px] origin-top md:transform-none scale-[0.6] sm:scale-[0.8] md:scale-100 mb-[-300px] md:mb-0 print:scale-100 print:mb-0 flex flex-col gap-4 md:gap-8 items-center">
         
         {/* PAGE 1 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
+        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0">
           <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
           <div className="relative z-10 w-full h-full flex flex-col">
             <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
@@ -382,7 +384,7 @@ function EditorContent() {
             </div>
           </div>
         )}
-
+        </div>
       </div>
     </div>
   );

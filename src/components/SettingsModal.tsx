@@ -49,8 +49,8 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
-        <div className="p-4 border-b flex justify-between items-center bg-slate-50">
+      <div className="bg-white rounded-lg shadow-2xl w-[95%] md:w-full md:max-w-md overflow-hidden">
+        <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50">
           <h2 className="font-bold text-lg text-slate-800">Website Branding</h2>
           <button onClick={onClose} className="text-slate-500 hover:bg-slate-200 p-1.5 rounded-full transition-colors">
             <X size={20} />

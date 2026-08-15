@@ -44,7 +44,7 @@ export default function ReportForm({
 }: ReportFormProps) {
   const [password, setPassword] = React.useState('');
   return (
-    <div className="w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full">
+    <div className="w-full md:w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full md:h-screen">
       <div className="p-4 border-b bg-slate-900 text-white flex flex-col gap-3 shrink-0">
         
         {/* Top row: Back + Title */}
@@ -83,9 +83,9 @@ export default function ReportForm({
         <div className="flex gap-2">
           <button 
             onClick={() => handlePrint(password)}
-            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-3 md:px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
           >
-            <Printer size={16} /> Generate PDF
+            <Printer size={16} /> <span className="hidden sm:inline">Generate PDF</span><span className="sm:hidden">Print</span>
           </button>
           {onSaveTemplate && (
             <button 
@@ -93,7 +93,7 @@ export default function ReportForm({
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-1 text-xs"
               title="Save as Template"
             >
-              <Save size={14} /> Make Template
+              <Save size={14} /> <span className="hidden sm:inline">Make Template</span><span className="sm:hidden">Save</span>
             </button>
           )}
         </div>
@@ -104,7 +104,7 @@ export default function ReportForm({
         {/* General Info */}
         <section>
           <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">General Info</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Report # <span className="text-slate-400 font-normal">(Auto-generated)</span></label>
               <input type="text" value={formData.reportNo} readOnly disabled className="w-full border border-slate-200 rounded p-2 text-sm font-mono bg-gray-100 text-gray-500 cursor-not-allowed" />
@@ -137,7 +137,7 @@ export default function ReportForm({
               <Plus size={12} /> Add Field
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
             {migrateToDynamicFields(formData).map((f) => (
               <div key={f.id} className={f.label === 'SAMPLE DESCRIPTION' ? 'col-span-2 group relative' : 'col-span-1 group relative'}>
                 <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">
