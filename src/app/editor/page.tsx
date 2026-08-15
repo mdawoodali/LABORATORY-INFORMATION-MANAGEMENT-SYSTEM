@@ -375,7 +375,7 @@ function EditorContent() {
       <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
         
         {/* Floating Toolbar */}
-        <div className="sticky top-0 z-50 flex gap-2 bg-white/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 no-print">
+        <div className="fixed top-4 right-4 md:top-6 md:right-8 z-50 flex gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print">
           <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 transition-all text-slate-700" title="Undo">
             <Undo2 size={18} />
           </button>
