@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Upload, Trash2 } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface SettingsModalProps {
@@ -25,24 +25,12 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
     }
   }, []);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("Image must be smaller than 2MB");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLocalSettings({ ...localSettings, logoBase64: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+
 
   const handleSave = () => {
-    setBrandSettings(localSettings);
-    localStorage.setItem('sr_brand_settings', JSON.stringify(localSettings));
+    const updatedSettings = { ...localSettings, logoBase64: '' };
+    setBrandSettings(updatedSettings);
+    localStorage.setItem('sr_brand_settings', JSON.stringify(updatedSettings));
     localStorage.setItem('sr_settings', JSON.stringify({ autoBackup, defaultPassword }));
     toast.success("Settings saved successfully!");
     onClose();
@@ -59,30 +47,6 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
         </div>
         
         <div className="p-6 space-y-6 flex-1 overflow-y-auto min-h-0">
-          {/* Logo Upload */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Company Logo</label>
-            <div className="flex flex-col gap-3">
-              {localSettings.logoBase64 ? (
-                <div className="relative group w-full h-32 border rounded-lg flex items-center justify-center bg-slate-50 overflow-hidden p-2">
-                  <img src={localSettings.logoBase64} alt="Company Logo" className="max-h-full max-w-full object-contain" />
-                  <button 
-                    onClick={() => setLocalSettings({ ...localSettings, logoBase64: '' })}
-                    className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ) : (
-                <label className="w-full h-32 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition-colors">
-                  <Upload size={24} className="text-slate-400 mb-2" />
-                  <span className="text-sm font-medium text-slate-600">Upload Logo (PNG/JPG)</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
-                </label>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500 mt-2">This logo will appear on the header of all generated PDF reports.</p>
-          </div>
 
           {/* Company Name */}
           <div>
