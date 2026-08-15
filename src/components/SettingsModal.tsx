@@ -58,7 +58,7 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
           </button>
         </div>
         
-        <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+        <div className="p-6 space-y-6 flex-1 overflow-y-auto min-h-0">
           {/* Logo Upload */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Company Logo</label>
