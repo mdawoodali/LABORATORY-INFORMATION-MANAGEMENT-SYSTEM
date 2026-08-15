@@ -190,15 +190,19 @@ export default function ReportForm({
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 2 Header</label>
-              <DropdownInput fieldKey="tableHeader2" placeholder="Unit" value={formData.tableHeader2} onChange={val => updateField('tableHeader2', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader2" placeholder="Test Method" value={formData.tableHeader2} onChange={val => updateField('tableHeader2', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 3 Header</label>
-              <DropdownInput fieldKey="tableHeader3" placeholder="ASTM Standard" value={formData.tableHeader3} onChange={val => updateField('tableHeader3', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader3" placeholder="Value" value={formData.tableHeader3} onChange={val => updateField('tableHeader3', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 4 Header</label>
-              <DropdownInput fieldKey="tableHeader4" placeholder="Actual Results" value={formData.tableHeader4} onChange={val => updateField('tableHeader4', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+              <DropdownInput fieldKey="tableHeader4" placeholder="Unit" value={formData.tableHeader4} onChange={val => updateField('tableHeader4', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+            </div>
+            <div className="col-span-1">
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 5 Header</label>
+              <DropdownInput fieldKey="tableHeader5" placeholder="Result" value={formData.tableHeader5} onChange={val => updateField('tableHeader5', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
             </div>
             <div className="col-span-2 mb-2">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Table Footer Text</label>
@@ -218,16 +222,20 @@ export default function ReportForm({
                     <DropdownInput fieldKey="testName" placeholder="Test Name" value={test.test} onChange={val => updateTest(test.id, 'test', val)} className="w-full border-b border-slate-300 bg-transparent text-sm font-semibold py-1 focus:outline-none focus:border-blue-500 transition-colors" />
                   </div>
                   <div>
+                    <label className="text-[10px] uppercase font-bold text-slate-400">Test Method</label>
+                    <DropdownInput fieldKey="testMethod" placeholder="Test Method" value={test.method} onChange={val => updateTest(test.id, 'method', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-slate-400">Value</label>
+                    <DropdownInput fieldKey="testValue" placeholder="Value" value={test.value} onChange={val => updateTest(test.id, 'value', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                  </div>
+                  <div>
                     <label className="text-[10px] uppercase font-bold text-slate-400">Unit</label>
                     <DropdownInput fieldKey="testUnit" placeholder="Unit" value={test.unit} onChange={val => updateTest(test.id, 'unit', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-slate-400">ASTM Standard</label>
-                    <DropdownInput fieldKey="testStandard" placeholder="Standard" value={test.standard} onChange={val => updateTest(test.id, 'standard', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
-                  </div>
-                  <div className="col-span-2 mt-2">
-                    <label className="text-[10px] uppercase font-bold text-slate-400">Actual Result</label>
-                    <DropdownInput fieldKey="testResult" placeholder="Actual Result" value={test.result} onChange={val => updateTest(test.id, 'result', val)} className="w-full bg-white border border-slate-300 rounded text-sm p-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold" />
+                    <label className="text-[10px] uppercase font-bold text-slate-400">Result</label>
+                    <DropdownInput fieldKey="testResult" placeholder="Result" value={test.result} onChange={val => updateTest(test.id, 'result', val)} defaultOptions={['Pass', 'Fail']} className="w-full bg-white border border-slate-300 rounded text-sm p-1.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold" />
                   </div>
                 </div>
               </div>

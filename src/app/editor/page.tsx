@@ -302,7 +302,7 @@ function EditorContent() {
   };
 
   const addTest = () => {
-    setTests([...tests, { id: Date.now().toString(), test: 'New Test', unit: '-', standard: '-', result: '-' }]);
+    setTests([...tests, { id: Date.now().toString(), test: 'New Test', method: '-', value: '-', unit: '-', result: '-' }]);
   };
 
   const updateTest = (id: string, field: keyof TestRow, value: string) => {

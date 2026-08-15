@@ -8,8 +8,9 @@ export interface DynamicField {
 export interface TestRow {
   id: string;
   test: string;
+  method: string;
+  value: string;
   unit: string;
-  standard: string;
   result: string;
 }
 
@@ -42,6 +43,7 @@ export interface ReportFormData {
   tableHeader2: string;
   tableHeader3: string;
   tableHeader4: string;
+  tableHeader5: string;
   footerText: string;
 }
 
@@ -104,11 +106,12 @@ export const DEFAULT_FORM_DATA: ReportFormData = {
   tableHeader2: '',
   tableHeader3: '',
   tableHeader4: '',
+  tableHeader5: '',
   footerText: ''
 };
 
 export const DEFAULT_TESTS: TestRow[] = [
-  { id: '1', test: 'New Test', unit: '-', standard: '-', result: '-' },
+  { id: '1', test: 'New Test', method: '-', value: '-', unit: '-', result: '-' },
 ];
 
 export const DEFAULT_SETTINGS: AppSettings = {

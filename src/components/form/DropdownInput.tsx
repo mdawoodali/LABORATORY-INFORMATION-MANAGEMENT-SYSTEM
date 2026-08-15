@@ -7,11 +7,12 @@ interface DropdownInputProps {
   fieldKey: string;
   className?: string;
   placeholder?: string;
+  defaultOptions?: string[];
 }
 
-export default function DropdownInput({ value, onChange, fieldKey, className = '', placeholder = '' }: DropdownInputProps) {
+export default function DropdownInput({ value, onChange, fieldKey, className = '', placeholder = '', defaultOptions }: DropdownInputProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [options, setOptions] = useState<string[]>([]);
+  const [options, setOptions] = useState<string[]>(defaultOptions || []);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Load options from localStorage on mount
@@ -23,7 +24,10 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
         setOptions(JSON.parse(saved));
       } catch {
         console.error("Failed to parse options for", fieldKey);
+        if (defaultOptions) setOptions(defaultOptions);
       }
+    } else if (defaultOptions) {
+      setOptions(defaultOptions);
     }
   }, [fieldKey]);
 
