@@ -111,7 +111,7 @@ export const DEFAULT_FORM_DATA: ReportFormData = {
 };
 
 export const DEFAULT_TESTS: TestRow[] = [
-  { id: '1', test: 'New Test', method: '-', value: '-', unit: '-', result: '-' },
+  { id: '1', test: '', method: '', value: '', unit: '', result: '' },
 ];
 
 export const DEFAULT_SETTINGS: AppSettings = {
