@@ -15,6 +15,7 @@ interface ReportFormProps {
   removeImage: () => void;
   handlePrint: (password?: string) => void;
   onSaveTemplate?: () => void;
+  onGoHome?: () => void;
   onOpenSettings?: () => void;
   brandSettings?: { logoBase64: string; companyName: string; };
   updateDynamicField?: (id: string, value: string) => void;
