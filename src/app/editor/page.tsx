@@ -10,9 +10,10 @@ import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
 import CanvaImage from '@/components/report/CanvaImage';
-import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS } from '@/types';
+import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
+import { Undo2, Redo2, ZoomIn, ZoomOut } from 'lucide-react';
 
 function EditorContent() {
   const router = useRouter();
@@ -30,6 +31,13 @@ function EditorContent() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   
+  // Undo/Redo state
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const isUndoRedoAction = React.useRef(false);
+
+  // Zoom state
+  const [zoom, setZoom] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
   const [brandSettings, setBrandSettings] = useState({
     logoBase64: '',
@@ -84,6 +92,49 @@ function EditorContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
   }, [templateId, reportId]);
+
+  // Capture history (debounced)
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (isUndoRedoAction.current) {
+      isUndoRedoAction.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      const stateStr = JSON.stringify({ formData, tests });
+      setHistory(prev => {
+        const newHistory = prev.slice(0, historyIndex + 1);
+        if (newHistory.length > 0 && newHistory[newHistory.length - 1] === stateStr) return prev;
+        newHistory.push(stateStr);
+        if (newHistory.length > 50) newHistory.shift();
+        setHistoryIndex(newHistory.length - 1);
+        return newHistory;
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [formData, tests, isLoaded, historyIndex]);
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      isUndoRedoAction.current = true;
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      const parsed = JSON.parse(history[newIndex]);
+      setFormData(parsed.formData);
+      setTests(parsed.tests);
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      isUndoRedoAction.current = true;
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      const parsed = JSON.parse(history[newIndex]);
+      setFormData(parsed.formData);
+      setTests(parsed.tests);
+    }
+  };
 
   const loadReport = async (id: string) => {
     try {
@@ -226,7 +277,7 @@ function EditorContent() {
 
   const updateDynamicField = (id: string, value: string) => {
     setFormData(prev => {
-      const dynamicFields = prev.dynamicFields ? [...prev.dynamicFields] : [];
+      const dynamicFields = prev.dynamicFields && prev.dynamicFields.length > 0 ? [...prev.dynamicFields] : migrateToDynamicFields(prev);
       const index = dynamicFields.findIndex(f => f.id === id);
       if (index !== -1) {
         dynamicFields[index] = { ...dynamicFields[index], value };
@@ -237,7 +288,7 @@ function EditorContent() {
 
   const addDynamicField = (label: string, value: string, bold: boolean = false) => {
     setFormData(prev => {
-      const dynamicFields = prev.dynamicFields ? [...prev.dynamicFields] : [];
+      const dynamicFields = prev.dynamicFields && prev.dynamicFields.length > 0 ? [...prev.dynamicFields] : migrateToDynamicFields(prev);
       dynamicFields.push({ id: `f_${Date.now()}`, label, value, bold });
       return { ...prev, dynamicFields };
     });
@@ -245,8 +296,8 @@ function EditorContent() {
 
   const removeDynamicField = (id: string) => {
     setFormData(prev => {
-      if (!prev.dynamicFields) return prev;
-      return { ...prev, dynamicFields: prev.dynamicFields.filter(f => f.id !== id) };
+      const dynamicFields = prev.dynamicFields && prev.dynamicFields.length > 0 ? [...prev.dynamicFields] : migrateToDynamicFields(prev);
+      return { ...prev, dynamicFields: dynamicFields.filter(f => f.id !== id) };
     });
   };
 
@@ -321,9 +372,30 @@ function EditorContent() {
         brandSettings={brandSettings}
       />
 
-      <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center ${isGenerating ? 'is-generating-pdf' : ''}`}>
+      <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
         
-        <div className="w-full max-w-[794px] origin-top md:transform-none scale-[0.6] sm:scale-[0.8] md:scale-100 mb-[-300px] md:mb-0 print:scale-100 print:mb-0 flex flex-col gap-4 md:gap-8 items-center">
+        {/* Floating Toolbar */}
+        <div className="sticky top-0 z-50 flex gap-2 bg-white/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 no-print">
+          <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 transition-all text-slate-700" title="Undo">
+            <Undo2 size={18} />
+          </button>
+          <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 transition-all text-slate-700" title="Redo">
+            <Redo2 size={18} />
+          </button>
+          <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
+          <button onClick={() => setZoom(z => Math.max(0.4, z - 0.1))} className="p-2 rounded-lg hover:bg-slate-100 transition-all text-slate-700" title="Zoom Out">
+            <ZoomOut size={18} />
+          </button>
+          <span className="text-xs font-mono text-slate-500 self-center w-12 text-center">{Math.round(zoom * 100)}%</span>
+          <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} className="p-2 rounded-lg hover:bg-slate-100 transition-all text-slate-700" title="Zoom In">
+            <ZoomIn size={18} />
+          </button>
+        </div>
+
+        <div 
+          className="w-full max-w-[794px] origin-top md:transform-none print:scale-100 print:mb-0 flex flex-col gap-4 md:gap-8 items-center transition-transform"
+          style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}
+        >
         
         {/* PAGE 1 */}
         <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0">
