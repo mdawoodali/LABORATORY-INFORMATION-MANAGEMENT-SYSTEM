@@ -327,7 +327,6 @@ function EditorContent() {
         
         {/* PAGE 1 */}
         <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
           <div className="relative z-10 w-full h-full flex flex-col">
             <Header logoBase64={brandSettings.logoBase64} />
             <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
@@ -346,7 +345,6 @@ function EditorContent() {
 
         {/* PAGE 2 */}
         <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
           <div className="relative z-10 w-full h-full flex flex-col">
             <Header logoBase64={brandSettings.logoBase64} />
             <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
@@ -366,7 +364,6 @@ function EditorContent() {
         {/* PAGE 3 - Sample Image */}
         {sampleImage && (
           <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-            <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
             <div className="relative z-10 w-full h-full flex flex-col">
               <Header logoBase64={brandSettings.logoBase64} />
             <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
