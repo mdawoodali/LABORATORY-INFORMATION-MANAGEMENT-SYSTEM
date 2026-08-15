@@ -17,7 +17,7 @@ export const ensureBackupFolder = async (basePath: string, isSecondary: boolean 
       return false;
     }
 
-    const srPath = `${cleanPath}\\SR_LAB_BACKUP`;
+    const srPath = `${cleanPath}\\LIMS_BACKUP`;
     
     const srExists = await exists(srPath);
     if (!srExists) {

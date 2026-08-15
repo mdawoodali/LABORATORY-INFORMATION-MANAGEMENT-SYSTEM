@@ -21,8 +21,8 @@ const montserrat = Montserrat({
 import SecurityShield from "@/components/SecurityShield";
 
 export const metadata: Metadata = {
-  title: "S. R. LABORATORIES",
-  description: "Report Management System",
+  title: "Laboratory Information Management System",
+  description: "LIMS Desktop & Web Application",
   icons: {
     icon: '/icon.jpg?v=4',
   },
