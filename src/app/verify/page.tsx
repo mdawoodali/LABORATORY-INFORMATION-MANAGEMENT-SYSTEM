@@ -10,7 +10,7 @@ export default function VerifyIndexPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (reportNo) {
-      router.push(`/verify/${reportNo}`);
+      router.push(`/verify/receipt?id=${reportNo}`);
     }
   };
 

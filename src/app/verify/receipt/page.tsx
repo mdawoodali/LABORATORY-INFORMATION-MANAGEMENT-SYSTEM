@@ -2,16 +2,16 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ReportFormData, TestRow } from '@/types';
 import SubHeader from '@/components/report/SubHeader';
 import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
 
-export default function VerifyPage() {
-  const params = useParams();
-  const reportNo = params.id as string;
+function VerifyPage() {
+  const searchParams = useSearchParams();
+  const reportNo = searchParams.get('id') || '';
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -144,5 +144,13 @@ export default function VerifyPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function VerifyPageWrapper() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-slate-900 flex justify-center items-center text-white">Loading secure portal...</div>}>
+      <VerifyPage />
+    </React.Suspense>
   );
 }
