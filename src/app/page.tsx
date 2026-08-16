@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES } from '@/types';
-import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download } from 'lucide-react';
+import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, Search } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
@@ -18,19 +18,23 @@ export default function HomePage() {
       const { data: reports, error } = await supabase
         .from('receipts')
         .select('id, data, created_at')
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .order('created_at', { ascending: false });
 
       if (error || !reports) return [];
 
-      return reports.map(r => ({
-        id: r.id,
-        reportNo: r.id,
-        applicant: r.data?.formData?.applicant || 'Untitled',
-        date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
-      }));
+      return reports.map(r => {
+        const applicantField = r.data?.formData?.dynamicFields?.find((f: any) => f.label === 'APPLICANT');
+        return {
+          id: r.id,
+          reportNo: r.id,
+          applicant: applicantField ? applicantField.value : (r.data?.formData?.applicant || 'Untitled'),
+          date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
+        };
+      });
     }
   });
+
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [templates, setTemplates] = useState<Template[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
@@ -60,6 +64,15 @@ export default function HomePage() {
   }, []);
 
   const isLoading = reportsLoading || templatesLoading;
+
+  const filteredReports = recentReports.filter(report => {
+    const term = searchTerm.toLowerCase();
+    return (
+      report.reportNo.toLowerCase().includes(term) ||
+      report.applicant.toLowerCase().includes(term) ||
+      report.date.toLowerCase().includes(term)
+    );
+  });
 
   const deleteTemplate = (id: string) => {
     const updated = templates.filter(t => t.id !== id);
@@ -229,17 +242,35 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-5 flex items-center gap-2">
-            <Clock size={14} />
-            Recent Reports
-          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+              <Clock size={14} />
+              Recent Reports
+            </h2>
+            <div className="relative w-full sm:w-64">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={14} className="text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by date, report #, applicant..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2b579a] transition-shadow"
+              />
+            </div>
+          </div>
 
           {isLoading ? (
             <div className="bg-white rounded-lg p-10 text-center text-gray-400 text-sm">Loading...</div>
-          ) : recentReports.length === 0 ? (
+          ) : filteredReports.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-10 text-center text-gray-400">
               <FileText size={40} className="mx-auto mb-3 text-gray-300" />
-              <p className="text-sm">No reports yet. Click <strong>&quot;Default&quot;</strong> to create one.</p>
+              {recentReports.length === 0 ? (
+                <p className="text-sm">No reports yet. Click <strong>&quot;Default&quot;</strong> to create one.</p>
+              ) : (
+                <p className="text-sm">No reports match your search.</p>
+              )}
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
@@ -253,7 +284,7 @@ export default function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {recentReports.map((report, idx) => (
+                  {filteredReports.map((report, idx) => (
                     <tr
                       key={report.id}
                       className={`border-b border-gray-100 hover:bg-blue-50/50 transition-colors cursor-pointer ${idx % 2 === 1 ? 'bg-gray-50/30' : ''}`}
