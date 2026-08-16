@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import Updater from "@/components/Updater";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col select-none">
         <Providers>
-          <Toaster position="top-center" />
+          <Updater />
+          <Toaster position="bottom-right" />
           <SecurityShield />
           {children}
         </Providers>

@@ -30,6 +30,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
           tagName: "v0.1.0-alpha.${{ github.run_number }}" # Creates a unique tag for every build
           releaseName: "SR-LAB Windows Executable (Build ${{ github.run_number }})"
