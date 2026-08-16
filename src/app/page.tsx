@@ -9,6 +9,7 @@ import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import packageJson from '../../package.json';
 
 export default function HomePage() {
   const router = useRouter();
@@ -130,6 +131,7 @@ export default function HomePage() {
               <span className="text-2xl font-black text-gray-800">L.I.M.S</span>
               <span className="text-xs font-semibold ml-3 text-gray-500 uppercase tracking-widest hidden md:inline-block">
                 Laboratory Information Management System
+                <span className="ml-2 text-gray-400 font-mono text-[10px] bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v{packageJson.version}</span>
               </span>
             </div>
           </div>
