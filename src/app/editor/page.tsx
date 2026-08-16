@@ -285,8 +285,21 @@ function EditorContent() {
       const index = dynamicFields.findIndex(f => f.id === id);
       if (index !== -1) {
         dynamicFields[index] = { ...dynamicFields[index], value };
+        return { ...prev, dynamicFields };
       }
-      return { ...prev, dynamicFields };
+      return prev;
+    });
+  };
+
+  const renameDynamicField = (id: string, newLabel: string) => {
+    setFormData(prev => {
+      const dynamicFields = prev.dynamicFields && prev.dynamicFields.length > 0 ? [...prev.dynamicFields] : migrateToDynamicFields(prev);
+      const index = dynamicFields.findIndex(f => f.id === id);
+      if (index !== -1) {
+        dynamicFields[index] = { ...dynamicFields[index], label: newLabel };
+        return { ...prev, dynamicFields };
+      }
+      return prev;
     });
   };
 
@@ -360,6 +373,7 @@ function EditorContent() {
         formData={formData}
         updateField={updateField}
         updateDynamicField={updateDynamicField}
+        renameDynamicField={renameDynamicField}
         addDynamicField={addDynamicField}
         removeDynamicField={removeDynamicField}
         tests={tests}

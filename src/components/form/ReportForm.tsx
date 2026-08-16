@@ -19,6 +19,7 @@ interface ReportFormProps {
   onOpenSettings?: () => void;
   brandSettings?: { logoBase64: string; companyName: string; };
   updateDynamicField?: (id: string, value: string) => void;
+  renameDynamicField?: (id: string, newLabel: string) => void;
   addDynamicField?: (label: string, value: string, bold: boolean) => void;
   removeDynamicField?: (id: string) => void;
   extraPages?: ExtraPage[];
@@ -41,6 +42,7 @@ export default function ReportForm({
   onOpenSettings,
   brandSettings,
   updateDynamicField,
+  renameDynamicField,
   addDynamicField,
   removeDynamicField,
   extraPages,
@@ -132,41 +134,32 @@ export default function ReportForm({
           </div>
           {isPage1FieldsOpen && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
-              <div className="col-span-2">
-                <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">APPLICANT</label>
-                <DropdownInput fieldKey="applicant" value={formData.applicant} onChange={val => updateField('applicant', val)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white font-semibold focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-              </div>
-              <div className="col-span-2">
-                <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">ADDRESS</label>
-                <DropdownInput fieldKey="address" value={formData.address} onChange={val => updateField('address', val)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-              </div>
-              <div className="col-span-1">
-                <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">PHONE #</label>
-                <DropdownInput fieldKey="phone" value={formData.phone} onChange={val => updateField('phone', val)} className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-              </div>
-            {migrateToDynamicFields(formData).map((f) => {
-              if (f.label === 'APPLICANT' || f.label === 'ADDRESS' || f.label === 'PHONE #') return null;
-              return (
-              <div key={f.id} className={f.label === 'SAMPLE DESCRIPTION' ? 'col-span-2 group relative' : 'col-span-1 group relative'}>
-                <label className="flex justify-between text-[11px] font-semibold text-slate-500 mb-1">
-                  {f.label}
-                  {f.id.startsWith('f_') && removeDynamicField && (
-                    <button onClick={() => removeDynamicField(f.id)} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" title="Remove Custom Field">
-                      <Trash2 size={12} />
-                    </button>
-                  )}
-                </label>
-                <DropdownInput 
-                  fieldKey={f.label} 
-                  value={f.value} 
-                  onChange={val => {
-                    if (updateDynamicField) updateDynamicField(f.id, val);
-                    else updateField(f.id as keyof ReportFormData, val); // fallback
-                  }} 
-                  className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
-                />
-              </div>
-            )})}
+              {migrateToDynamicFields(formData).map((f) => (
+                <div key={f.id} className={f.label === 'SAMPLE DESCRIPTION' || f.value.length > 30 ? 'col-span-2 group relative' : 'col-span-1 group relative'}>
+                  <div className="flex justify-between items-center mb-1">
+                    <input 
+                      type="text"
+                      value={f.label}
+                      onChange={(e) => renameDynamicField?.(f.id, e.target.value)}
+                      className="text-[11px] font-bold text-slate-500 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase"
+                    />
+                    {removeDynamicField && (
+                      <button onClick={() => removeDynamicField(f.id)} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0" title="Remove Field">
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </div>
+                  <DropdownInput 
+                    fieldKey={f.label} 
+                    value={f.value} 
+                    onChange={val => {
+                      if (updateDynamicField) updateDynamicField(f.id, val);
+                      else updateField(f.id as keyof ReportFormData, val); // fallback
+                    }} 
+                    className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                  />
+                </div>
+              ))}
             </div>
           )}
         </section>
