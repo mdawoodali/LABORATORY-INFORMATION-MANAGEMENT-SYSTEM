@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS } from '@/types';
+import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES } from '@/types';
 import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
@@ -44,7 +44,12 @@ export default function HomePage() {
         setTemplates(JSON.parse(savedTemplates));
       } catch {
         console.error('Failed to parse templates');
+        setTemplates(DEFAULT_TEMPLATES);
+        localStorage.setItem('sr_templates', JSON.stringify(DEFAULT_TEMPLATES));
       }
+    } else {
+      setTemplates(DEFAULT_TEMPLATES);
+      localStorage.setItem('sr_templates', JSON.stringify(DEFAULT_TEMPLATES));
     }
     setTemplatesLoading(false);
   }

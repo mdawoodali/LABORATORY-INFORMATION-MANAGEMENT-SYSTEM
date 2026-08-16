@@ -157,3 +157,69 @@ export const migrateToDynamicFields = (data: ReportFormData): DynamicField[] => 
     { id: 'f21', label: 'CARE LABEL SYMBOLS', value: data.careLabelSymbols || '' },
   ];
 };
+
+export const DEFAULT_TEMPLATES: Template[] = [
+  {
+    id: 'tpl-1',
+    name: 'Garment Wash & Shrinkage Report',
+    createdAt: new Date().toISOString(),
+    tests: [
+      { id: 't1', test: 'Dimensional Stability to Washing', method: 'AATCC 135', value: '-2.5%', unit: '%', result: 'Pass' },
+      { id: 't2', test: 'Appearance After Wash', method: 'Visual', value: 'No significant change', unit: 'Rating', result: 'Pass' }
+    ],
+    formData: {
+      ...DEFAULT_FORM_DATA,
+      reportNo: 'TPL-WASH-01',
+      dynamicFields: [
+        { id: 'f1', label: 'APPLICANT', value: 'ABC Garments Ltd', bold: true },
+        { id: 'f2', label: 'ADDRESS', value: '123 Textile Ave' },
+        { id: 'f11', label: 'FABRIC CONSTRUCTION', value: '100% Cotton Single Jersey' },
+        { id: 'f21', label: 'CARE LABEL SYMBOLS', value: 'Machine Wash Cold' },
+      ]
+    }
+  },
+  {
+    id: 'tpl-2',
+    name: 'Color Fastness Certificate',
+    createdAt: new Date().toISOString(),
+    tests: [
+      { id: 't1', test: 'Color Fastness to Dry Rubbing', method: 'ISO 105-X12', value: '4-5', unit: 'Grade', result: 'Pass' },
+      { id: 't2', test: 'Color Fastness to Wet Rubbing', method: 'ISO 105-X12', value: '3-4', unit: 'Grade', result: 'Pass' },
+      { id: 't3', test: 'Color Fastness to Washing', method: 'ISO 105-C06', value: '4', unit: 'Grade', result: 'Pass' }
+    ],
+    formData: {
+      ...DEFAULT_FORM_DATA,
+      reportNo: 'TPL-COLOR-02',
+      dynamicFields: [
+        { id: 'f1', label: 'APPLICANT', value: 'XYZ Dyeing Mills', bold: true },
+        { id: 'f9', label: 'COLOR', value: 'Navy Blue' },
+        { id: 'f13', label: 'FIBRE CONTENT', value: 'Polyester/Cotton Blend' },
+      ]
+    }
+  },
+  {
+    id: 'tpl-3',
+    name: 'Testing Services Invoice',
+    createdAt: new Date().toISOString(),
+    tests: [
+      { id: 't1', test: 'Color Fastness Test', method: '1 Set', value: '$45.00', unit: 'USD', result: '$45.00' },
+      { id: 't2', test: 'Shrinkage Test', method: '2 Sets', value: '$30.00', unit: 'USD', result: '$60.00' },
+      { id: 't3', test: 'Total Amount Due', method: '', value: '', unit: '', result: '$105.00' }
+    ],
+    formData: {
+      ...DEFAULT_FORM_DATA,
+      reportNo: 'INV-2026-001',
+      tableHeader1: 'Description',
+      tableHeader2: 'Quantity',
+      tableHeader3: 'Unit Price',
+      tableHeader4: 'Currency',
+      tableHeader5: 'Total',
+      dynamicFields: [
+        { id: 'f1', label: 'CLIENT NAME', value: 'Global Fashion Brands', bold: true },
+        { id: 'f2', label: 'BILLING ADDRESS', value: '456 Retail Blvd' },
+        { id: 'f3', label: 'INVOICE DATE', value: new Date().toLocaleDateString() },
+        { id: 'f4', label: 'PAYMENT TERMS', value: 'Net 30 Days' },
+      ]
+    }
+  }
+];
