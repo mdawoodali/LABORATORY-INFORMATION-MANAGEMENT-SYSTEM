@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SettingsModal from '@/components/SettingsModal';
+import PASWordmark from '@/components/report/PASWordmark';
 import ReportForm from '@/components/form/ReportForm';
 import Header from '@/components/report/Header';
 import SubHeader from '@/components/report/SubHeader';
@@ -14,6 +15,52 @@ import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, Ap
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut } from 'lucide-react';
+import QRCode from 'react-qr-code';
+
+const PASHeader = ({ reportNo, reportingDate }: { reportNo: string, reportingDate: string }) => {
+  const verifyUrl = `https://sr-laboratories-nine.vercel.app/verify/${reportNo}`;
+
+  return (
+    <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
+      <div className="flex items-center gap-4">
+        <img src="/pas-logo.svg" alt="PAS Logo" className="w-20 h-20 object-contain" />
+        <div className="flex flex-col">
+          <PASWordmark style={{ height: '24px', width: 'auto' }} className="mb-1" />
+          <div className="text-xs text-gray-600 mt-0 flex flex-col">
+            <span>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
+            <span>Contact: 03322673373 | Email: pas@info.net</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex flex-col items-end">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="text-xl font-bold tracking-wider text-gray-800 border border-gray-800 px-3 py-1">REPORT</div>
+          <div className="flex flex-col items-center">
+            <QRCode 
+              value={verifyUrl} 
+              size={40}
+              level="L"
+              style={{ height: "auto", maxWidth: "100%", width: "40px" }}
+            />
+            <span className="text-[7px] font-bold font-sans tracking-[0.1em] text-gray-700 mt-[2px]">SCAN ME</span>
+          </div>
+        </div>
+        <div className="flex gap-2 text-sm"><span className="font-bold w-20 text-right whitespace-nowrap">Report #:</span><span className="w-28 text-left border-b border-gray-400">{reportNo}</span></div>
+        <div className="flex gap-2 text-sm mt-1"><span className="font-bold w-20 text-right whitespace-nowrap">Report Date:</span><span className="w-28 text-left border-b border-gray-400">{reportingDate}</span></div>
+      </div>
+    </div>
+  );
+};
+
+const PASFooter = ({ pageNum, totalPages }: { pageNum: number, totalPages: number }) => (
+  <div className="absolute bottom-10 left-0 w-full flex flex-col items-center">
+    <div className="w-[80%] flex justify-between border-t border-gray-400 pt-3 text-xs text-gray-500">
+      <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
+      <span className="font-bold text-gray-700">Page {pageNum}/{totalPages}</span>
+    </div>
+  </div>
+);
 
 function EditorContent() {
   const router = useRouter();
@@ -45,6 +92,28 @@ function EditorContent() {
     companyName: 'L.I.M.S'
   });
 
+  const getTodayDate = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  useEffect(() => {
+    // Hydrate report date on mount
+    setFormData(prev => {
+      const dynamicFields = prev.dynamicFields && prev.dynamicFields.length > 0 
+        ? [...prev.dynamicFields] 
+        : migrateToDynamicFields(prev);
+      const index = dynamicFields.findIndex(f => f.id === 'f20');
+      if (index !== -1 && !dynamicFields[index].value) {
+        dynamicFields[index] = { ...dynamicFields[index], value: getTodayDate() };
+      }
+      return { ...prev, dynamicFields };
+    });
+  }, []);
+
   useEffect(() => {
     const saved = localStorage.getItem('sr_brand_settings');
     if (saved) {
@@ -75,9 +144,20 @@ function EditorContent() {
       if (templateData) {
         try {
           const template: Template = JSON.parse(templateData);
+          
+          // Auto date logic
+          const dynamicFields = template.formData.dynamicFields && template.formData.dynamicFields.length > 0 
+            ? [...template.formData.dynamicFields] 
+            : migrateToDynamicFields(template.formData);
+          const index = dynamicFields.findIndex(f => f.id === 'f20');
+          if (index !== -1 && !dynamicFields[index].value) {
+            dynamicFields[index] = { ...dynamicFields[index], value: getTodayDate() };
+          }
+
           // eslint-disable-next-line react-hooks/set-state-in-effect
           setFormData({
             ...template.formData,
+            dynamicFields,
             reportNo: String(Math.floor(100000 + Math.random() * 900000)),
           });
           // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -360,6 +440,8 @@ function EditorContent() {
     toast.success(`Template "${name}" saved!`);
   };
 
+  const actualReportingDate = formData.dynamicFields?.find(f => f.id === 'f20')?.value || formData.sampleReportingDate || '';
+
   if (!isLoaded) {
     return <div className="flex h-screen items-center justify-center bg-slate-200 text-gray-500">Initializing editor...</div>;
   }
@@ -417,67 +499,41 @@ function EditorContent() {
         </div>
 
         <div 
-          className="w-full max-w-[794px] origin-top md:transform-none print:scale-100 print:mb-0 flex flex-col gap-4 md:gap-8 items-center transition-transform"
+        className="w-full max-w-[794px] origin-top md:transform-none print:scale-100 print:mb-0 flex flex-col gap-4 md:gap-8 items-center transition-transform"
           style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}
         >
         
         {/* PAGE 1 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
-          <div className="relative z-10 w-full h-full flex flex-col">
-            <SubHeader reportNo={formData.reportNo} pageNum={1} totalPages={totalPages} />
-            <div className="pt-[175px]">
-              <PageOneData data={formData} />
-            </div>
-            <div className="flex-1"></div>
-            <div className="pb-[55px] relative">
-              <Signature companyName={brandSettings.companyName} />
-              <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                This document was generated digitally and doesn't require a signature
-              </div>
-            </div>
+        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+          <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} />
+          <div className="flex-1">
+            <PageOneData data={formData} />
           </div>
+          <PASFooter pageNum={1} totalPages={totalPages} />
         </div>
 
         {/* PAGE 2 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
-          <div className="relative z-10 w-full h-full flex flex-col">
-            <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
-            <div className="pt-[175px] flex-1 flex flex-col">
-              <TestTable tests={tests} data={formData} />
-              <div className="flex-1"></div>
-              <div className="pb-[55px] relative">
-                <Signature companyName={brandSettings.companyName} />
-                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                  This document was generated digitally and doesn&apos;t require a signature
-                </div>
-              </div>
-            </div>
+        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+          <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} />
+          <div className="flex-1 px-10">
+            <TestTable tests={tests} data={formData} />
           </div>
+          <PASFooter pageNum={2} totalPages={totalPages} />
         </div>
 
         {/* PAGE 3 - Sample Image */}
         {sampleImage && (
-          <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-            <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
-            <div className="relative z-10 w-full h-full flex flex-col">
-            <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
-              <div className="pt-[175px] flex-1 flex justify-center items-start px-10 relative">
-                <CanvaImage 
-                  src={sampleImage} 
-                  defaultWidth={400} 
-                  defaultHeight={400} 
-                  className="border border-gray-200 shadow-sm bg-white p-2"
-                />
-              </div>
-              <div className="pb-[55px] relative">
-                <Signature companyName={brandSettings.companyName} />
-                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                  This document was generated digitally and doesn&apos;t require a signature
-                </div>
-              </div>
+          <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+            <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} />
+            <div className="flex-1 flex justify-center items-start px-10">
+              <CanvaImage 
+                src={sampleImage} 
+                defaultWidth={400} 
+                defaultHeight={400} 
+                className="border border-gray-200 shadow-sm bg-white p-2"
+              />
             </div>
+            <PASFooter pageNum={3} totalPages={totalPages} />
           </div>
         )}
 
@@ -485,32 +541,24 @@ function EditorContent() {
         {extraPages.map((page, index) => {
           const pageNum = (sampleImage ? 4 : 3) + index;
           return (
-            <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 mt-8" style={{ width: '794px', height: '1123px' }}>
-              <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
-              <div className="relative z-10 w-full h-full flex flex-col">
-                <SubHeader reportNo={formData.reportNo} pageNum={pageNum} totalPages={totalPages} />
-                <div className="pt-[175px] flex-1 flex flex-col px-10 relative">
-                  {page.image && (
-                    <div className="flex-1 flex justify-center items-start mb-4">
-                      <CanvaImage 
-                        src={page.image}
-                        className="max-w-full max-h-[850px] object-contain"
-                      />
-                    </div>
-                  )}
-                  {page.text && (
-                    <div className="whitespace-pre-wrap font-sans text-sm pb-10">
-                      {page.text}
-                    </div>
-                  )}
-                </div>
-                <div className="pb-[55px] relative">
-                  <Signature companyName={brandSettings.companyName} />
-                  <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                    This document was generated digitally and doesn&apos;t require a signature
+            <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+              <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} />
+              <div className="flex-1 flex flex-col px-10 relative">
+                {page.image && (
+                  <div className="flex-1 flex justify-center items-start mb-4">
+                    <CanvaImage 
+                      src={page.image}
+                      className="max-w-full max-h-[850px] object-contain"
+                    />
                   </div>
-                </div>
+                )}
+                {page.text && (
+                  <div className="whitespace-pre-wrap font-sans text-sm pb-10">
+                    {page.text}
+                  </div>
+                )}
               </div>
+              <PASFooter pageNum={pageNum} totalPages={totalPages} />
             </div>
           );
         })}

@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES } from '@/types';
 import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, Search } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
+import PASWordmark from '@/components/report/PASWordmark';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -44,18 +45,47 @@ export default function HomePage() {
 
     // Load templates from localStorage
     const savedTemplates = localStorage.getItem('sr_templates');
+    let loadedTemplates = DEFAULT_TEMPLATES;
     if (savedTemplates) {
       try {
-        setTemplates(JSON.parse(savedTemplates));
+        loadedTemplates = JSON.parse(savedTemplates);
       } catch {
         console.error('Failed to parse templates');
-        setTemplates(DEFAULT_TEMPLATES);
-        localStorage.setItem('sr_templates', JSON.stringify(DEFAULT_TEMPLATES));
       }
-    } else {
-      setTemplates(DEFAULT_TEMPLATES);
-      localStorage.setItem('sr_templates', JSON.stringify(DEFAULT_TEMPLATES));
     }
+
+    const hasPasReport = loadedTemplates.some((t: Template) => t.id === 'pas-report');
+    const hasPasInvoice = loadedTemplates.some((t: Template) => t.id === 'pas-invoice');
+    
+    let updatedTemplates = [...loadedTemplates];
+    
+    // Add PAS templates to the very beginning if they don't exist
+    if (!hasPasInvoice) {
+      updatedTemplates.unshift({
+        id: 'pas-invoice',
+        name: 'PAS INVOICE',
+        formData: DEFAULT_FORM_DATA,
+        tests: [],
+        createdAt: new Date().toISOString(),
+        thumbnail: 'pas-invoice'
+      });
+    }
+    if (!hasPasReport) {
+      updatedTemplates.unshift({
+        id: 'pas-report',
+        name: 'PAS REPORT',
+        formData: DEFAULT_FORM_DATA,
+        tests: [],
+        createdAt: new Date().toISOString(),
+        thumbnail: 'pas-report'
+      });
+    }
+    
+    if (!hasPasReport || !hasPasInvoice) {
+      localStorage.setItem('sr_templates', JSON.stringify(updatedTemplates));
+    }
+
+    setTemplates(updatedTemplates);
     setTemplatesLoading(false);
   }
 
@@ -109,6 +139,14 @@ export default function HomePage() {
   };
 
   const handleOpenTemplate = (template: Template) => {
+    if (template.id === 'pas-report') {
+      router.push('/pas-report');
+      return;
+    }
+    if (template.id === 'pas-invoice') {
+      router.push('/invoice');
+      return;
+    }
     // Store template data in sessionStorage so editor can pick it up
     sessionStorage.setItem('sr_template_data', JSON.stringify(template));
     router.push('/editor?template=' + template.id);
@@ -187,14 +225,30 @@ export default function HomePage() {
                   className="w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg flex flex-col justify-between p-4 hover:shadow-lg hover:border-[#2b579a] transition-all cursor-pointer relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/40 to-transparent z-10 pointer-events-none" />
-                  
-                  {template.thumbnail ? (
-                    <div className="absolute inset-0 bg-cover bg-top opacity-60 group-hover:opacity-100 transition-opacity" style={{ backgroundImage: `url(${template.thumbnail})` }} />
-                  ) : (
-                    <div className="w-full h-[140px] bg-gradient-to-b from-gray-50 to-gray-100 rounded flex items-center justify-center border border-gray-100 relative z-0 mt-2">
-                      <Layout size={36} className="text-gray-300" />
-                    </div>
-                  )}
+                  {template.thumbnail === 'pas-report' ? (
+                      <div className="absolute inset-0 bg-white opacity-80 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-start border border-gray-200 rounded p-4 pt-8">
+                        <PASWordmark style={{ height: '16px', width: 'auto' }} className="mb-3 opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-full h-1 bg-[#071b3d] rounded mb-1"></div>
+                        <div className="w-3/4 h-1 bg-gray-300 rounded mb-4"></div>
+                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                      </div>
+                    ) : template.thumbnail === 'pas-invoice' ? (
+                      <div className="absolute inset-0 bg-white opacity-80 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-start border border-gray-200 rounded p-4 pt-8">
+                        <PASWordmark style={{ height: '16px', width: 'auto' }} className="mb-3 opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-full h-2 bg-orange-300 rounded mb-2"></div>
+                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                      </div>
+                    ) : template.thumbnail ? (
+                      <div className="absolute inset-0 bg-cover bg-top opacity-60 group-hover:opacity-100 transition-opacity" style={{ backgroundImage: `url(${template.thumbnail})` }} />
+                    ) : (
+                      <div className="w-full h-[140px] bg-gradient-to-b from-gray-50 to-gray-100 rounded flex items-center justify-center border border-gray-100 relative z-0 mt-2">
+                        <Layout size={36} className="text-gray-300" />
+                      </div>
+                    )}
 
                   <div className="mt-auto relative z-20 bg-white/80 backdrop-blur-sm p-2 -mx-2 rounded">
                     <div className="text-sm font-bold text-gray-700 truncate">{template.name}</div>
@@ -235,6 +289,7 @@ export default function HomePage() {
               </div>
               <span className="text-xs text-gray-400 group-hover:text-[#2b579a] font-bold">Add Template</span>
             </motion.button>
+
           </div>
         </motion.div>
 

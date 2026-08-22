@@ -60,3 +60,10 @@
     page-break-after: auto;
   }
 }
+
+@font-face {
+  font-family: 'Good Times Bold';
+  src: url('/fonts/Good-Times-W00-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
