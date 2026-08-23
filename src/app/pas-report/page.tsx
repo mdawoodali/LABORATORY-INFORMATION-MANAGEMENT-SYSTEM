@@ -466,7 +466,6 @@ function EditorContent() {
     toast.success(`Template "${name}" saved!`);
   };
 
-  const actualReportingDate = formData.dynamicFields?.find(f => f.id === 'f20')?.value || formData.sampleReportingDate || '';
 
   if (!isLoaded) {
     return <div className="flex h-screen items-center justify-center bg-slate-200 text-gray-500">Initializing editor...</div>;
@@ -531,7 +530,7 @@ function EditorContent() {
         
         {/* PAGE 1 */}
         <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} onReportingDateChange={(date) => updateDynamicField('f20', date)} />
+          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
           <div className="flex-1">
             <PageOneData data={formData} />
           </div>
@@ -540,7 +539,7 @@ function EditorContent() {
 
         {/* PAGE 2 */}
         <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} onReportingDateChange={(date) => updateDynamicField('f20', date)} />
+          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
           <div className="flex-1 px-10">
             <TestTable tests={tests} data={formData} />
           </div>
@@ -550,7 +549,7 @@ function EditorContent() {
         {/* PAGE 3 - Sample Image */}
         {sampleImage && (
           <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} onReportingDateChange={(date) => updateDynamicField('f20', date)} />
+            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
             <div className="flex-1 flex justify-center items-start px-10">
               <CanvaImage 
                 src={sampleImage} 
@@ -568,7 +567,7 @@ function EditorContent() {
           const pageNum = (sampleImage ? 4 : 3) + index;
           return (
             <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-              <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} onReportingDateChange={(date) => updateDynamicField('f20', date)} />
+              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
               <div className="flex-1 flex flex-col px-10 relative">
                 {page.image && (
                   <div className="flex-1 flex justify-center items-start mb-4">

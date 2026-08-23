@@ -113,6 +113,24 @@ export default function ReportForm({
               <label className="block text-xs font-semibold text-slate-600 mb-1">Report # <span className="text-slate-400 font-normal">(Auto-generated)</span></label>
               <input type="text" value={formData.reportNo} readOnly disabled className="w-full border border-slate-200 rounded p-2 text-sm font-mono bg-gray-100 text-gray-500 cursor-not-allowed" />
             </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Report Date</label>
+              <input 
+                type="date" 
+                value={formData.reportDate ? (formData.reportDate.split('-').length === 3 ? `${formData.reportDate.split('-')[2]}-${formData.reportDate.split('-')[1]}-${formData.reportDate.split('-')[0]}` : formData.reportDate) : ''} 
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val) {
+                    const parts = val.split('-');
+                    if (parts.length === 3) updateField('reportDate', `${parts[2]}-${parts[1]}-${parts[0]}`);
+                    else updateField('reportDate', val);
+                  } else {
+                    updateField('reportDate', '');
+                  }
+                }} 
+                className="w-full border border-slate-200 rounded p-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
+              />
+            </div>
           </div>
         </section>
 

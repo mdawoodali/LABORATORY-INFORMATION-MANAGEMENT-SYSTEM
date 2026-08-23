@@ -36,6 +36,7 @@ export interface ReportFormData {
   buyingHouse: string;
   manufacturer: string;
   previousReportNo: string;
+  reportDate?: string;
   sampleReceivingDate: string;
   sampleReportingDate: string;
   careLabelSymbols: string;
@@ -96,6 +97,7 @@ export const DEFAULT_FORM_DATA: ReportFormData = {
   buyingHouse: '',
   manufacturer: '',
   previousReportNo: '',
+  reportDate: '',
   sampleReceivingDate: '',
   sampleReportingDate: '',
   careLabelSymbols: '',
