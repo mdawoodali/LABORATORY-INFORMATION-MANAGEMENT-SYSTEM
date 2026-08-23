@@ -28,7 +28,7 @@ jobs:
 
       - name: Update Version Numbers
         run: |
-          node -e "const fs = require('fs'); const version = '0.1.${{ github.run_number }}'; const tauriConf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json')); tauriConf.version = version; fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(tauriConf, null, 2)); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = version; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
+          node -e "const fs = require('fs'); const version = '6.2.${{ github.run_number }}'; const tauriConf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json')); tauriConf.version = version; fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(tauriConf, null, 2)); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = version; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
