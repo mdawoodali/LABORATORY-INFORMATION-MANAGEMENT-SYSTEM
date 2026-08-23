@@ -275,6 +275,41 @@ function EditorContent() {
       toast.error("Please enter a password to lock the PDF.");
       return;
     }
+
+    if (!isSilent) {
+      // Bulletproof Auto-Save of all Dropdown options!
+      const forceSaveOption = (key: string, val: string | undefined) => {
+        if (!val || !val.toString().trim()) return;
+        const storageKey = `sr_options_${key}`;
+        let options: string[] = [];
+        try {
+          const saved = localStorage.getItem(storageKey);
+          if (saved) options = JSON.parse(saved);
+        } catch (e) {}
+        const trimmed = val.toString().trim();
+        if (!options.includes(trimmed)) {
+          localStorage.setItem(storageKey, JSON.stringify([trimmed, ...options]));
+        }
+      };
+
+      formData.dynamicFields?.forEach(f => {
+        forceSaveOption(f.label, f.value);
+      });
+      forceSaveOption('tableHeader1', formData.tableHeader1);
+      forceSaveOption('tableHeader2', formData.tableHeader2);
+      forceSaveOption('tableHeader3', formData.tableHeader3);
+      forceSaveOption('tableHeader4', formData.tableHeader4);
+      forceSaveOption('tableHeader5', formData.tableHeader5);
+      forceSaveOption('footerText', formData.footerText);
+
+      tests.forEach(test => {
+        forceSaveOption('testName', test.test);
+        forceSaveOption('testMethod', test.method);
+        forceSaveOption('testValue', test.value);
+        forceSaveOption('testUnit', test.unit);
+        forceSaveOption('testResult', test.result);
+      });
+    }
     
     if (!isSilent) setIsGenerating(true);
 

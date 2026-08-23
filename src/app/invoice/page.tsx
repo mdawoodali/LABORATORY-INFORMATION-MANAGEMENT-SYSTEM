@@ -198,7 +198,37 @@ function InvoiceContent() {
       toast.error("Please enter a password to lock the PDF.");
       return;
     }
-    
+
+    // Bulletproof Auto-Save of all Dropdown options!
+    const forceSaveOption = (key: string, val: string) => {
+      if (!val || !val.toString().trim()) return;
+      const storageKey = `sr_options_${key}`;
+      let options: string[] = [];
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) options = JSON.parse(saved);
+      } catch (e) {}
+      const trimmed = val.toString().trim();
+      if (!options.includes(trimmed)) {
+        localStorage.setItem(storageKey, JSON.stringify([trimmed, ...options]));
+      }
+    };
+
+    forceSaveOption('inv_customerName', formData.customerName);
+    forceSaveOption('inv_companyAddress', formData.companyAddress);
+    forceSaveOption('inv_responsiblePerson', formData.responsiblePerson);
+    forceSaveOption('inv_contactDetail', formData.contactDetail);
+    forceSaveOption('inv_email', formData.email);
+    forceSaveOption('inv_ntn', formData.ntn);
+    forceSaveOption('inv_otherInformation', formData.otherInformation);
+
+    items.forEach(item => {
+      forceSaveOption('inv_item_test', item.test);
+      forceSaveOption('inv_item_method', item.method);
+      if (item.price !== '') forceSaveOption('inv_item_price', item.price);
+      if (item.samples !== '') forceSaveOption('inv_item_samples', item.samples);
+    });
+
     setIsGenerating(true);
     try {
       // 1. Try to save to DB (Handle RLS gracefully based on settings)
