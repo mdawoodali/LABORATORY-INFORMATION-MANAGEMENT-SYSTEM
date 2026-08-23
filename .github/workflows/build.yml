@@ -46,5 +46,5 @@ jobs:
           releaseName: "SR-LAB Windows Executable (v6.2.${{ github.run_number }})"
           releaseBody: "Automated build triggered by a push to main."
           releaseDraft: false
-          prerelease: true
+          prerelease: false
           args: "--target x86_64-pc-windows-msvc"
