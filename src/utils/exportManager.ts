@@ -2,7 +2,7 @@ import { saveAs } from 'file-saver';
 import toast from 'react-hot-toast';
 import { ensureBackupFolder } from './backupValidator';
 
-export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent: boolean = true) => {
+export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent: boolean = true, type: 'report' | 'invoice' = 'report') => {
   const isTauri = '__TAURI_INTERNALS__' in window || '__TAURI__' in window;
 
   try {
@@ -30,7 +30,8 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
 
       const baseValidPath = typeof primaryTarget === 'string' ? primaryTarget : `${basePath}\\LIMS BACKUP`;
       
-      const reportFolderPath = `${baseValidPath}\\REPORTS\\${y}\\${monthName}\\${dateStr}\\${reportNo}`;
+      const folderCategory = type === 'invoice' ? 'INVOICES' : 'REPORTS';
+      const reportFolderPath = `${baseValidPath}\\${folderCategory}\\${y}\\${monthName}\\${dateStr}\\${reportNo}`;
       await mkdir(reportFolderPath, { recursive: true });
 
       const pdfBuffer = await pdfBlob.arrayBuffer();

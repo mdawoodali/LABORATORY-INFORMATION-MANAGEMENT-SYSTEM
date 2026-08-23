@@ -298,7 +298,7 @@ function InvoiceContent() {
       // Save using Tauri natively, or fallback to browser download
       const { saveSilentBackup } = await import('@/utils/exportManager');
       pdfGenerator.getBlob(async (blob: Blob) => {
-        await saveSilentBackup(formData.invoiceNo, blob, false);
+        await saveSilentBackup(formData.invoiceNo, blob, false, 'invoice');
         toast.success("Invoice PDF generated and secured successfully!");
       });
       
