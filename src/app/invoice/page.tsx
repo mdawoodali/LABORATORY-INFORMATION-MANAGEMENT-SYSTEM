@@ -280,12 +280,14 @@ export default function InvoicePage() {
             </div>
           </section>
 
-          <section>
-            <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Table Items</h3>
-            {items.map((item, index) => (
-              <div key={item.id} className="border p-3 rounded mb-2 bg-slate-50 relative">
-                <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="absolute top-2 right-2 text-red-500 hover:text-red-700"><Trash2 size={14}/></button>
-                <div className="space-y-2">
+            <section>
+              <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Table Items</h3>
+              {items.map((item, index) => (
+                <div key={item.id} className="border p-3 rounded mb-2 bg-slate-50 relative mt-4 shadow-sm hover:shadow transition-all">
+                  <div className="absolute -top-2 -right-2">
+                    <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="bg-slate-800 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow"><Trash2 size={12} /></button>
+                  </div>
+                  <div className="space-y-2">
                   <textarea value={item.test} onChange={e => updateItem(item.id, 'test', e.target.value)} className="w-full border rounded p-1 text-sm font-semibold" placeholder="TEST" rows={2}/>
                   <textarea value={item.method} onChange={e => updateItem(item.id, 'method', e.target.value)} className="w-full border rounded p-1 text-sm" placeholder="METHOD" rows={1}/>
                   <div className="grid grid-cols-2 gap-2">
