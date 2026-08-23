@@ -23,6 +23,11 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
       - name: Install dependencies
         run: npm install
 
@@ -37,8 +42,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
-          tagName: "v0.1.${{ github.run_number }}"
-          releaseName: "SR-LAB Windows Executable (v0.1.${{ github.run_number }})"
+          tagName: "v6.2.${{ github.run_number }}"
+          releaseName: "SR-LAB Windows Executable (v6.2.${{ github.run_number }})"
           releaseBody: "Automated build triggered by a push to main."
           releaseDraft: false
           prerelease: true
