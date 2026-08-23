@@ -404,9 +404,12 @@ function InvoiceContent() {
             <div className="flex gap-2">
               <button 
                 onClick={handlePrint}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-3 md:px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+                disabled={isGenerating}
+                className={`flex-1 ${isGenerating ? 'bg-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold py-2 px-3 md:px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm`}
               >
-                <Printer size={16} /> <span className="hidden sm:inline">Generate PDF</span><span className="sm:hidden">Print</span>
+                <Printer size={16} /> 
+                <span className="hidden sm:inline">{isGenerating ? 'Generating PDF...' : 'Generate PDF'}</span>
+                <span className="sm:hidden">{isGenerating ? 'Wait...' : 'Print'}</span>
               </button>
             </div>
           </div>
@@ -449,6 +452,7 @@ function InvoiceContent() {
                         {formData.invoiceDate}
                         <input 
                           type="date"
+                          data-html2canvas-ignore="true"
                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                           value={convertDate(formData.invoiceDate)}
                           onChange={(e) => updateField('invoiceDate', convertDate(e.target.value))}
