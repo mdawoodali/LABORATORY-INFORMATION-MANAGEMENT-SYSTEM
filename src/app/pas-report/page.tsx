@@ -351,8 +351,8 @@ function EditorContent() {
       for (let i = 0; i < pages.length; i++) {
         // Dynamically import html2canvas to prevent blocking initial load
         const html2canvas = (await import('html2canvas-pro')).default;
-        // Increased scale from 2 to 4 for ultra-high resolution PDF output
-        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 4, useCORS: true });
+        // Scale lowered to 1.5 to prevent memory exhaustion and hanging during pdf generation
+        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 1.5, useCORS: true });
         // Use PNG to prevent JPEG compression ringing artifacts around text and logos
         const imgData = canvas.toDataURL('image/png');
         content.push({

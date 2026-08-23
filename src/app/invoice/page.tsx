@@ -261,7 +261,7 @@ function InvoiceContent() {
 
       for (let i = 0; i < pages.length; i++) {
         const html2canvas = (await import('html2canvas-pro')).default;
-        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 4, useCORS: true });
+        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 1.5, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
         
         if (imgData.length > 20) {
