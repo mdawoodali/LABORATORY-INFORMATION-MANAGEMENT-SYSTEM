@@ -33,9 +33,14 @@ const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportN
         <img src="/pqs-logo.svg" alt="PQS Logo" className="w-[90px] h-[90px] object-contain" />
         <div className="flex flex-col">
           <PQSWordmark className="mb-2" />
-          <div className="text-xs text-gray-600 mt-0 flex flex-col">
-            <span>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
-            <span>Contact: 03322673373 | precisionqualityserviceslabs@gmail.com</span>
+          <div className="text-xs text-gray-500 mt-1">
+            R-332/9, Dastagir, F.B Area, Karachi, 75950.
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            Contact: 03322673373
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            Email: precisionqualityserviceslabs@gmail.com
           </div>
         </div>
       </div>
@@ -55,13 +60,13 @@ const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportN
           </div>
         </div>
         <div className="flex gap-2 text-sm">
-          <span className="font-bold w-24 text-right whitespace-nowrap">Report #:</span>
-          <span className="w-32 text-left border-b border-gray-400">{reportNo}</span>
+          <span className="font-bold w-20 text-right whitespace-nowrap">Report #:</span>
+          <span className="w-28 text-left border-b border-gray-400">{reportNo}</span>
         </div>
         <div className="flex gap-2 text-sm mt-1">
-          <span className="font-bold w-24 text-right whitespace-nowrap">Report Date:</span>
+          <span className="font-bold w-20 text-right whitespace-nowrap">Report Date:</span>
           {onReportingDateChange ? (
-            <label className="w-32 text-left border-b border-gray-400 relative cursor-pointer block">
+            <label className="w-28 text-left border-b border-gray-400 relative cursor-pointer block">
               {reportingDate}
               <input 
                 type="date"
@@ -71,7 +76,7 @@ const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportN
               />
             </label>
           ) : (
-            <span className="w-32 text-left border-b border-gray-400">{reportingDate}</span>
+            <span className="w-28 text-left border-b border-gray-400">{reportingDate}</span>
           )}
         </div>
       </div>

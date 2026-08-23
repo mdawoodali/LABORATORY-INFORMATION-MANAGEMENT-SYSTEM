@@ -328,34 +328,40 @@ export default function InvoicePage() {
               
               {/* Header */}
               <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4">
-                <div className="flex items-center gap-3 shrink-0">
-                  <img src="/pqs-logo.svg" alt="PQS Logo" className="w-[90px] h-[90px] object-contain" />
-                  <div className="flex flex-col">
-                    <PQSWordmark className="mb-2" />
-                    <div className="text-xs text-gray-600 mt-0 flex flex-col">
-                      <span>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
-                      <span>Contact: 03322673373 | precisionqualityserviceslabs@gmail.com</span>
+                  <div className="flex items-center gap-3">
+                    <img src="/pqs-logo.svg" alt="PQS Logo" className="w-[90px] h-[90px] object-contain" />
+                    <div className="flex flex-col">
+                      <PQSWordmark className="mb-2" />
+                      <div className="text-xs text-gray-500 mt-1">
+                        R-332/9, Dastagir, F.B Area, Karachi, 75950.
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        Contact: 03322673373
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        Email: precisionqualityserviceslabs@gmail.com
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right flex flex-col items-end">
+                    <div className="mb-4">
+                      <div className="text-2xl font-bold tracking-wider text-gray-800 border border-gray-800 px-4 py-1">INVOICE</div>
+                    </div>
+                    <div className="flex gap-2 text-sm"><span className="font-bold w-20 text-right whitespace-nowrap">Inv #:</span><span className="w-28 text-left border-b border-gray-400">{formData.invoiceNo}</span></div>
+                    <div className="flex gap-2 text-sm mt-1">
+                      <span className="font-bold w-20 text-right whitespace-nowrap">Invoice Date:</span>
+                      <label className="w-28 text-left border-b border-gray-400 relative cursor-pointer block">
+                        {formData.invoiceDate}
+                        <input 
+                          type="date"
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                          value={convertDate(formData.invoiceDate)}
+                          onChange={(e) => updateField('invoiceDate', convertDate(e.target.value))}
+                        />
+                      </label>
                     </div>
                   </div>
                 </div>
-                
-                <div className="text-right flex flex-col items-end">
-                  <div className="text-2xl font-bold mb-4 tracking-wider text-gray-800 border border-gray-800 px-4 py-1">INVOICE</div>
-                  <div className="flex gap-2 text-sm"><span className="font-bold w-24 text-right whitespace-nowrap">Inv #:</span><span className="w-32 text-left border-b border-gray-400">{formData.invoiceNo}</span></div>
-                  <div className="flex gap-2 text-sm mt-1">
-                    <span className="font-bold w-24 text-right whitespace-nowrap">Invoice Date:</span>
-                    <label className="w-32 text-left border-b border-gray-400 relative cursor-pointer block">
-                      {formData.invoiceDate}
-                      <input 
-                        type="date"
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                        value={convertDate(formData.invoiceDate)}
-                        onChange={(e) => updateField('invoiceDate', convertDate(e.target.value))}
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
 
               {/* Client Details */}
               <div className="mb-4">
