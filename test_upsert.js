@@ -8,5 +8,9 @@ env.split('\n').forEach(l => {
 });
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(url, key);
-supabase.from('receipts').select('id, created_at, data').order('created_at', { ascending: false }).limit(5).then(({ data }) => console.log(JSON.stringify(data, null, 2)));
+supabase.from('receipts').upsert({
+  id: 'test-invoice-1234',
+  password: '123',
+  data: { type: 'invoice' }
+}).then((res) => console.log('Upsert result:', res));
 

@@ -354,21 +354,21 @@ function InvoiceContent() {
                   <div className="absolute -top-2 -right-2">
                     <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="bg-slate-800 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow"><Trash2 size={12} /></button>
                   </div>
-                  <div className="space-y-2">
-                  <textarea value={item.test} onChange={e => updateItem(item.id, 'test', e.target.value)} className="w-full border rounded p-1 text-sm font-semibold" placeholder="TEST" rows={2}/>
-                  <textarea value={item.method} onChange={e => updateItem(item.id, 'method', e.target.value)} className="w-full border rounded p-1 text-sm" placeholder="METHOD" rows={1}/>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[10px] text-slate-500">PRICE (PKR)</label>
-                      <input type="number" placeholder="0" value={item.price} onChange={e => updateItem(item.id, 'price', e.target.value)} className="w-full border rounded p-1 text-sm text-right" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-slate-500">No of sample</label>
-                      <input type="number" placeholder="1" value={item.samples} onChange={e => updateItem(item.id, 'samples', e.target.value)} className="w-full border rounded p-1 text-sm text-right" />
+                    <div className="space-y-2">
+                      <DropdownInput fieldKey="inv_item_test" value={item.test} onChange={val => updateItem(item.id, 'test', val)} className="w-full border rounded p-1 text-sm font-semibold" placeholder="TEST" />
+                      <DropdownInput fieldKey="inv_item_method" value={item.method} onChange={val => updateItem(item.id, 'method', val)} className="w-full border rounded p-1 text-sm" placeholder="METHOD" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] text-slate-500">PRICE (PKR)</label>
+                        <DropdownInput fieldKey="inv_item_price" placeholder="0" value={item.price?.toString() || ''} onChange={val => updateItem(item.id, 'price', val)} className="w-full border rounded p-1 text-sm text-right" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500">No of sample</label>
+                        <DropdownInput fieldKey="inv_item_samples" placeholder="1" value={item.samples?.toString() || ''} onChange={val => updateItem(item.id, 'samples', val)} className="w-full border rounded p-1 text-sm text-right" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
             ))}
             <div className="mt-4 border-t pt-4">
               <button onClick={() => setItems([...items, { id: Date.now().toString(), test: '', method: '', price: '', samples: '' }])} className="w-full py-2 border-2 border-dashed rounded text-blue-600 font-bold text-sm flex items-center justify-center gap-2"><Plus size={16}/> Add Test</button>
