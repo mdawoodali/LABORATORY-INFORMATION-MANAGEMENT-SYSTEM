@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { Printer, ArrowLeft, Plus, Trash2, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
@@ -36,10 +37,13 @@ function numberToWords(num: number): string {
   return 'Pakistani Rupees ' + (isNegative ? 'Minus ' : '') + words + ' Only.';
 }
 
-export default function InvoicePage() {
+function InvoiceContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams?.get('id');
   const [isGenerating, setIsGenerating] = useState(false);
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(!!id);
   
   const generateInvoiceNo = () => {
     const d = new Date();
@@ -71,21 +75,33 @@ export default function InvoicePage() {
     email: '',
     ntn: '',
     otherInformation: '',
-    discountPercent: '',
+    discountPercent: 0,
   });
-
-  // Hydrate on mount to avoid hydration mismatch with random/date values
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      invoiceNo: generateInvoiceNo(),
-      invoiceDate: getTodayDate()
-    }));
-  }, []);
 
   const [items, setItems] = useState<any[]>([
     { id: '1', test: 'Water Analysis', method: 'ISO 1234', price: '', samples: '' },
   ]);
+
+  // Hydrate on mount to avoid hydration mismatch with random/date values, or load from DB
+  useEffect(() => {
+    if (id) {
+      supabase.from('receipts').select('*').eq('id', id).single().then(({ data }) => {
+        if (data?.data) {
+          setFormData(data.data.formData);
+          setItems(data.data.items || []);
+          if (data.password) setPassword(data.password);
+        }
+        setIsLoading(false);
+      });
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        invoiceNo: generateInvoiceNo(),
+        invoiceDate: getTodayDate()
+      }));
+      setIsLoading(false);
+    }
+  }, [id]);
 
   const lastBackedUpDataRef = React.useRef<string>('');
 
@@ -263,6 +279,10 @@ export default function InvoicePage() {
       setIsGenerating(false);
     }
   };
+
+  if (isLoading) {
+    return <div className="flex min-h-screen items-center justify-center text-gray-500">Loading invoice...</div>;
+  }
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
@@ -512,5 +532,13 @@ export default function InvoicePage() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function InvoicePage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-gray-500">Loading...</div>}>
+      <InvoiceContent />
+    </Suspense>
   );
 }

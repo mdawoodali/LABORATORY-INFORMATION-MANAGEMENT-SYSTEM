@@ -31,6 +31,7 @@ export default function HomePage() {
           reportNo: r.id,
           applicant: applicantField ? applicantField.value : (r.data?.formData?.applicant || 'Untitled'),
           date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
+          type: r.data?.type || 'report'
         };
       });
     }
@@ -160,8 +161,12 @@ export default function HomePage() {
     router.push('/editor?template=' + template.id);
   };
 
-  const handleOpenReport = (reportNo: string) => {
-    router.push('/editor?report=' + reportNo);
+  const handleOpenReport = (report: any) => {
+    if (report.type === 'invoice') {
+      router.push('/invoice?id=' + report.reportNo);
+    } else {
+      router.push('/editor?report=' + report.reportNo);
+    }
   };
 
   return (
@@ -353,7 +358,7 @@ export default function HomePage() {
                     <tr
                       key={report.id}
                       className={`border-b border-gray-100 hover:bg-blue-50/50 transition-colors cursor-pointer ${idx % 2 === 1 ? 'bg-gray-50/30' : ''}`}
-                      onClick={() => handleOpenReport(report.reportNo)}
+                      onClick={() => handleOpenReport(report)}
                     >
                       <td className="px-6 py-4 font-mono font-bold text-[#2b579a]">{report.reportNo}</td>
                       <td className="px-6 py-4 text-gray-700">{report.applicant}</td>
