@@ -39,6 +39,7 @@ function numberToWords(num: number): string {
 export default function InvoicePage() {
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [password, setPassword] = useState('');
   
   const generateInvoiceNo = () => {
     const d = new Date();
@@ -51,9 +52,13 @@ export default function InvoicePage() {
   const getTodayDate = () => {
     const today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
     const yyyy = today.getFullYear();
-    return dd + '-' + mm + '-' + yyyy;
+    return `${dd}-${mm}-${yyyy}`;
+  };
+
+  const updateField = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const [formData, setFormData] = useState({
@@ -99,7 +104,7 @@ export default function InvoicePage() {
 
     const timer = setTimeout(async () => {
       try {
-        const password = localStorage.getItem('sr_settings') 
+        const defaultPwd = localStorage.getItem('sr_settings') 
           ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword 
           : '1234';
           
@@ -108,7 +113,7 @@ export default function InvoicePage() {
           .from('receipts')
           .upsert({
             id: formData.invoiceNo,
-            password: password || '1234',
+            password: password || defaultPwd || '1234',
             data: { formData, items, type: 'invoice' }
           });
           
@@ -119,7 +124,7 @@ export default function InvoicePage() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [formData, items]);
+  }, [formData, items, password]);
 
   const totalAmount = items.reduce((sum, item) => sum + ((Number(item.price) || 0) * (item.samples === '' ? 1 : (Number(item.samples) || 0))), 0);
   const discountAmount = totalAmount * ((Number(formData.discountPercent) || 0) / 100);
@@ -177,6 +182,11 @@ export default function InvoicePage() {
   };
 
   const handlePrint = async () => {
+    if (!password) {
+      toast.error("Please enter a password to lock the PDF.");
+      return;
+    }
+    
     setIsGenerating(true);
     try {
       // 1. Try to save to DB (Handle RLS gracefully based on settings)
@@ -188,7 +198,7 @@ export default function InvoicePage() {
           .from('receipts')
           .upsert({
             id: formData.invoiceNo,
-            password: '1234', // default password for now
+            password: password, // use the explicitly entered password
             data: { formData, items, type: 'invoice' }
           });
           
@@ -199,26 +209,25 @@ export default function InvoicePage() {
           } else {
             toast.error("Database save failed: " + error.message);
           }
-        } else {
-          toast.success("Saved securely to cloud.");
         }
       }
 
       await new Promise(r => setTimeout(r, 300));
-      const html2canvas = (await import('html2canvas-pro')).default;
-      
+      const pages = document.querySelectorAll('.a4-page');
       const content = [];
-      for (let i = 0; i < chunks.length; i++) {
-        const element = document.getElementById(`invoice-page-${i}`);
-        if (element) {
-          const canvas = await html2canvas(element, { scale: 3, useCORS: true });
-          const imgData = canvas.toDataURL('image/png');
+
+      for (let i = 0; i < pages.length; i++) {
+        const html2canvas = (await import('html2canvas-pro')).default;
+        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 4, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        
+        if (imgData.length > 20) {
           content.push({ 
             image: imgData, 
             width: 595.28, 
             height: 841.89, 
             margin: [0, 0, 0, 0],
-            pageBreak: i < chunks.length - 1 ? 'after' : undefined
+            pageBreak: i < pages.length - 1 ? 'after' : undefined
           });
         }
       }
@@ -236,7 +245,10 @@ export default function InvoicePage() {
       const docDefinition = {
         pageSize: 'A4' as const,
         pageMargins: [0, 0, 0, 0] as [number, number, number, number],
-        content: content as any
+        content: content as any,
+        userPassword: password,
+        ownerPassword: password,
+        permissions: { printing: 'high', modifying: false, copying: false }
       };
 
       const pdfGenerator = pdfMake.createPdf(docDefinition);
@@ -245,7 +257,7 @@ export default function InvoicePage() {
       const { saveSilentBackup } = await import('@/utils/exportManager');
       pdfGenerator.getBlob(async (blob: Blob) => {
         await saveSilentBackup(formData.invoiceNo, blob, false);
-        toast.success("Invoice PDF generated successfully!");
+        toast.success("Invoice PDF generated and secured successfully!");
       });
       
     } catch (e: any) {
@@ -267,11 +279,6 @@ export default function InvoicePage() {
               <ArrowLeft size={16} />
             </button>
             <h2 className="font-bold text-lg tracking-wider">Invoice Editor</h2>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded shadow transition-all flex items-center gap-2 text-sm">
-              <Printer size={16} /> Generate PDF
-            </button>
           </div>
         </div>
 
@@ -352,16 +359,42 @@ export default function InvoicePage() {
             </div>
           </section>
 
-          <section>
-             <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Discount</h3>
-             <div>
-                <label className="text-xs font-semibold text-slate-600">Discount %</label>
-                <input type="number" placeholder="0" value={formData.discountPercent} onChange={e => updateField('discountPercent', e.target.value)} className="w-full border rounded p-2 text-sm" />
-             </div>
-          </section>
+             <section>
+               <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Discount</h3>
+               <div>
+                  <label className="text-xs font-semibold text-slate-600">Discount %</label>
+                  <input type="number" placeholder="0" value={formData.discountPercent} onChange={e => updateField('discountPercent', e.target.value)} className="w-full border rounded p-2 text-sm" />
+               </div>
+            </section>
+  
+          </div>
 
+          <div className="p-4 border-t bg-slate-900 flex flex-col gap-3 mt-auto shrink-0 z-10">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] uppercase font-bold text-slate-400">PDF Password Lock</label>
+              <input
+                type="text"
+                className="border border-slate-600 bg-slate-800 rounded p-2 text-sm w-full text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  import('react-hot-toast').then(mod => mod.default.error("Pasting disabled for security reasons."));
+                }}
+                placeholder="Enter password to lock PDF"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button 
+                onClick={handlePrint}
+                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-3 md:px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+              >
+                <Printer size={16} /> <span className="hidden sm:inline">Generate PDF</span><span className="sm:hidden">Print</span>
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
 
       {/* Preview Area */}
       <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center bg-gray-400 print:bg-white print:p-0 ${isGenerating ? 'is-generating-pdf' : ''}`}>
