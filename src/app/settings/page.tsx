@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { AppSettings, DEFAULT_SETTINGS } from '@/types';
 import { ArrowLeft, Download, Upload, Shield, Database, Save, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { ensureBackupFolder } from '@/utils/backupValidator';
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
@@ -51,6 +52,9 @@ export default function SettingsPage() {
     localStorage.setItem('sr_settings', JSON.stringify(settings));
     if (settings.backupLocation) {
       localStorage.setItem('sr_backuppath', settings.backupLocation);
+      if (isTauri) {
+        await ensureBackupFolder(settings.backupLocation);
+      }
     }
     
     // Sync the new default password to all existing cloud receipts
