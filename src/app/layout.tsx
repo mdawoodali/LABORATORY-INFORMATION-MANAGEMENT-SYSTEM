@@ -20,6 +20,7 @@ const montserrat = Montserrat({
 });
 
 import SecurityShield from "@/components/SecurityShield";
+import FolderInit from "@/components/FolderInit";
 
 export const metadata: Metadata = {
   title: "Laboratory Information Management System",
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col select-none">
         <Providers>
           <Updater />
+          <FolderInit />
           <Toaster position="bottom-right" />
           <SecurityShield />
           {children}

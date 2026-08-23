@@ -35,9 +35,20 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
       await mkdir(reportFolderPath, { recursive: true });
 
       const pdfBuffer = await pdfBlob.arrayBuffer();
-      await writeFile(`${reportFolderPath}\\${reportNo}.pdf`, new Uint8Array(pdfBuffer));
+      const finalPath = `${reportFolderPath}\\${reportNo}.pdf`;
+      await writeFile(finalPath, new Uint8Array(pdfBuffer));
       
       console.log(`Auto-saved backup strictly to: ${reportFolderPath}`);
+      
+      if (!isSilent) {
+        try {
+          const { open } = await import('@tauri-apps/plugin-shell');
+          await open(finalPath);
+        } catch (e) {
+          console.error("Failed to open PDF automatically:", e);
+        }
+      }
+      return finalPath;
     } else {
       // Web Fallback: Only download if it's NOT a silent auto-backup (which happens every 15s)
       // We don't want to spam the user's Downloads folder with PDFs while they are typing.
@@ -45,9 +56,8 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
       if (!isSilent) {
         saveAs(pdfBlob, `Report_${reportNo}.pdf`);
       }
+      return null;
     }
-
-    return true;
   } catch (error: unknown) {
     console.error('Failed to save report backup', error);
     const err = error as Error;

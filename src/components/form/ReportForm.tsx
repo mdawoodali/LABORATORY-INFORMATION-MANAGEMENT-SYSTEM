@@ -24,6 +24,8 @@ interface ReportFormProps {
   removeDynamicField?: (id: string) => void;
   extraPages?: ExtraPage[];
   setExtraPages?: (pages: ExtraPage[]) => void;
+  isGenerating?: boolean;
+  isSuccess?: boolean;
 }
 
 export default function ReportForm({
@@ -46,7 +48,9 @@ export default function ReportForm({
   addDynamicField,
   removeDynamicField,
   extraPages,
-  setExtraPages
+  setExtraPages,
+  isGenerating,
+  isSuccess
 }: ReportFormProps) {
   const [password, setPassword] = React.useState('');
   const [isPage1FieldsOpen, setIsPage1FieldsOpen] = React.useState(false);
@@ -87,9 +91,12 @@ export default function ReportForm({
         <div className="flex gap-2">
           <button 
             onClick={() => handlePrint(password)}
-            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-3 md:px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+            disabled={isGenerating}
+            className={`flex-1 ${isGenerating ? 'bg-slate-500 cursor-not-allowed' : isSuccess ? 'bg-green-600 hover:bg-green-500' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold py-2 px-3 md:px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm`}
           >
-            <Printer size={16} /> <span className="hidden sm:inline">Generate PDF</span><span className="sm:hidden">Print</span>
+            <Printer size={16} /> 
+            <span className="hidden sm:inline">{isGenerating ? 'Generating PDF...' : isSuccess ? 'Successful' : 'Generate PDF'}</span>
+            <span className="sm:hidden">{isGenerating ? 'Wait...' : isSuccess ? 'Done' : 'Print'}</span>
           </button>
           {onSaveTemplate && (
             <button 

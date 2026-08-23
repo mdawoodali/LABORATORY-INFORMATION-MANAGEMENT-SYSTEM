@@ -42,6 +42,7 @@ function InvoiceContent() {
   const searchParams = useSearchParams();
   const id = searchParams?.get('id');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(!!id);
   
@@ -299,6 +300,8 @@ function InvoiceContent() {
       const { saveSilentBackup } = await import('@/utils/exportManager');
       pdfGenerator.getBlob(async (blob: Blob) => {
         await saveSilentBackup(formData.invoiceNo, blob, false, 'invoice');
+        setIsSuccess(true);
+        setTimeout(() => setIsSuccess(false), 5000);
         toast.success("Invoice PDF generated and secured successfully!");
       });
       
@@ -431,17 +434,17 @@ function InvoiceContent() {
               />
             </div>
 
-            <div className="flex gap-2">
-              <button 
-                onClick={handlePrint}
-                disabled={isGenerating}
-                className={`flex-1 ${isGenerating ? 'bg-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold py-2 px-3 md:px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm`}
-              >
-                <Printer size={16} /> 
-                <span className="hidden sm:inline">{isGenerating ? 'Generating PDF...' : 'Generate PDF'}</span>
-                <span className="sm:hidden">{isGenerating ? 'Wait...' : 'Print'}</span>
-              </button>
-            </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handlePrint}
+                  disabled={isGenerating}
+                  className={`flex-1 ${isGenerating ? 'bg-slate-500 cursor-not-allowed' : isSuccess ? 'bg-green-600 hover:bg-green-500' : 'bg-blue-600 hover:bg-blue-500'} text-white font-bold py-2 px-3 md:px-4 rounded shadow transition-all active:scale-95 flex items-center justify-center gap-2 text-sm`}
+                >
+                  <Printer size={16} /> 
+                  <span className="hidden sm:inline">{isGenerating ? 'Generating PDF...' : isSuccess ? 'Successful' : 'Generate PDF'}</span>
+                  <span className="sm:hidden">{isGenerating ? 'Wait...' : isSuccess ? 'Done' : 'Print'}</span>
+                </button>
+              </div>
           </div>
         </div>
 

@@ -108,6 +108,7 @@ function EditorContent() {
   const [sampleImage, setSampleImage] = useState<string | null>(null);
   const [extraPages, setExtraPages] = useState<ExtraPage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   
   // Undo/Redo state
@@ -389,7 +390,11 @@ function EditorContent() {
       const { saveSilentBackup } = await import('@/utils/exportManager');
       pdfGenerator.getBlob(async (blob: Blob) => {
         await saveSilentBackup(formData.reportNo, blob, isSilent);
-        if (!isSilent) toast.success("PDF generated and secured successfully!");
+        if (!isSilent) {
+          setIsSuccess(true);
+          setTimeout(() => setIsSuccess(false), 5000);
+          toast.success("PDF generated and secured successfully!");
+        }
       });
       
     } catch (err: any) {
@@ -555,6 +560,8 @@ function EditorContent() {
         handleImageUpload={handleImageUpload}
         removeImage={() => setSampleImage(null)}
         handlePrint={handlePrint}
+        isGenerating={isGenerating}
+        isSuccess={isSuccess}
         onSaveTemplate={handleSaveTemplate}
         onGoHome={() => router.push('/')}
         onOpenSettings={() => setShowSettings(true)}
