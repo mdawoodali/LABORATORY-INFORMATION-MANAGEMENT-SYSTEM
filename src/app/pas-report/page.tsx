@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SettingsModal from '@/components/SettingsModal';
 import PQSWordmark from '@/components/report/PQSWordmark';
+import PQSLogoImage from '@/components/report/PQSLogoImage';
 import ReportForm from '@/components/form/ReportForm';
 import Header from '@/components/report/Header';
 import SubHeader from '@/components/report/SubHeader';
@@ -30,7 +31,7 @@ const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportN
   return (
     <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
       <div className="flex items-center gap-3 shrink-0">
-        <img src="/pqs-logo.svg" alt="PQS Logo" className="w-[90px] h-[90px] object-contain" />
+        <PQSLogoImage className="w-[90px] h-[90px] object-contain" />
         <div className="flex flex-col">
           <PQSWordmark className="mb-2" />
           <div className="text-xs text-gray-500 mt-1">

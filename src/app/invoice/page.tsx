@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { Printer, ArrowLeft, Plus, Trash2, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
+import PQSLogoImage from '@/components/report/PQSLogoImage';
 import DropdownInput from '@/components/form/DropdownInput';
 
 const convertDate = (d: string) => {
@@ -463,7 +464,7 @@ function InvoiceContent() {
               {/* Header */}
               <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4">
                   <div className="flex items-center gap-3">
-                    <img src="/pqs-logo.svg" alt="PQS Logo" className="w-[90px] h-[90px] object-contain" />
+                    <PQSLogoImage className="w-[90px] h-[90px] object-contain" />
                     <div className="flex flex-col">
                       <PQSWordmark className="mb-2" />
                       <div className="text-xs text-gray-500 mt-1">

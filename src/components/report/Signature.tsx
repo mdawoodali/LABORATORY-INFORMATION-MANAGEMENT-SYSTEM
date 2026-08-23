@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AppSettings, DEFAULT_SETTINGS } from '@/types';
 import CanvaImage from './CanvaImage';
+import { DefaultSignatureBase64 } from './SignatureImage';
 
 export default function Signature({ companyName }: { companyName?: string }) {
   const [signatureImage, setSignatureImage] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export default function Signature({ companyName }: { companyName?: string }) {
         {/* Draggable/Resizable Signature image from DOCX or Settings */}
         <div className="w-full h-[90px] flex items-center justify-center -mt-2 mb-1 z-50">
           <CanvaImage 
-            src={signatureImage || "/docx_images/image2.png"}
+            src={signatureImage || DefaultSignatureBase64}
             defaultWidth={150}
             defaultHeight={90}
             onReplace={(newSrc) => {
@@ -51,7 +52,7 @@ export default function Signature({ companyName }: { companyName?: string }) {
               localStorage.setItem('sr_settings', JSON.stringify({ ...settings, signatureImage: newSrc }));
             }}
             onRemove={() => {
-              setSignatureImage("/docx_images/image2.png");
+              setSignatureImage(DefaultSignatureBase64);
               const savedSettings = localStorage.getItem('sr_settings');
               const settings = savedSettings ? JSON.parse(savedSettings) : DEFAULT_SETTINGS;
               localStorage.setItem('sr_settings', JSON.stringify({ ...settings, signatureImage: undefined }));
