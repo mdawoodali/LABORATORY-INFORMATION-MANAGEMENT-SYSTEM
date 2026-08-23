@@ -173,10 +173,6 @@ export default function InvoicePage() {
   }
   if (chunks.length === 0) chunks.push([]);
 
-  const updateField = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   const updateItem = (id: string, field: string, value: string | number) => {
     setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
