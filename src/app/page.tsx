@@ -26,10 +26,18 @@ export default function HomePage() {
 
       return reports.map(r => {
         const applicantField = r.data?.formData?.dynamicFields?.find((f: any) => f.label === 'APPLICANT');
+        
+        let applicantValue = 'Untitled';
+        if (r.data?.type === 'invoice') {
+          applicantValue = r.data?.formData?.customerName || 'Unknown Customer';
+        } else {
+          applicantValue = applicantField ? applicantField.value : (r.data?.formData?.applicant || 'Untitled');
+        }
+
         return {
           id: r.id,
           reportNo: r.id,
-          applicant: applicantField ? applicantField.value : (r.data?.formData?.applicant || 'Untitled'),
+          applicant: applicantValue,
           date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
           type: r.data?.type || 'report'
         };
