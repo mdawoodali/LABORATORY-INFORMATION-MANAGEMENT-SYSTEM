@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SettingsModal from '@/components/SettingsModal';
-import PASWordmark from '@/components/report/PASWordmark';
+import PQSWordmark from '@/components/report/PQSWordmark';
 import ReportForm from '@/components/form/ReportForm';
 import Header from '@/components/report/Header';
 import SubHeader from '@/components/report/SubHeader';
@@ -17,37 +17,63 @@ import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut } from 'lucide-react';
 import QRCode from 'react-qr-code';
 
-const PASHeader = ({ reportNo, reportingDate }: { reportNo: string, reportingDate: string }) => {
+const convertDate = (d: string) => {
+  if (!d) return '';
+  const p = d.split('-');
+  if (p.length !== 3) return d;
+  return `${p[2]}-${p[1]}-${p[0]}`;
+};
+
+const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportNo: string, reportingDate: string, onReportingDateChange?: (date: string) => void }) => {
   const verifyUrl = `https://sr-laboratories-nine.vercel.app/verify/${reportNo}`;
 
   return (
     <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
-      <div className="flex items-center gap-4">
-        <img src="/pas-logo.svg" alt="PAS Logo" className="w-20 h-20 object-contain" />
+      <div className="flex items-center gap-3 shrink-0">
+        <img src="/pqs-logo.svg" alt="PQS Logo" className="w-[90px] h-[90px] object-contain" />
         <div className="flex flex-col">
-          <PASWordmark style={{ height: '24px', width: 'auto' }} className="mb-1" />
+          <PQSWordmark className="mb-2" />
           <div className="text-xs text-gray-600 mt-0 flex flex-col">
             <span>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
-            <span>Contact: 03322673373 | Email: pas@info.net</span>
+            <span>Contact: 03322673373 | precisionqualityserviceslabs@gmail.com</span>
           </div>
         </div>
       </div>
       
-      <div className="flex flex-col items-end">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="text-xl font-bold tracking-wider text-gray-800 border border-gray-800 px-3 py-1">REPORT</div>
-          <div className="flex flex-col items-center">
+      <div className="text-right flex flex-col items-end">
+        <div className="relative mb-4">
+          <div className="text-2xl font-bold tracking-wider text-gray-800 border border-gray-800 px-4 py-1">
+            REPORT
+          </div>
+          <div className="absolute top-0 right-full mr-4 flex flex-col items-center">
             <QRCode 
               value={verifyUrl} 
-              size={40}
-              level="L"
-              style={{ height: "auto", maxWidth: "100%", width: "40px" }}
+              size={50}
+              level="M"
             />
-            <span className="text-[7px] font-bold font-sans tracking-[0.1em] text-gray-700 mt-[2px]">SCAN ME</span>
+            <span className="text-[8px] mt-1 text-gray-500 font-bold uppercase tracking-wider">Scan Me</span>
           </div>
         </div>
-        <div className="flex gap-2 text-sm"><span className="font-bold w-20 text-right whitespace-nowrap">Report #:</span><span className="w-28 text-left border-b border-gray-400">{reportNo}</span></div>
-        <div className="flex gap-2 text-sm mt-1"><span className="font-bold w-20 text-right whitespace-nowrap">Report Date:</span><span className="w-28 text-left border-b border-gray-400">{reportingDate}</span></div>
+        <div className="flex gap-2 text-sm">
+          <span className="font-bold w-24 text-right whitespace-nowrap">Report #:</span>
+          <span className="w-32 text-left border-b border-gray-400">{reportNo}</span>
+        </div>
+        <div className="flex gap-2 text-sm mt-1">
+          <span className="font-bold w-24 text-right whitespace-nowrap">Report Date:</span>
+          {onReportingDateChange ? (
+            <label className="w-32 text-left border-b border-gray-400 relative cursor-pointer block">
+              {reportingDate}
+              <input 
+                type="date"
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                value={convertDate(reportingDate)}
+                onChange={(e) => onReportingDateChange(convertDate(e.target.value))}
+              />
+            </label>
+          ) : (
+            <span className="w-32 text-left border-b border-gray-400">{reportingDate}</span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -505,7 +531,7 @@ function EditorContent() {
         
         {/* PAGE 1 */}
         <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} />
+          <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} onReportingDateChange={(date) => updateDynamicField('f20', date)} />
           <div className="flex-1">
             <PageOneData data={formData} />
           </div>
@@ -514,7 +540,7 @@ function EditorContent() {
 
         {/* PAGE 2 */}
         <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} />
+          <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} onReportingDateChange={(date) => updateDynamicField('f20', date)} />
           <div className="flex-1 px-10">
             <TestTable tests={tests} data={formData} />
           </div>
@@ -524,7 +550,7 @@ function EditorContent() {
         {/* PAGE 3 - Sample Image */}
         {sampleImage && (
           <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} />
+            <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} onReportingDateChange={(date) => updateDynamicField('f20', date)} />
             <div className="flex-1 flex justify-center items-start px-10">
               <CanvaImage 
                 src={sampleImage} 
@@ -542,7 +568,7 @@ function EditorContent() {
           const pageNum = (sampleImage ? 4 : 3) + index;
           return (
             <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-              <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} />
+              <PASHeader reportNo={formData.reportNo} reportingDate={actualReportingDate} onReportingDateChange={(date) => updateDynamicField('f20', date)} />
               <div className="flex-1 flex flex-col px-10 relative">
                 {page.image && (
                   <div className="flex-1 flex justify-center items-start mb-4">

@@ -4,8 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Printer, ArrowLeft, Plus, Trash2, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import PASWordmark from '@/components/report/PASWordmark';
+import PQSWordmark from '@/components/report/PQSWordmark';
 import DropdownInput from '@/components/form/DropdownInput';
+
+const convertDate = (d: string) => {
+  if (!d) return '';
+  const p = d.split('-');
+  if (p.length !== 3) return d;
+  return `${p[2]}-${p[1]}-${p[0]}`;
+};
 
 // Helper to convert numbers to words (International format)
 function numberToWords(num: number): string {
@@ -38,7 +45,7 @@ export default function InvoicePage() {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const yy = String(d.getFullYear()).slice(-2);
     const random = Math.floor(100000 + Math.random() * 900000);
-    return `pas-${mm}${yy}-${random}`;
+    return `pqs-${mm}${yy}-${random}`;
   };
   
   const getTodayDate = () => {
@@ -198,7 +205,7 @@ export default function InvoicePage() {
       const { saveSilentBackup } = await import('@/utils/exportManager');
       pdfGenerator.getBlob(async (blob: Blob) => {
         await saveSilentBackup(formData.invoiceNo, blob, false);
-        toast.success("Invoice PDF generated and secured successfully!");
+        toast.success("Invoice PDF generated successfully!");
       });
       
     } catch (e: any) {
@@ -238,7 +245,7 @@ export default function InvoicePage() {
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-600">Invoice Date</label>
-                <input type="text" value={formData.invoiceDate} readOnly className="w-full border rounded p-2 text-sm bg-gray-100 text-gray-500 cursor-not-allowed focus:outline-none" />
+                <input type="date" value={convertDate(formData.invoiceDate)} onChange={(e) => updateField('invoiceDate', convertDate(e.target.value))} className="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
             </div>
           </section>
@@ -321,13 +328,13 @@ export default function InvoicePage() {
               
               {/* Header */}
               <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4">
-                <div className="flex items-center gap-4">
-                  <img src="/pas-logo.svg" alt="PAS Logo" className="w-20 h-20 object-contain" />
+                <div className="flex items-center gap-3 shrink-0">
+                  <img src="/pqs-logo.svg" alt="PQS Logo" className="w-[90px] h-[90px] object-contain" />
                   <div className="flex flex-col">
-                    <PASWordmark style={{ height: '24px', width: 'auto' }} className="mb-1" />
+                    <PQSWordmark className="mb-2" />
                     <div className="text-xs text-gray-600 mt-0 flex flex-col">
                       <span>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
-                      <span>Contact: 03322673373 | Email: pas@info.net</span>
+                      <span>Contact: 03322673373 | precisionqualityserviceslabs@gmail.com</span>
                     </div>
                   </div>
                 </div>
@@ -335,7 +342,18 @@ export default function InvoicePage() {
                 <div className="text-right flex flex-col items-end">
                   <div className="text-2xl font-bold mb-4 tracking-wider text-gray-800 border border-gray-800 px-4 py-1">INVOICE</div>
                   <div className="flex gap-2 text-sm"><span className="font-bold w-24 text-right whitespace-nowrap">Inv #:</span><span className="w-32 text-left border-b border-gray-400">{formData.invoiceNo}</span></div>
-                  <div className="flex gap-2 text-sm mt-1"><span className="font-bold w-24 text-right whitespace-nowrap">Invoice Date:</span><span className="w-32 text-left border-b border-gray-400">{formData.invoiceDate}</span></div>
+                  <div className="flex gap-2 text-sm mt-1">
+                    <span className="font-bold w-24 text-right whitespace-nowrap">Invoice Date:</span>
+                    <label className="w-32 text-left border-b border-gray-400 relative cursor-pointer block">
+                      {formData.invoiceDate}
+                      <input 
+                        type="date"
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        value={convertDate(formData.invoiceDate)}
+                        onChange={(e) => updateField('invoiceDate', convertDate(e.target.value))}
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
 

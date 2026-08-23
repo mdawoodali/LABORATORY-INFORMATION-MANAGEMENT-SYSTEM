@@ -32,11 +32,6 @@ export interface ReportFormData {
   sampleDate: string;
   orderNo: string;
   color: string;
-  size: string;
-  fabricConstruction: string;
-  fabricWeight: string;
-  fibreContent: string;
-  endUse: string;
   buyerName: string;
   buyingHouse: string;
   manufacturer: string;
@@ -97,11 +92,6 @@ export const DEFAULT_FORM_DATA: ReportFormData = {
   sampleDate: '',
   orderNo: '',
   color: '',
-  size: '',
-  fabricConstruction: '',
-  fabricWeight: '',
-  fibreContent: '',
-  endUse: '',
   buyerName: '',
   buyingHouse: '',
   manufacturer: '',
@@ -143,11 +133,6 @@ export const migrateToDynamicFields = (data: ReportFormData): DynamicField[] => 
     { id: 'f7', label: 'SAMPLE DATE', value: data.sampleDate || '' },
     { id: 'f8', label: 'ORDER NO.', value: data.orderNo || '' },
     { id: 'f9', label: 'COLOR', value: data.color || '' },
-    { id: 'f10', label: 'SIZE', value: data.size || '' },
-    { id: 'f11', label: 'FABRIC CONSTRUCTION', value: data.fabricConstruction || '' },
-    { id: 'f12', label: 'FABRIC WEIGHT', value: data.fabricWeight || '' },
-    { id: 'f13', label: 'FIBRE CONTENT', value: data.fibreContent || '' },
-    { id: 'f14', label: 'END USE', value: data.endUse || '' },
     { id: 'f15', label: 'BUYER NAME', value: data.buyerName || '' },
     { id: 'f16', label: 'BUYING HOUSE', value: data.buyingHouse || '' },
     { id: 'f17', label: 'MANUFACTURER', value: data.manufacturer || '' },
@@ -173,7 +158,6 @@ export const DEFAULT_TEMPLATES: Template[] = [
       dynamicFields: [
         { id: 'f1', label: 'APPLICANT', value: 'ABC Garments Ltd', bold: true },
         { id: 'f2', label: 'ADDRESS', value: '123 Textile Ave' },
-        { id: 'f11', label: 'FABRIC CONSTRUCTION', value: '100% Cotton Single Jersey' },
         { id: 'f21', label: 'CARE LABEL SYMBOLS', value: 'Machine Wash Cold' },
       ]
     }

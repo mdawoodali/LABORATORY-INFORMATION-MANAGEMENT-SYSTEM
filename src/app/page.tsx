@@ -6,8 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES } from '@/types';
 import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, Search } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
-import PASWordmark from '@/components/report/PASWordmark';
 import { toast } from 'react-hot-toast';
+import PQSWordmark from '@/components/report/PQSWordmark';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import packageJson from '../../package.json';
@@ -54,34 +54,34 @@ export default function HomePage() {
       }
     }
 
-    const hasPasReport = loadedTemplates.some((t: Template) => t.id === 'pas-report');
-    const hasPasInvoice = loadedTemplates.some((t: Template) => t.id === 'pas-invoice');
+    const hasPqsReport = loadedTemplates.some((t: Template) => t.id === 'pqs-report');
+    const hasPqsInvoice = loadedTemplates.some((t: Template) => t.id === 'pqs-invoice');
     
     let updatedTemplates = [...loadedTemplates];
     
-    // Add PAS templates to the very beginning if they don't exist
-    if (!hasPasInvoice) {
+    // Add PQS templates to the very beginning if they don't exist
+    if (!hasPqsInvoice) {
       updatedTemplates.unshift({
-        id: 'pas-invoice',
-        name: 'PAS INVOICE',
+        id: 'pqs-invoice',
+        name: 'PQS INVOICE',
         formData: DEFAULT_FORM_DATA,
         tests: [],
         createdAt: new Date().toISOString(),
-        thumbnail: 'pas-invoice'
+        thumbnail: 'pqs-invoice'
       });
     }
-    if (!hasPasReport) {
+    if (!hasPqsReport) {
       updatedTemplates.unshift({
-        id: 'pas-report',
-        name: 'PAS REPORT',
+        id: 'pqs-report',
+        name: 'PQS REPORT',
         formData: DEFAULT_FORM_DATA,
         tests: [],
         createdAt: new Date().toISOString(),
-        thumbnail: 'pas-report'
+        thumbnail: 'pqs-report'
       });
     }
     
-    if (!hasPasReport || !hasPasInvoice) {
+    if (!hasPqsReport || !hasPqsInvoice) {
       localStorage.setItem('sr_templates', JSON.stringify(updatedTemplates));
     }
 
@@ -139,6 +139,14 @@ export default function HomePage() {
   };
 
   const handleOpenTemplate = (template: Template) => {
+    if (template.id === 'pqs-report') {
+      router.push('/pas-report');
+      return;
+    }
+    if (template.id === 'pqs-invoice') {
+      router.push('/invoice');
+      return;
+    }
     if (template.id === 'pas-report') {
       router.push('/pas-report');
       return;
@@ -225,18 +233,18 @@ export default function HomePage() {
                   className="w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg flex flex-col justify-between p-4 hover:shadow-lg hover:border-[#2b579a] transition-all cursor-pointer relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/40 to-transparent z-10 pointer-events-none" />
-                  {template.thumbnail === 'pas-report' ? (
+                  {(template.thumbnail === 'pas-report' || template.thumbnail === 'pqs-report') ? (
+                        <div className="absolute inset-0 bg-white opacity-80 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-start border border-gray-200 rounded p-4 pt-8">
+                          <PQSWordmark style={{ height: '16px', width: 'auto' }} className="mb-3 opacity-80 group-hover:opacity-100 transition-opacity" />
+                          <div className="w-full h-1 bg-[#071b3d] rounded mb-1"></div>
+                          <div className="w-3/4 h-1 bg-gray-300 rounded mb-4"></div>
+                          <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                          <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                          <div className="w-3/4 h-[1px] bg-gray-200"></div>
+                        </div>
+                      ) : (template.thumbnail === 'pas-invoice' || template.thumbnail === 'pqs-invoice') ? (
                       <div className="absolute inset-0 bg-white opacity-80 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-start border border-gray-200 rounded p-4 pt-8">
-                        <PASWordmark style={{ height: '16px', width: 'auto' }} className="mb-3 opacity-80 group-hover:opacity-100 transition-opacity" />
-                        <div className="w-full h-1 bg-[#071b3d] rounded mb-1"></div>
-                        <div className="w-3/4 h-1 bg-gray-300 rounded mb-4"></div>
-                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
-                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
-                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
-                      </div>
-                    ) : template.thumbnail === 'pas-invoice' ? (
-                      <div className="absolute inset-0 bg-white opacity-80 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-start border border-gray-200 rounded p-4 pt-8">
-                        <PASWordmark style={{ height: '16px', width: 'auto' }} className="mb-3 opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <PQSWordmark style={{ height: '16px', width: 'auto' }} className="mb-3 opacity-80 group-hover:opacity-100 transition-opacity" />
                         <div className="w-full h-2 bg-orange-300 rounded mb-2"></div>
                         <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
                         <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
