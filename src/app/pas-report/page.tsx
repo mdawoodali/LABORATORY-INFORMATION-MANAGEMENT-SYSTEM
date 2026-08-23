@@ -368,23 +368,43 @@ function EditorContent() {
   const lastBackedUpDataRef = React.useRef<string>('');
 
   useEffect(() => {
-    let syncInterval: any;
-    if (isLoaded && typeof window !== 'undefined') {
-       syncInterval = setInterval(() => {
-          const currentData = JSON.stringify({ formData, tests, extraPages });
-          if (currentData !== lastBackedUpDataRef.current && lastBackedUpDataRef.current !== '') {
-             // Silent background auto-sync without UI interruption
-             const password = localStorage.getItem('sr_settings') ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword : '1234';
-             handlePrint(password, true).then(() => {
-               lastBackedUpDataRef.current = currentData;
-             });
-          } else if (lastBackedUpDataRef.current === '') {
-             lastBackedUpDataRef.current = currentData;
-          }
-       }, 15000); // 15 seconds
+    if (!isLoaded || typeof window === 'undefined') return;
+    
+    const currentData = JSON.stringify({ formData, tests, extraPages });
+    
+    // Set initial baseline so we don't save immediately on load
+    if (lastBackedUpDataRef.current === '') {
+      lastBackedUpDataRef.current = currentData;
+      return;
     }
-    return () => clearInterval(syncInterval);
-  }, [isLoaded, formData, tests, extraPages]);
+
+    if (currentData === lastBackedUpDataRef.current) return;
+
+    // Debounce auto-save by 3 seconds of inactivity
+    const timer = setTimeout(async () => {
+      try {
+        const password = localStorage.getItem('sr_settings') 
+          ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword 
+          : '1234';
+          
+        const { error } = await supabase
+          .from('receipts')
+          .upsert({
+            id: formData.reportNo,
+            password: password || '1234',
+            data: { formData, tests, sampleImage, extraPages }
+          });
+          
+        if (!error) {
+          lastBackedUpDataRef.current = currentData;
+        }
+      } catch (e) {
+        // silent fail for auto-save
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [isLoaded, formData, tests, extraPages, sampleImage]);
 
   const updateField = (field: keyof ReportFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

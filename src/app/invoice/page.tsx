@@ -60,6 +60,7 @@ export default function InvoicePage() {
     invoiceNo: '',
     invoiceDate: '',
     customerName: '',
+    companyAddress: '',
     responsiblePerson: '',
     contactDetail: '',
     email: '',
@@ -80,6 +81,45 @@ export default function InvoicePage() {
   const [items, setItems] = useState<any[]>([
     { id: '1', test: 'Water Analysis', method: 'ISO 1234', price: '', samples: '' },
   ]);
+
+  const lastBackedUpDataRef = React.useRef<string>('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !formData.invoiceNo) return;
+    
+    const currentData = JSON.stringify({ formData, items });
+    
+    // Set initial baseline
+    if (lastBackedUpDataRef.current === '') {
+      lastBackedUpDataRef.current = currentData;
+      return;
+    }
+
+    if (currentData === lastBackedUpDataRef.current) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const password = localStorage.getItem('sr_settings') 
+          ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword 
+          : '1234';
+          
+        const { supabase } = await import('@/lib/supabase');
+        const { error } = await supabase
+          .from('receipts')
+          .upsert({
+            id: formData.invoiceNo,
+            password: password || '1234',
+            data: { formData, items, type: 'invoice' }
+          });
+          
+        if (!error) {
+          lastBackedUpDataRef.current = currentData;
+        }
+      } catch (e) {}
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [formData, items]);
 
   const totalAmount = items.reduce((sum, item) => sum + ((Number(item.price) || 0) * (item.samples === '' ? 1 : (Number(item.samples) || 0))), 0);
   const discountAmount = totalAmount * ((Number(formData.discountPercent) || 0) / 100);
@@ -258,6 +298,10 @@ export default function InvoicePage() {
                 <DropdownInput value={formData.customerName} onChange={v => updateField('customerName', v)} fieldKey="inv_customerName" className="w-full border rounded p-2 text-sm" />
               </div>
               <div>
+                <label className="text-xs font-semibold text-slate-600">Company Address</label>
+                <DropdownInput value={formData.companyAddress} onChange={v => updateField('companyAddress', v)} fieldKey="inv_companyAddress" className="w-full border rounded p-2 text-sm" />
+              </div>
+              <div>
                 <label className="text-xs font-semibold text-slate-600">Contact Person</label>
                 <DropdownInput value={formData.responsiblePerson} onChange={v => updateField('responsiblePerson', v)} fieldKey="inv_responsiblePerson" className="w-full border rounded p-2 text-sm" />
               </div>
@@ -370,6 +414,7 @@ export default function InvoicePage() {
                  <div className="font-bold text-lg mb-2 text-gray-700 underline">Client details:</div>
                  <div className="flex flex-col gap-1 ml-4">
                     <div className="flex"><span className="w-40 font-semibold text-gray-700">Company Name:</span><span className="font-bold underline">{formData.customerName}</span></div>
+                    <div className="flex"><span className="w-40 font-semibold text-gray-700">Company Address:</span><span>{formData.companyAddress}</span></div>
                     <div className="flex"><span className="w-40 font-semibold text-gray-700">Contact Person:</span><span>{formData.responsiblePerson}</span></div>
                     <div className="flex"><span className="w-40 font-semibold text-gray-700">Contact detail:</span><span>{formData.contactDetail}</span></div>
                     <div className="flex"><span className="w-40 font-semibold text-gray-700">Email:</span><span>{formData.email}</span></div>
