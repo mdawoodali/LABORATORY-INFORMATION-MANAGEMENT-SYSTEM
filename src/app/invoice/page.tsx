@@ -299,16 +299,19 @@ function InvoiceContent() {
       // Save using Tauri natively, or fallback to browser download
       const { saveSilentBackup } = await import('@/utils/exportManager');
       pdfGenerator.getBlob(async (blob: Blob) => {
-        await saveSilentBackup(formData.invoiceNo, blob, false, 'invoice');
-        setIsSuccess(true);
-        setTimeout(() => setIsSuccess(false), 5000);
-        toast.success("Invoice PDF generated and secured successfully!");
+        try {
+          await saveSilentBackup(formData.invoiceNo, blob, false, 'invoice');
+          setIsSuccess(true);
+          setTimeout(() => setIsSuccess(false), 5000);
+          toast.success("Invoice PDF generated and secured successfully!");
+        } finally {
+          setIsGenerating(false);
+        }
       });
       
     } catch (e: any) {
       console.error(e);
       toast.error(`PDF generation failed: ${e.message || 'Unknown error'}`);
-    } finally {
       setIsGenerating(false);
     }
   };

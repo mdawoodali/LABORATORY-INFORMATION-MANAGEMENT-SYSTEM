@@ -30,12 +30,14 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
 
       const baseValidPath = typeof primaryTarget === 'string' ? primaryTarget : `${basePath}\\LIMS BACKUP`;
       
+      const safeReportNo = reportNo.replace(/[^a-zA-Z0-9-_ \.]/g, '_');
+      
       const folderCategory = type === 'invoice' ? 'INVOICES' : 'REPORTS';
-      const reportFolderPath = `${baseValidPath}\\${folderCategory}\\${y}\\${monthName}\\${dateStr}\\${reportNo}`;
+      const reportFolderPath = `${baseValidPath}\\${folderCategory}\\${y}\\${monthName}\\${dateStr}\\${safeReportNo}`;
       await mkdir(reportFolderPath, { recursive: true });
 
       const pdfBuffer = await pdfBlob.arrayBuffer();
-      const finalPath = `${reportFolderPath}\\${reportNo}.pdf`;
+      const finalPath = `${reportFolderPath}\\${safeReportNo}.pdf`;
       await writeFile(finalPath, new Uint8Array(pdfBuffer));
       
       console.log(`Auto-saved backup strictly to: ${reportFolderPath}`);

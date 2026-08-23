@@ -386,24 +386,29 @@ function EditorContent() {
 
       const pdfGenerator = pdfMake.createPdf(docDefinition);
 
-      // Save using Tauri natively, or fallback to browser download
-      const { saveSilentBackup } = await import('@/utils/exportManager');
-      pdfGenerator.getBlob(async (blob: Blob) => {
-        await saveSilentBackup(formData.reportNo, blob, isSilent);
+        // Save using Tauri natively, or fallback to browser download
+        const { saveSilentBackup } = await import('@/utils/exportManager');
+        pdfGenerator.getBlob(async (blob: Blob) => {
+          try {
+            await saveSilentBackup(formData.reportNo, blob, isSilent);
+            if (!isSilent) {
+              setIsSuccess(true);
+              setTimeout(() => setIsSuccess(false), 5000);
+              toast.success("PDF generated and secured successfully!");
+            }
+          } finally {
+            if (!isSilent) setIsGenerating(false);
+          }
+        });
+        
+      } catch (err: any) {
+        console.error(err);
         if (!isSilent) {
-          setIsSuccess(true);
-          setTimeout(() => setIsSuccess(false), 5000);
-          toast.success("PDF generated and secured successfully!");
+          toast.error(`PDF generation failed: ${err.message || 'Unknown error'}`);
+          setIsGenerating(false);
         }
-      });
-      
-    } catch (err: any) {
-      console.error(err);
-      if (!isSilent) toast.error(`PDF generation failed: ${err.message || 'Unknown error'}`);
-    } finally {
-      if (!isSilent) setIsGenerating(false);
-    }
-  };
+      }
+    };
 
   const lastBackedUpDataRef = React.useRef<string>('');
 
