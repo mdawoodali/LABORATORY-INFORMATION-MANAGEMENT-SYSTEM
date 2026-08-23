@@ -47,13 +47,34 @@ export default function SettingsPage() {
     }
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem('sr_settings', JSON.stringify(settings));
     if (settings.backupLocation) {
       localStorage.setItem('sr_backuppath', settings.backupLocation);
     }
+    
+    // Sync the new default password to all existing cloud receipts
+    if (settings.defaultPassword) {
+      try {
+        const { error } = await supabase
+          .from('receipts')
+          .update({ password: settings.defaultPassword })
+          .neq('id', 'dummy_id');
+          
+        if (error) {
+          console.error("Failed to sync passwords:", error);
+          toast.error("Settings saved locally, but failed to update existing cloud passwords.");
+        } else {
+          toast.success("Settings saved and all cloud passwords updated!");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      toast.success("Settings saved successfully!");
+    }
+
     setSaved(true);
-    toast.success("Settings saved successfully!");
     setTimeout(() => setSaved(false), 2000);
   };
 
