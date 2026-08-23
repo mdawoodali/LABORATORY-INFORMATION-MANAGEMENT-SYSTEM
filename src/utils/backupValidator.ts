@@ -17,7 +17,7 @@ export const ensureBackupFolder = async (basePath: string) => {
       return false;
     }
 
-    const srPath = `${cleanPath}\\LIMS_BACKUP`;
+    const srPath = `${cleanPath}\\LIMS BACKUP`;
     
     const srExists = await exists(srPath);
     if (!srExists) {

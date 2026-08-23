@@ -28,7 +28,7 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
         throw new Error("Primary backup location is inaccessible. Backup aborted.");
       }
 
-      const baseValidPath = typeof primaryTarget === 'string' ? primaryTarget : `${basePath}\\LIMS_BACKUP`;
+      const baseValidPath = typeof primaryTarget === 'string' ? primaryTarget : `${basePath}\\LIMS BACKUP`;
       
       const reportFolderPath = `${baseValidPath}\\REPORTS\\${y}\\${monthName}\\${dateStr}\\${reportNo}`;
       await mkdir(reportFolderPath, { recursive: true });

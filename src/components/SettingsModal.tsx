@@ -106,7 +106,7 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
                   Change
                 </button>
               </div>
-              <p className="text-[11px] text-slate-500 mt-2">Reports are automatically saved to LIMS_BACKUP inside this folder every 15 seconds after changes.</p>
+              <p className="text-[11px] text-slate-500 mt-2">Reports are automatically saved to LIMS BACKUP inside this folder every 15 seconds after changes.</p>
             </div>
           ) : (
             <div>
