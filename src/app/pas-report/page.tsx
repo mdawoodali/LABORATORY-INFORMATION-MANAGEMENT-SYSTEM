@@ -40,18 +40,18 @@ const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportN
         </div>
       </div>
       
-      <div className="text-right flex flex-col items-end">
-        <div className="relative mb-4">
+      <div className="text-right flex flex-col items-end relative">
+        <div className="absolute top-0 right-full mr-4 flex flex-col items-center">
+          <QRCode 
+            value={verifyUrl} 
+            size={50}
+            level="M"
+          />
+          <span className="text-[8px] mt-1 text-gray-500 font-bold uppercase tracking-wider">Scan Me</span>
+        </div>
+        <div className="mb-4">
           <div className="text-2xl font-bold tracking-wider text-gray-800 border border-gray-800 px-4 py-1">
             REPORT
-          </div>
-          <div className="absolute top-0 right-full mr-4 flex flex-col items-center">
-            <QRCode 
-              value={verifyUrl} 
-              size={50}
-              level="M"
-            />
-            <span className="text-[8px] mt-1 text-gray-500 font-bold uppercase tracking-wider">Scan Me</span>
           </div>
         </div>
         <div className="flex gap-2 text-sm">
