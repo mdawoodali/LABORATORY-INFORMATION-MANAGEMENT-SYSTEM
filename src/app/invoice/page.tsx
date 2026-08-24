@@ -80,7 +80,8 @@ function InvoiceContent() {
     discountPercent: 0,
   });
 
-  const [items, setItems] = useState<Record<string, unknown>[]>([
+  const [items, setItems] = useState<any[]>(/* eslint-disable-line @typescript-eslint/no-explicit-any */
+[
     { id: '1', test: 'Water Analysis', method: 'ISO 1234', price: '', samples: '' },
   ]);
 
@@ -261,9 +262,19 @@ function InvoiceContent() {
       const content = [];
 
       for (let i = 0; i < pages.length; i++) {
-        const html2canvas = (await import('html2canvas-pro')).default;
-        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 1.5, useCORS: true });
-        const imgData = canvas.toDataURL('image/png');
+                const { toPng } = await import('html-to-image');
+        const pageEl = pages[i] as HTMLElement;
+        const imgData = await toPng(pageEl, {
+          cacheBust: true,
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+          style: {
+            transform: 'none',
+            transformOrigin: 'top left',
+            margin: '0',
+            position: 'relative',
+          }
+        });
         
         if (imgData.length > 20) {
           content.push({ 
@@ -576,6 +587,8 @@ function InvoiceContent() {
     </div>
   );
 }
+
+
 
 export default function InvoicePage() {
   return (

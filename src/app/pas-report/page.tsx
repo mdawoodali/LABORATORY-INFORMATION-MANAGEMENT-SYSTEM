@@ -356,11 +356,19 @@ function EditorContent() {
 
       for (let i = 0; i < pages.length; i++) {
         // Dynamically import html2canvas to prevent blocking initial load
-        const html2canvas = (await import('html2canvas-pro')).default;
-        // Scale lowered to 1.5 to prevent memory exhaustion and hanging during pdf generation
-        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 1.5, useCORS: true });
-        // Use PNG to prevent JPEG compression ringing artifacts around text and logos
-        const imgData = canvas.toDataURL('image/png');
+                const { toPng } = await import('html-to-image');
+        const pageEl = pages[i] as HTMLElement;
+        const imgData = await toPng(pageEl, {
+          cacheBust: true,
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+          style: {
+            transform: 'none',
+            transformOrigin: 'top left',
+            margin: '0',
+            position: 'relative',
+          }
+        });
         content.push({
           image: imgData,
           width: 595.28,
