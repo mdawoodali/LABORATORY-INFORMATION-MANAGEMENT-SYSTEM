@@ -25,7 +25,7 @@ export default function HomePage() {
       if (error || !reports) return [];
 
       return reports.map(r => {
-        const applicantField = r.data?.formData?.dynamicFields?.find((f: any) => f.label === 'APPLICANT');
+        const applicantField = r.data?.formData?.dynamicFields?.find((f: Record<string, unknown>) => f.label === 'APPLICANT');
         
         let applicantValue = 'Untitled';
         if (r.data?.type === 'invoice') {
@@ -66,7 +66,7 @@ export default function HomePage() {
     const hasPqsReport = loadedTemplates.some((t: Template) => t.id === 'pqs-report');
     const hasPqsInvoice = loadedTemplates.some((t: Template) => t.id === 'pqs-invoice');
     
-    let updatedTemplates = [...loadedTemplates];
+    const updatedTemplates = [...loadedTemplates];
     
     // Add PQS templates to the very beginning if they don't exist
     if (!hasPqsInvoice) {
@@ -169,11 +169,11 @@ export default function HomePage() {
     router.push('/editor?template=' + template.id);
   };
 
-  const handleOpenReport = (report: any) => {
+  const handleOpenReport = (report: Record<string, unknown>) => {
     if (report.type === 'invoice') {
       router.push('/invoice?id=' + report.reportNo);
     } else {
-      router.push('/editor?report=' + report.reportNo);
+      router.push('/pas-report?id=' + report.reportNo);
     }
   };
 

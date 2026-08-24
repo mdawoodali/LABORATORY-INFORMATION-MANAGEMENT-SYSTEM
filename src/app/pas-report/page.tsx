@@ -100,9 +100,27 @@ function EditorContent() {
   const templateId = searchParams.get('template');
   const reportId = searchParams.get('report');
 
-  const [formData, setFormData] = useState<ReportFormData>({
-    ...DEFAULT_FORM_DATA,
-    reportNo: String(Math.floor(100000 + Math.random() * 900000)),
+  const [formData, setFormData] = useState<ReportFormData>(() => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    const todayDate = `${dd}-${mm}-${yyyy}`;
+
+    const dynamicFields = DEFAULT_FORM_DATA.dynamicFields && DEFAULT_FORM_DATA.dynamicFields.length > 0 
+      ? [...DEFAULT_FORM_DATA.dynamicFields] 
+      : migrateToDynamicFields(DEFAULT_FORM_DATA);
+      
+    const index = dynamicFields.findIndex(f => f.id === 'f20');
+    if (index !== -1 && !dynamicFields[index].value) {
+      dynamicFields[index] = { ...dynamicFields[index], value: todayDate };
+    }
+
+    return {
+      ...DEFAULT_FORM_DATA,
+      reportNo: String(Math.floor(100000 + Math.random() * 900000)),
+      dynamicFields
+    };
   });
 
   const [tests, setTests] = useState<TestRow[]>([...DEFAULT_TESTS]);
@@ -133,19 +151,26 @@ function EditorContent() {
     return `${dd}-${mm}-${yyyy}`;
   };
 
-  useEffect(() => {
-    // Hydrate report date on mount
-    setFormData(prev => {
-      const dynamicFields = prev.dynamicFields && prev.dynamicFields.length > 0 
-        ? [...prev.dynamicFields] 
-        : migrateToDynamicFields(prev);
-      const index = dynamicFields.findIndex(f => f.id === 'f20');
-      if (index !== -1 && !dynamicFields[index].value) {
-        dynamicFields[index] = { ...dynamicFields[index], value: getTodayDate() };
+
+  const loadReport = async (id: string) => {
+    try {
+      const { data } = await supabase
+        .from('receipts')
+        .select('data')
+        .eq('id', id)
+        .single();
+
+      if (data?.data) {
+        const reportData = data.data as Record<string, unknown>;
+        if (reportData.formData) setFormData(reportData.formData as ReportFormData);
+        if (reportData.tests) setTests(reportData.tests as TestRow[]);
+        if (reportData.sampleImage) setSampleImage(reportData.sampleImage as string);
+        if (reportData.extraPages) setExtraPages(reportData.extraPages as ExtraPage[]);
       }
-      return { ...prev, dynamicFields };
-    });
-  }, []);
+    } catch (e) {
+      console.error('Failed to load report:', e);
+    }
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('sr_brand_settings');
@@ -252,26 +277,6 @@ function EditorContent() {
     }
   };
 
-  const loadReport = async (id: string) => {
-    try {
-      const { data } = await supabase
-        .from('receipts')
-        .select('data')
-        .eq('id', id)
-        .single();
-
-      if (data?.data) {
-        const reportData = data.data as any;
-        setFormData(reportData.formData);
-        setTests(reportData.tests);
-        if (reportData.sampleImage) setSampleImage(reportData.sampleImage);
-        if (reportData.extraPages) setExtraPages(reportData.extraPages);
-      }
-    } catch (e) {
-      console.error('Failed to load report:', e);
-    }
-  };
-
   const handlePrint = async (password?: string, isSilent: boolean = false) => {
     if (!password && !isSilent) {
       toast.error("Please enter a password to lock the PDF.");
@@ -374,10 +379,9 @@ function EditorContent() {
         permissions: { printing: 'high', modifying: false, copying: false }
       };
 
-      // Ensure pdfmake handles client side imports safely
-      // @ts-ignore
+      // @ts-expect-error pdfmake typing differences
       const pdfMakeModule = await import('pdfmake/build/pdfmake.js');
-      // @ts-ignore
+      // @ts-expect-error pdfmake typing differences
       const pdfFontsModule = await import('pdfmake/build/vfs_fonts.js');
       
       const pdfMake = pdfMakeModule.default || pdfMakeModule;
@@ -402,10 +406,11 @@ function EditorContent() {
           }
         });
         
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         if (!isSilent) {
-          toast.error(`PDF generation failed: ${err.message || 'Unknown error'}`);
+          const msg = err instanceof Error ? err.message : String(err);
+          toast.error(`PDF generation failed: ${msg}`);
           setIsGenerating(false);
         }
       }

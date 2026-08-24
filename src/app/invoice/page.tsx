@@ -80,7 +80,7 @@ function InvoiceContent() {
     discountPercent: 0,
   });
 
-  const [items, setItems] = useState<any[]>([
+  const [items, setItems] = useState<Record<string, unknown>[]>([
     { id: '1', test: 'Water Analysis', method: 'ISO 1234', price: '', samples: '' },
   ]);
 
@@ -93,7 +93,7 @@ function InvoiceContent() {
           setItems(data.data.items || []);
           if (data.password) setPassword(data.password);
         }
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 0);
       });
     } else {
       setFormData(prev => ({
@@ -101,7 +101,7 @@ function InvoiceContent() {
         invoiceNo: generateInvoiceNo(),
         invoiceDate: getTodayDate()
       }));
-      setIsLoading(false);
+      setTimeout(() => setIsLoading(false), 0);
     }
   }, [id]);
 
@@ -149,7 +149,7 @@ function InvoiceContent() {
   const invoiceAmount = totalAmount - discountAmount;
   const amountInWords = numberToWords(invoiceAmount);
 
-  const getWeight = (item: any) => {
+  const getWeight = (item: Record<string, unknown>) => {
     const testLines = (item.test || '').toString().split('\n').map((line: string) => Math.max(1, Math.ceil(line.length / 45))).reduce((a: number, b: number) => a + b, 0);
     const methodLines = (item.method || '').toString().split('\n').map((line: string) => Math.max(1, Math.ceil(line.length / 22))).reduce((a: number, b: number) => a + b, 0);
     return Math.max(1, testLines, methodLines);
@@ -278,9 +278,9 @@ function InvoiceContent() {
       
       if (content.length === 0) throw new Error("No pages generated");
 
-      // @ts-ignore
+      // @ts-expect-error pdfmake typing differences
       const pdfMakeModule = await import('pdfmake/build/pdfmake.js');
-      // @ts-ignore
+      // @ts-expect-error pdfmake typing differences
       const pdfFontsModule = await import('pdfmake/build/vfs_fonts.js');
       const pdfMake = pdfMakeModule.default || pdfMakeModule;
       const pdfFonts = pdfFontsModule.default || pdfFontsModule;
@@ -289,7 +289,7 @@ function InvoiceContent() {
       const docDefinition = {
         pageSize: 'A4' as const,
         pageMargins: [0, 0, 0, 0] as [number, number, number, number],
-        content: content as any,
+        content: content as unknown[],
         userPassword: password,
         ownerPassword: password,
         permissions: { printing: 'high', modifying: false, copying: false }
@@ -310,9 +310,10 @@ function InvoiceContent() {
         }
       });
       
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      toast.error(`PDF generation failed: ${e.message || 'Unknown error'}`);
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(`PDF generation failed: ${msg}`);
       setIsGenerating(false);
     }
   };
@@ -563,7 +564,7 @@ function InvoiceContent() {
               {/* Footer Area */}
               <div className="absolute bottom-10 left-0 w-full flex flex-col items-center">
                 <div className="w-[80%] flex justify-between border-t border-gray-400 pt-3 text-xs text-gray-500">
-                  <span className="italic tracking-wide">This is a computer generated document and doesn't need a signature.</span>
+                  <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
                   <span className="font-bold text-gray-700">Page {pageIndex + 1}/{chunks.length}</span>
                 </div>
               </div>

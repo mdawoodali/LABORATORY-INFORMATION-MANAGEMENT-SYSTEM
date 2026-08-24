@@ -21,10 +21,10 @@ function EditorContent() {
   const templateId = searchParams.get('template');
   const reportId = searchParams.get('report');
 
-  const [formData, setFormData] = useState<ReportFormData>({
+  const [formData, setFormData] = useState<ReportFormData>(() => ({
     ...DEFAULT_FORM_DATA,
     reportNo: String(Math.floor(100000 + Math.random() * 900000)),
-  });
+  }));
 
   const [tests, setTests] = useState<TestRow[]>([...DEFAULT_TESTS]);
   const [sampleImage, setSampleImage] = useState<string | null>(null);
@@ -44,6 +44,26 @@ function EditorContent() {
     logoBase64: '',
     companyName: 'L.I.M.S'
   });
+
+  const loadReport = async (id: string) => {
+    try {
+      const { data } = await supabase
+        .from('receipts')
+        .select('data')
+        .eq('id', id)
+        .single();
+
+      if (data?.data) {
+        const reportData = data.data as Record<string, unknown>;
+        setFormData(reportData.formData);
+        setTests(reportData.tests);
+        if (reportData.sampleImage) setSampleImage(reportData.sampleImage);
+        if (reportData.extraPages) setExtraPages(reportData.extraPages);
+      }
+    } catch (e) {
+      console.error('Failed to load report:', e);
+    }
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('sr_brand_settings');
@@ -139,26 +159,6 @@ function EditorContent() {
     }
   };
 
-  const loadReport = async (id: string) => {
-    try {
-      const { data } = await supabase
-        .from('receipts')
-        .select('data')
-        .eq('id', id)
-        .single();
-
-      if (data?.data) {
-        const reportData = data.data as any;
-        setFormData(reportData.formData);
-        setTests(reportData.tests);
-        if (reportData.sampleImage) setSampleImage(reportData.sampleImage);
-        if (reportData.extraPages) setExtraPages(reportData.extraPages);
-      }
-    } catch (e) {
-      console.error('Failed to load report:', e);
-    }
-  };
-
   const handlePrint = async (password?: string, isSilent: boolean = false) => {
     if (!password && !isSilent) {
       toast.error("Please enter a password to lock the PDF.");
@@ -227,9 +227,9 @@ function EditorContent() {
       };
 
       // Ensure pdfmake handles client side imports safely
-      // @ts-ignore
+      // @ts-expect-error pdfmake typing differences
       const pdfMakeModule = await import('pdfmake/build/pdfmake.js');
-      // @ts-ignore
+      // @ts-expect-error pdfmake typing differences
       const pdfFontsModule = await import('pdfmake/build/vfs_fonts.js');
       
       const pdfMake = pdfMakeModule.default || pdfMakeModule;
@@ -246,9 +246,9 @@ function EditorContent() {
         if (!isSilent) toast.success("PDF generated and secured successfully!");
       });
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      if (!isSilent) toast.error(`PDF generation failed: ${err.message || 'Unknown error'}`);
+      if (!isSilent) toast.error(`PDF generation failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       if (!isSilent) setIsGenerating(false);
     }
@@ -453,7 +453,7 @@ function EditorContent() {
             <div className="pb-[55px] relative">
               <Signature companyName={brandSettings.companyName} />
               <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
-                This document was generated digitally and doesn't require a signature
+                This document was generated digitally and doesn&apos;t require a signature
               </div>
             </div>
           </div>
