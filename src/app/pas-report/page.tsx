@@ -325,26 +325,13 @@ function EditorContent() {
       // Force auto backup to always be enabled
       const autoBackup = true;
       if (autoBackup) {
-        const { error } = await supabase
-          .from('receipts')
-          .upsert({
+        supabase.from('receipts').upsert({
             id: formData.reportNo,
             password: password || '1234',
             data: { formData, tests, sampleImage, extraPages }
-          });
+          }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
-        if (error) {
-          console.error("Supabase Error:", error);
-          if (!isSilent) {
-            if (error.message.includes('row-level security')) {
-              toast.error("Cloud Backup Failed: Row Level Security is enabled but no public policy exists. Please add a policy in Supabase or turn off Auto Backup in Settings.", { duration: 6000 });
-            } else {
-              toast.error("Database save failed: " + error.message);
-            }
-          }
-        } else {
-          if (!isSilent) toast.success("Saved securely to cloud.");
-        }
+        
       }
 
       // Wait a tick for isGenerating state to apply CSS class hiding handles
@@ -446,17 +433,13 @@ function EditorContent() {
           ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword 
           : '1234';
           
-        const { error } = await supabase
-          .from('receipts')
-          .upsert({
+        supabase.from('receipts').upsert({
             id: formData.reportNo,
             password: password || '1234',
             data: { formData, tests, sampleImage, extraPages }
-          });
+          }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
-        if (!error) {
-          lastBackedUpDataRef.current = currentData;
-        }
+        lastBackedUpDataRef.current = currentData;
       } catch (e) {
         // silent fail for auto-save
       }

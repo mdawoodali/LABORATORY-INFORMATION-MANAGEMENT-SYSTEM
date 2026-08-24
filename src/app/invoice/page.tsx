@@ -128,17 +128,13 @@ function InvoiceContent() {
           : '1234';
           
         const { supabase } = await import('@/lib/supabase');
-        const { error } = await supabase
-          .from('receipts')
-          .upsert({
+        supabase.from('receipts').upsert({
             id: formData.invoiceNo,
             password: password || defaultPwd || '1234',
             data: { formData, items, type: 'invoice' }
-          });
+          }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
-        if (!error) {
-          lastBackedUpDataRef.current = currentData;
-        }
+        lastBackedUpDataRef.current = currentData;
       } catch (e) {}
     }, 3000);
 
@@ -239,35 +235,39 @@ function InvoiceContent() {
       if (autoBackup) {
         // We will need to import supabase, so I'll add it to the top of the file
         const { supabase } = await import('@/lib/supabase');
-        const { error } = await supabase
-          .from('receipts')
-          .upsert({
+        supabase.from('receipts').upsert({
             id: formData.invoiceNo,
             password: password, // use the explicitly entered password
             data: { formData, items, type: 'invoice' }
-          });
+          }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
-        if (error) {
-          console.error("Supabase Error:", error);
-          if (error.message.includes('row-level security')) {
-            toast.error("Cloud Backup Failed: Row Level Security is enabled.", { duration: 6000 });
-          } else {
-            toast.error("Database save failed: " + error.message);
-          }
-        }
+        
       }
 
       await new Promise(r => setTimeout(r, 300));
       const pages = document.querySelectorAll('.a4-page');
-      const content = [];
+      if (pages.length === 0) throw new Error("No pages found");
+
+      const { toPng } = await import('html-to-image');
+      const { jsPDF } = await import('jspdf');
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
 
       for (let i = 0; i < pages.length; i++) {
-                const { toPng } = await import('html-to-image');
         const pageEl = pages[i] as HTMLElement;
         const imgData = await toPng(pageEl, {
           cacheBust: true,
-          pixelRatio: 2,
+          pixelRatio: 3,
           backgroundColor: '#ffffff',
+          width: pageEl.offsetWidth,
+          height: pageEl.offsetHeight,
+          skipFonts: true,
           style: {
             transform: 'none',
             transformOrigin: 'top left',
@@ -276,51 +276,24 @@ function InvoiceContent() {
           }
         });
         
-        if (imgData.length > 20) {
-          content.push({ 
-            image: imgData, 
-            width: 595.28, 
-            height: 841.89, 
-            margin: [0, 0, 0, 0],
-            pageBreak: i < pages.length - 1 ? 'after' : undefined
-          });
-        }
+        if (i > 0) pdf.addPage();
+        
+        const imgProps = pdf.getImageProperties(imgData);
+        const calculatedHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, calculatedHeight);
       }
+
+      const blob = pdf.output('blob');
       
-      if (content.length === 0) throw new Error("No pages generated");
-
-      // @ts-expect-error pdfmake typing differences
-      const pdfMakeModule = await import('pdfmake/build/pdfmake.js');
-      // @ts-expect-error pdfmake typing differences
-      const pdfFontsModule = await import('pdfmake/build/vfs_fonts.js');
-      const pdfMake = pdfMakeModule.default || pdfMakeModule;
-      const pdfFonts = pdfFontsModule.default || pdfFontsModule;
-      pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts.vfs;
-
-      const docDefinition = {
-        pageSize: 'A4' as const,
-        pageMargins: [0, 0, 0, 0] as [number, number, number, number],
-        content: content as unknown[],
-        userPassword: password,
-        ownerPassword: password,
-        permissions: { printing: 'high', modifying: false, copying: false }
-      };
-
-      const pdfGenerator = pdfMake.createPdf(docDefinition);
-      
-      // Save using Tauri natively, or fallback to browser download
       const { saveSilentBackup } = await import('@/utils/exportManager');
-      pdfGenerator.getBlob(async (blob: Blob) => {
-        try {
-          await saveSilentBackup(formData.invoiceNo, blob, false, 'invoice');
-          setIsSuccess(true);
-          setTimeout(() => setIsSuccess(false), 5000);
-          toast.success("Invoice PDF generated and secured successfully!");
-        } finally {
-          setIsGenerating(false);
-        }
-      });
+      const backupType = 'invoice';
       
+      await saveSilentBackup(formData.invoiceNo, blob, false, backupType);
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 5000);
+      toast.success(backupType === 'invoice' ? "Invoice PDF generated successfully!" : "Report PDF generated successfully!");
+      setIsGenerating(false);
     } catch (e: unknown) {
       console.error(e);
       const msg = e instanceof Error ? e.message : String(e);
