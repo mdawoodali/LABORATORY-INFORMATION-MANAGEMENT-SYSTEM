@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES } from '@/types';
-import { Plus, FileText, Settings, Trash2, Clock, ChevronRight, Layout, Download, Search } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Search, Plus, Trash2, Edit2, Settings, Layout, Download } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import packageJson from '../../package.json';
 import { pushGlobalSettings } from '@/lib/sync';
 
@@ -39,7 +39,8 @@ export default function HomePage() {
     queryFn: async () => {
       const { data: reports, error } = await supabase
         .from('receipts')
-        .select('id, data, created_at')
+        .select('id, data, password, created_at')
+        .neq('id', 'GLOBAL_SETTINGS')
         .order('created_at', { ascending: false });
 
       if (error || !reports) return [];
@@ -59,6 +60,7 @@ export default function HomePage() {
           reportNo: r.id,
           applicant: applicantValue,
           date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
+          password: r.password || '',
           type: r.data?.type || 'report'
         };
       });
@@ -174,6 +176,36 @@ export default function HomePage() {
     } catch (error) {
       toast.error('Failed to save template. File might be too large for browser storage.');
       console.error(error);
+    }
+  };
+
+  const queryClient = useQueryClient();
+  
+  const handleDeleteReport = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete ${id}?`)) {
+      await supabase.from('receipts').delete().eq('id', id);
+      queryClient.invalidateQueries({ queryKey: ['recentReports'] });
+      toast.success("Report deleted!");
+    }
+  };
+
+  const handleRenameReport = async (e: React.MouseEvent, oldId: string) => {
+    e.stopPropagation();
+    const newId = prompt(`Rename ${oldId} to:`, oldId);
+    if (newId && newId !== oldId) {
+      const { data } = await supabase.from('receipts').select('*').eq('id', oldId).single();
+      if (data) {
+        data.id = newId;
+        const { error } = await supabase.from('receipts').insert(data);
+        if (!error) {
+          await supabase.from('receipts').delete().eq('id', oldId);
+          queryClient.invalidateQueries({ queryKey: ['recentReports'] });
+          toast.success("Report renamed!");
+        } else {
+          toast.error("Failed to rename. Name might already exist.");
+        }
+      }
     }
   };
 
@@ -392,6 +424,7 @@ export default function HomePage() {
                     <th className="px-6 py-3 font-semibold">Report #</th>
                     <th className="px-6 py-3 font-semibold">Applicant</th>
                     <th className="px-6 py-3 font-semibold">Date</th>
+                    <th className="px-6 py-3 font-semibold">Password</th>
                     <th className="px-6 py-3 font-semibold text-right">Action</th>
                   </tr>
                 </thead>
@@ -405,8 +438,13 @@ export default function HomePage() {
                       <td className="px-6 py-4 font-mono font-bold text-[#2b579a]">{report.reportNo}</td>
                       <td className="px-6 py-4 text-gray-700">{report.applicant}</td>
                       <td className="px-6 py-4 text-gray-500">{report.date}</td>
+                      <td className="px-6 py-4 text-gray-500 font-mono text-xs">{report.password || '-'}</td>
                       <td className="px-6 py-4 text-right">
-                        <ChevronRight size={16} className="text-gray-400 inline" />
+                        <div className="flex items-center justify-end gap-3">
+                          <button onClick={(e) => handleRenameReport(e, report.id)} className="text-gray-400 hover:text-blue-600 transition-colors" title="Rename"><Edit2 size={16} /></button>
+                          <button onClick={(e) => handleDeleteReport(e, report.id)} className="text-gray-400 hover:text-red-600 transition-colors" title="Delete"><Trash2 size={16} /></button>
+                          <ChevronRight size={16} className="text-gray-400 inline" />
+                        </div>
                       </td>
                     </tr>
                   ))}
