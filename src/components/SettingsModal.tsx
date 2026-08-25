@@ -122,6 +122,66 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
             </div>
             <p className="text-[11px] text-slate-500 mt-2">Reports are automatically saved to LIMS BACKUP inside this folder every 15 seconds after changes.</p>
           </div>
+
+          {/* Sync / Export Settings */}
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Sync App Settings & Options</label>
+            <p className="text-[11px] text-slate-500 mb-3">
+              Dropdown options and templates are saved locally on your device. Export them from the .exe app and import them here to sync.
+            </p>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => {
+                  const dump: Record<string, string> = {};
+                  for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('sr_')) {
+                      dump[key] = localStorage.getItem(key) || '';
+                    }
+                  }
+                  const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `lims_settings_${new Date().getTime()}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Settings exported!");
+                }}
+                className="flex-1 bg-slate-800 text-white hover:bg-slate-700 p-2 rounded-lg text-xs font-semibold transition-colors"
+              >
+                Export Settings
+              </button>
+              <button 
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'application/json';
+                  input.onchange = async (e: any) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const text = await file.text();
+                      const parsed = JSON.parse(text);
+                      for (const key of Object.keys(parsed)) {
+                        if (key.startsWith('sr_')) {
+                          localStorage.setItem(key, parsed[key]);
+                        }
+                      }
+                      toast.success("Settings imported successfully!");
+                      setTimeout(() => window.location.reload(), 1000);
+                    } catch {
+                      toast.error("Invalid settings file.");
+                    }
+                  };
+                  input.click();
+                }}
+                className="flex-1 bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 rounded-lg text-xs font-semibold transition-colors"
+              >
+                Import Settings
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="p-4 border-t bg-slate-50 flex justify-end gap-3">
