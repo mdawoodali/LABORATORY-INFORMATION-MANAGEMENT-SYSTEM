@@ -2,6 +2,7 @@ import React from 'react';
 import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save, Settings, ChevronDown } from 'lucide-react';
 import { ReportFormData, TestRow, migrateToDynamicFields, ExtraPage } from '@/types';
 import DropdownInput from './DropdownInput';
+import PasswordLock from './PasswordLock';
 
 interface ReportFormProps {
   formData: ReportFormData;
@@ -73,20 +74,7 @@ export default function ReportForm({
           <h2 className="font-bold text-lg tracking-wider flex-1 truncate">L.I.M.S</h2>
         </div>
         
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] uppercase font-bold text-slate-400">PDF Password Lock</label>
-          <input
-            type="text"
-            className="border border-slate-600 bg-slate-800 rounded p-2 text-sm w-full text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onPaste={(e) => {
-              e.preventDefault();
-              import('react-hot-toast').then(mod => mod.default.error("Pasting disabled for security reasons."));
-            }}
-            placeholder="Enter password to lock PDF"
-          />
-        </div>
+        <PasswordLock value={password} onChange={setPassword} />
 
         <div className="flex gap-2">
           <button 

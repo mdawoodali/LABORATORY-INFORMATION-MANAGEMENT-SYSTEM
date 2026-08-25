@@ -6,8 +6,10 @@ import { supabase } from '@/lib/supabase';
 import { Printer, ArrowLeft, Plus, Trash2, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
+import PASWordmark from '@/components/report/PASWordmark';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
 import DropdownInput from '@/components/form/DropdownInput';
+import PasswordLock from '@/components/form/PasswordLock';
 
 const convertDate = (d: string) => {
   if (!d) return '';
@@ -424,20 +426,7 @@ function InvoiceContent() {
           </div>
 
           <div className="p-4 border-t bg-slate-900 flex flex-col gap-3 mt-auto shrink-0 z-10">
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] uppercase font-bold text-slate-400">PDF Password Lock</label>
-              <input
-                type="text"
-                className="border border-slate-600 bg-slate-800 rounded p-2 text-sm w-full text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onPaste={(e) => {
-                  e.preventDefault();
-                  import('react-hot-toast').then(mod => mod.default.error("Pasting disabled for security reasons."));
-                }}
-                placeholder="Enter password to lock PDF"
-              />
-            </div>
+            <PasswordLock value={password} onChange={setPassword} />
 
               <div className="flex gap-2">
                 <button 
