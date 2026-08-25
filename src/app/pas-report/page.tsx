@@ -546,8 +546,26 @@ function EditorContent() {
     return <div className="flex h-screen items-center justify-center bg-slate-200 text-gray-500">Initializing editor...</div>;
   }
 
+  const [mobileStep, setMobileStep] = React.useState<1 | 2>(1);
+
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t border-gray-200 flex z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <button 
+          onClick={() => setMobileStep(1)}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 ${mobileStep === 1 ? 'text-[#2b579a]' : 'text-gray-400'}`}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider">1. Edit Data</span>
+        </button>
+        <button 
+          onClick={() => setMobileStep(2)}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 ${mobileStep === 2 ? 'text-[#2b579a]' : 'text-gray-400'}`}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider">2. Preview & Generate</span>
+        </button>
+      </div>
+
       {showSettings && (
         <SettingsModal 
           onClose={() => setShowSettings(false)}
@@ -555,32 +573,49 @@ function EditorContent() {
           setBrandSettings={setBrandSettings}
         />
       )}
-      <ReportForm 
-        formData={formData}
-        updateField={updateField}
-        updateDynamicField={updateDynamicField}
-        renameDynamicField={renameDynamicField}
-        addDynamicField={addDynamicField}
-        removeDynamicField={removeDynamicField}
-        tests={tests}
-        addTest={addTest}
-        updateTest={updateTest}
-        removeTest={removeTest}
-        sampleImage={sampleImage}
-        handleImageUpload={handleImageUpload}
-        removeImage={() => setSampleImage(null)}
-        handlePrint={handlePrint}
-        isGenerating={isGenerating}
-        isSuccess={isSuccess}
-        onSaveTemplate={handleSaveTemplate}
-        onGoHome={() => router.push('/')}
-        onOpenSettings={() => setShowSettings(true)}
-        brandSettings={brandSettings}
-        extraPages={extraPages}
-        setExtraPages={setExtraPages}
-      />
+      
+      {/* Step 1: Form (Hidden on mobile if step 2) */}
+      <div className={`${mobileStep === 1 ? 'flex' : 'hidden'} md:flex h-full w-full md:w-auto pb-14 md:pb-0 overflow-hidden`}>
+        <ReportForm 
+          formData={formData}
+          updateField={updateField}
+          updateDynamicField={updateDynamicField}
+          renameDynamicField={renameDynamicField}
+          addDynamicField={addDynamicField}
+          removeDynamicField={removeDynamicField}
+          tests={tests}
+          addTest={addTest}
+          updateTest={updateTest}
+          removeTest={removeTest}
+          sampleImage={sampleImage}
+          handleImageUpload={handleImageUpload}
+          removeImage={() => setSampleImage(null)}
+          handlePrint={handlePrint}
+          isGenerating={isGenerating}
+          isSuccess={isSuccess}
+          onSaveTemplate={handleSaveTemplate}
+          onGoHome={() => router.push('/')}
+          onOpenSettings={() => setShowSettings(true)}
+          brandSettings={brandSettings}
+          extraPages={extraPages}
+          setExtraPages={setExtraPages}
+        />
+      </div>
 
-      <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
+      {/* Step 2: Preview (Hidden on mobile if step 1) */}
+      <div className={`${mobileStep === 2 ? 'flex' : 'hidden'} md:flex flex-1 overflow-y-auto pb-20 md:pb-8 p-4 md:p-8 flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
+        
+        {/* Mobile floating generate button */}
+        <div className="md:hidden w-full max-w-[794px] mb-4 sticky top-4 z-50">
+           <button 
+             onClick={() => handlePrint()}
+             disabled={isGenerating}
+             className={`w-full ${isGenerating ? 'bg-slate-500' : isSuccess ? 'bg-green-600' : 'bg-blue-600'} text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2`}
+           >
+             <Printer size={20} /> 
+             <span>{isGenerating ? 'Generating PDF...' : isSuccess ? 'Successful!' : 'Generate PDF'}</span>
+           </button>
+        </div>
         
         {/* Floating Toolbar */}
         <div className="fixed top-4 right-4 md:top-6 md:right-6 z-50 flex flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print items-center">

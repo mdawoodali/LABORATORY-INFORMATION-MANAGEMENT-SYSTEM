@@ -301,6 +301,7 @@ function InvoiceContent() {
       setIsGenerating(false);
     }
   };
+  const [mobileStep, setMobileStep] = React.useState<1 | 2>(1);
 
   if (isLoading) {
     return <div className="flex min-h-screen items-center justify-center text-gray-500">Loading invoice...</div>;
@@ -308,9 +309,24 @@ function InvoiceContent() {
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t border-gray-200 flex z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <button 
+          onClick={() => setMobileStep(1)}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 ${mobileStep === 1 ? 'text-[#2b579a]' : 'text-gray-400'}`}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider">1. Edit Data</span>
+        </button>
+        <button 
+          onClick={() => setMobileStep(2)}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 ${mobileStep === 2 ? 'text-[#2b579a]' : 'text-gray-400'}`}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider">2. Preview & Generate</span>
+        </button>
+      </div>
       
       {/* Sidebar Form */}
-      <div className="w-full md:w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full md:h-screen">
+      <div className={`${mobileStep === 1 ? 'flex' : 'hidden'} md:flex w-full md:w-[450px] bg-white border-r shadow-lg flex-col z-10 no-print h-full pb-14 md:pb-0`}>
         <div className="p-4 border-b bg-slate-900 text-white flex gap-3 shrink-0 items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => router.push('/')} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all">
@@ -438,8 +454,19 @@ function InvoiceContent() {
         </div>
 
       {/* Preview Area */}
-      <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center bg-gray-400 print:bg-white print:p-0 ${isGenerating ? 'is-generating-pdf' : ''}`}>
+      <div className={`${mobileStep === 2 ? 'flex' : 'hidden'} md:flex flex-1 overflow-y-auto pb-20 md:pb-8 p-4 md:p-8 flex-col items-center bg-gray-400 print:bg-white print:p-0 ${isGenerating ? 'is-generating-pdf' : ''}`}>
         
+        {/* Mobile floating generate button */}
+        <div className="md:hidden w-full max-w-[794px] mb-4 sticky top-4 z-50">
+           <button 
+             onClick={handlePrint}
+             disabled={isGenerating}
+             className={`w-full ${isGenerating ? 'bg-slate-500' : isSuccess ? 'bg-green-600' : 'bg-blue-600'} text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2`}
+           >
+             <Printer size={20} /> 
+             <span>{isGenerating ? 'Generating PDF...' : isSuccess ? 'Successful!' : 'Generate PDF'}</span>
+           </button>
+        </div>
         {chunks.map((chunk, pageIndex) => {
           const isLastPage = pageIndex === chunks.length - 1;
           
