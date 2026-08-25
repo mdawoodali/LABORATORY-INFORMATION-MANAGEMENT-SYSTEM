@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabase';
 import { Printer, ArrowLeft, Plus, Trash2, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
-import PASWordmark from '@/components/report/PASWordmark';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
 import DropdownInput from '@/components/form/DropdownInput';
 import PasswordLock from '@/components/form/PasswordLock';

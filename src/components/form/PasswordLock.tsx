@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Lock, Unlock, Edit2, Check } from 'lucide-react';
 import { pushGlobalSettings } from '@/lib/sync';
 import toast from 'react-hot-toast';
@@ -56,7 +56,7 @@ export default function PasswordLock({ value, onChange }: { value: string, onCha
             <div className="border border-slate-700 bg-slate-800 rounded p-2 text-sm w-full text-slate-300 flex items-center justify-between">
               <div className="flex items-center gap-2 overflow-hidden">
                 <Lock size={14} className="text-emerald-500 shrink-0" />
-                <span className="truncate">{value ? '�'.repeat(Math.max(4, value.length)) : 'No Password'}</span>
+                <span className="truncate">{value ? '•'.repeat(Math.max(4, value.length)) : 'No Password'}</span>
               </div>
             </div>
           )}
