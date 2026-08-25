@@ -121,12 +121,23 @@ export default function HomePage() {
     toast.success("Template deleted");
   };
 
-  const handleSaveTemplate = (name: string, docxBase64?: string, thumbnailBase64?: string) => {
+  const handleSaveTemplate = (name: string, docxBase64?: string, thumbnailBase64?: string, extractedFields: string[] = []) => {
     try {
+      const dynamicFields = extractedFields.map((field, index) => ({
+        id: `f_${Date.now()}_${index}`,
+        label: field,
+        value: '',
+        bold: false
+      }));
+
       const newTemplate: Template = {
         id: Date.now().toString(),
         name,
-        formData: { ...DEFAULT_FORM_DATA, reportNo: '' },
+        formData: { 
+          ...DEFAULT_FORM_DATA, 
+          reportNo: '', 
+          dynamicFields: dynamicFields.length > 0 ? dynamicFields : undefined 
+        },
         tests: [...DEFAULT_TESTS],
         createdAt: new Date().toISOString(),
         fileData: docxBase64,

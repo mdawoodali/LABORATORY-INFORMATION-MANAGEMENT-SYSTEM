@@ -4,7 +4,7 @@ import { X, Upload } from 'lucide-react';
 
 interface TemplateUploadToastProps {
   t: Toast;
-  onSave: (name: string, docxBase64?: string, thumbnailBase64?: string) => void;
+  onSave: (name: string, docxBase64?: string, thumbnailBase64?: string, extractedFields?: string[]) => void;
 }
 
 export default function TemplateUploadToast({ t, onSave }: TemplateUploadToastProps) {
@@ -13,6 +13,7 @@ export default function TemplateUploadToast({ t, onSave }: TemplateUploadToastPr
   const [thumbnailBase64, setThumbnailBase64] = useState<string>('');
   const [docxName, setDocxName] = useState('');
   const [thumbName, setThumbName] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
 
   const handleDocxUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -34,10 +35,40 @@ export default function TemplateUploadToast({ t, onSave }: TemplateUploadToastPr
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) return;
-    onSave(name, docxBase64, thumbnailBase64);
+    
+    setIsParsing(true);
+    let extractedFields: string[] = [];
+    
+    if (docxBase64) {
+      try {
+        const base64Data = docxBase64.split(',')[1];
+        const binaryString = window.atob(base64Data);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const PizZip = (await import('pizzip')).default;
+        const Docxtemplater = (await import('docxtemplater')).default;
+        const InspectModule = (await import('docxtemplater/js/inspect-module.js')).default;
+        
+        const zip = new PizZip(bytes);
+        const iModule = InspectModule();
+        const doc = new Docxtemplater(zip, { modules: [iModule] });
+        doc.render();
+        const tags = iModule.getAllTags();
+        extractedFields = Object.keys(tags);
+      } catch (err) {
+        console.error("Failed to parse docx tags:", err);
+      }
+    }
+
+    onSave(name, docxBase64, thumbnailBase64, extractedFields);
     toast.dismiss(t.id);
+    setIsParsing(false);
   };
 
   return (
@@ -103,10 +134,10 @@ export default function TemplateUploadToast({ t, onSave }: TemplateUploadToastPr
         </button>
         <button
           onClick={handleSave}
-          disabled={!name.trim()}
+          disabled={!name.trim() || isParsing}
           className="px-4 py-1.5 bg-[#2b579a] hover:bg-[#1e4178] disabled:opacity-50 text-white text-xs font-bold rounded shadow"
         >
-          Save Template
+          {isParsing ? 'Parsing Fields...' : 'Save Template'}
         </button>
       </div>
     </div>
