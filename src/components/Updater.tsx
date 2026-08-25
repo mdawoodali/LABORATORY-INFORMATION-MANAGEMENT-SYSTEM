@@ -14,6 +14,12 @@ export default function Updater() {
     if (manual) checkToast = toast.loading('Checking for updates...');
     
     try {
+      const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+      if (!isTauri) {
+        if (checkToast) toast.dismiss(checkToast);
+        return;
+      }
+
       const { check } = await import('@tauri-apps/plugin-updater');
       const update = await check();
       

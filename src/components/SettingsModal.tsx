@@ -76,46 +76,52 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
           </div>
 
           {/* Auto Backup Path */}
-          {typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window) ? (
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Auto Backup Folder (Desktop App)</label>
-              <div className="flex gap-2">
-                <input 
-                  type="text"
-                  readOnly
-                  value={localStorage.getItem('sr_backuppath') || 'Default Desktop'}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-slate-50 text-slate-500 outline-none"
-                />
-                <button 
-                  onClick={async () => {
-                    try {
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Auto Backup Folder</label>
+            <div className="flex gap-2">
+              <input 
+                type="text"
+                readOnly
+                value={localStorage.getItem('sr_backuppath') || 'Default Desktop'}
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-slate-50 text-slate-500 outline-none"
+              />
+              <button 
+                onClick={async () => {
+                  try {
+                    if (typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window)) {
                       const { open } = await import('@tauri-apps/plugin-dialog');
                       const selected = await open({ directory: true, multiple: false });
                       if (selected && typeof selected === 'string') {
                         localStorage.setItem('sr_backuppath', selected);
                         toast.success(`Backup folder set to: ${selected}`);
-                        // Force re-render of this input
                         setLocalSettings({...localSettings});
                       }
-                    } catch {
+                    } else {
+                      // Web File System Access API
+                      if ('showDirectoryPicker' in window) {
+                        const dirHandle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
+                        const { set } = await import('idb-keyval');
+                        await set('backup_dir_handle', dirHandle);
+                        localStorage.setItem('sr_backuppath', dirHandle.name);
+                        toast.success(`Backup folder set to: ${dirHandle.name}`);
+                        setLocalSettings({...localSettings});
+                      } else {
+                        toast.error("Your browser doesn't support local folder selection.");
+                      }
+                    }
+                  } catch (err: any) {
+                    if (err.name !== 'AbortError') {
                       toast.error("Failed to open folder picker.");
                     }
-                  }}
-                  className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 rounded-lg font-medium text-sm transition-colors"
-                >
-                  Change
-                </button>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-2">Reports are automatically saved to LIMS BACKUP inside this folder every 15 seconds after changes.</p>
+                  }
+                }}
+                className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 rounded-lg font-medium text-sm transition-colors shrink-0"
+              >
+                Change
+              </button>
             </div>
-          ) : (
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Auto Backup Folder (Desktop App)</label>
-              <div className="w-full border border-slate-200 rounded-lg p-2.5 text-sm bg-slate-100 text-slate-500 italic text-center">
-                Auto save is a desktop only feature, please download .exe app from <a href="https://github.com/mdawoodali/LABORATORY-INFORMATION-MANAGEMENT-SYSTEM" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">GitHub</a>.
-              </div>
-            </div>
-          )}
+            <p className="text-[11px] text-slate-500 mt-2">Reports are automatically saved to LIMS BACKUP inside this folder every 15 seconds after changes.</p>
+          </div>
         </div>
 
         <div className="p-4 border-t bg-slate-50 flex justify-end gap-3">

@@ -52,7 +52,40 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
       }
       return finalPath;
     } else {
-      // Web Fallback: Only download if it's NOT a silent auto-backup (which happens every 15s)
+      // Web Fallback: Try to use File System Access API for silent backup
+      let savedSilently = false;
+      
+      try {
+        const { get } = await import('idb-keyval');
+        const dirHandle = await get('backup_dir_handle');
+        if (dirHandle && 'getFileHandle' in dirHandle) {
+          // Check/request permission
+          const opts = { mode: 'readwrite' as const };
+          if (await dirHandle.queryPermission(opts) === 'granted' || await dirHandle.requestPermission(opts) === 'granted') {
+            
+            // Replicate structure: LIMS BACKUP / {REPORTS|INVOICES} / y / monthName / dateStr / safeReportNo
+            const safeReportNo = reportNo.replace(/[^a-zA-Z0-9-_ \.]/g, '_');
+            const folderCategory = type === 'invoice' ? 'INVOICES' : 'REPORTS';
+            
+            let currentDir = dirHandle;
+            const pathParts = ['LIMS BACKUP', folderCategory, String(y), monthName, dateStr, safeReportNo];
+            
+            for (const part of pathParts) {
+              currentDir = await currentDir.getDirectoryHandle(part, { create: true });
+            }
+            
+            const fileHandle = await currentDir.getFileHandle(`${safeReportNo}.pdf`, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(pdfBlob);
+            await writable.close();
+            savedSilently = true;
+            console.log(`Web PWA Auto-saved backup strictly to: ${safeReportNo}.pdf`);
+          }
+        }
+      } catch (err) {
+        console.warn('Web auto-backup using File System Access API failed or user denied permission:', err);
+      }
+
       if (!isSilent) {
         const url = URL.createObjectURL(pdfBlob);
         const a = document.createElement('a');
@@ -63,7 +96,7 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
-      return null;
+      return savedSilently ? "Web_Saved" : null;
     }
   } catch (error: unknown) {
     console.error('Failed to save report backup', error);

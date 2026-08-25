@@ -25,8 +25,10 @@ import FolderInit from "@/components/FolderInit";
 export const metadata: Metadata = {
   title: "Laboratory Information Management System",
   description: "LIMS Desktop & Web Application",
+  manifest: '/manifest.json',
   icons: {
     icon: '/icon.jpg?v=4',
+    apple: '/icon.jpg?v=4',
   },
 };
 
