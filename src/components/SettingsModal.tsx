@@ -32,6 +32,7 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
     setBrandSettings(updatedSettings);
     localStorage.setItem('sr_brand_settings', JSON.stringify(updatedSettings));
     localStorage.setItem('sr_settings', JSON.stringify({ autoBackup, defaultPassword }));
+    import('@/lib/sync').then(m => m.pushGlobalSettings());
     toast.success("Settings saved successfully!");
     onClose();
   };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Plus } from 'lucide-react';
+import { pushGlobalSettings } from '@/lib/sync';
 
 interface DropdownInputProps {
   value: string;
@@ -31,6 +32,18 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
     }
   }, [fieldKey]);
 
+  // Listen for sync updates
+  useEffect(() => {
+    const handleSync = () => {
+      const saved = localStorage.getItem(`sr_options_${fieldKey}`);
+      if (saved) {
+        try { setOptions(JSON.parse(saved)); } catch {}
+      }
+    };
+    window.addEventListener('local-storage-synced', handleSync);
+    return () => window.removeEventListener('local-storage-synced', handleSync);
+  }, [fieldKey]);
+
   // Click outside to close
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -51,6 +64,7 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
       newOptions = [trimmed, ...newOptions];
       setOptions(newOptions);
       localStorage.setItem(`sr_options_${fieldKey}`, JSON.stringify(newOptions));
+      pushGlobalSettings();
     }
     
     onChange(trimmed);

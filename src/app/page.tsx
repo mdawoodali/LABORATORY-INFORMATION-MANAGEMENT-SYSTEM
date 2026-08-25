@@ -11,6 +11,7 @@ import PQSWordmark from '@/components/report/PQSWordmark';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import packageJson from '../../package.json';
+import { pushGlobalSettings } from '@/lib/sync';
 
 export default function HomePage() {
   const router = useRouter();
@@ -163,10 +164,13 @@ export default function HomePage() {
         thumbnail: thumbnailBase64,
       };
       
-      const updated = [...templates, newTemplate];
-      setTemplates(updated);
-      localStorage.setItem('sr_templates', JSON.stringify(updated));
-      toast.success('Template added successfully!');
+      const updatedTemplates = [...templates];
+      updatedTemplates.unshift(newTemplate);
+      
+      setTemplates(updatedTemplates);
+      localStorage.setItem('sr_templates', JSON.stringify(updatedTemplates));
+      pushGlobalSettings();
+      toast.success('Template saved successfully!');
     } catch (error) {
       toast.error('Failed to save template. File might be too large for browser storage.');
       console.error(error);

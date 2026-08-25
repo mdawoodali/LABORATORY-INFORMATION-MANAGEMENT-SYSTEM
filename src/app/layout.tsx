@@ -33,6 +33,7 @@ export const metadata: Metadata = {
 };
 
 import Providers from "@/components/Providers";
+import GlobalSync from "@/components/GlobalSync";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col select-none">
         <Providers>
           <Updater />
+          <GlobalSync />
           <FolderInit />
           <Toaster position="bottom-right" />
           <SecurityShield />

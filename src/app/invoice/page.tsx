@@ -393,8 +393,8 @@ function InvoiceContent() {
                     <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="bg-slate-800 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow"><Trash2 size={12} /></button>
                   </div>
                     <div className="space-y-2">
-                      <DropdownInput fieldKey="inv_item_test" value={item.test} onChange={val => updateItem(item.id, 'test', val)} className="w-full border rounded p-1 text-sm font-semibold" placeholder="TEST" />
-                      <DropdownInput fieldKey="inv_item_method" value={item.method} onChange={val => updateItem(item.id, 'method', val)} className="w-full border rounded p-1 text-sm" placeholder="METHOD" />
+                      <DropdownInput fieldKey="testName" value={item.test} onChange={val => updateItem(item.id, 'test', val)} className="w-full border rounded p-1 text-sm font-semibold" placeholder="TEST" />
+                      <DropdownInput fieldKey="testMethod" value={item.method} onChange={val => updateItem(item.id, 'method', val)} className="w-full border rounded p-1 text-sm" placeholder="METHOD" />
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="text-[10px] text-slate-500">PRICE (PKR)</label>
