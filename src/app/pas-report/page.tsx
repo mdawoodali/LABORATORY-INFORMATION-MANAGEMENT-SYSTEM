@@ -138,6 +138,7 @@ function EditorContent() {
   // Zoom state
   const [zoom, setZoom] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
+  const [mobileStep, setMobileStep] = useState<1 | 2>(1);
   const [brandSettings, setBrandSettings] = useState({
     logoBase64: '',
     companyName: 'L.I.M.S'
@@ -546,7 +547,6 @@ function EditorContent() {
     return <div className="flex h-screen items-center justify-center bg-slate-200 text-gray-500">Initializing editor...</div>;
   }
 
-  const [mobileStep, setMobileStep] = React.useState<1 | 2>(1);
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
