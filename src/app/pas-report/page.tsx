@@ -15,7 +15,7 @@ import CanvaImage from '@/components/report/CanvaImage';
 import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
-import { Undo2, Redo2, ZoomIn, ZoomOut } from 'lucide-react';
+import { Undo2, Redo2, ZoomIn, ZoomOut, Printer } from 'lucide-react';
 import QRCode from 'react-qr-code';
 
 const convertDate = (d: string) => {

@@ -56,7 +56,8 @@ export default function TemplateUploadToast({ t, onSave }: TemplateUploadToastPr
         const InspectModule = (await import('docxtemplater/js/inspect-module.js')).default;
         
         const zip = new PizZip(bytes);
-        const iModule = InspectModule();
+        // @ts-ignore
+        const iModule = typeof InspectModule === 'function' ? InspectModule() : new InspectModule();
         const doc = new Docxtemplater(zip, { modules: [iModule] });
         doc.render();
         const tags = iModule.getAllTags();
