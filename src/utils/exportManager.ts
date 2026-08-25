@@ -53,10 +53,15 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
       return finalPath;
     } else {
       // Web Fallback: Only download if it's NOT a silent auto-backup (which happens every 15s)
-      // We don't want to spam the user's Downloads folder with PDFs while they are typing.
-      // If it IS a silent backup, the data is already saved to Supabase Cloud via page.tsx!
       if (!isSilent) {
-        saveAs(pdfBlob, `Report_${reportNo}.pdf`);
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = type === 'invoice' ? `Invoice_${reportNo}.pdf` : `Report_${reportNo}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       }
       return null;
     }

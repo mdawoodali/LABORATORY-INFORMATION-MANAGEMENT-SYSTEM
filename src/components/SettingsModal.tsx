@@ -112,7 +112,7 @@ export default function SettingsModal({ onClose, brandSettings, setBrandSettings
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Auto Backup Folder (Desktop App)</label>
               <div className="w-full border border-slate-200 rounded-lg p-2.5 text-sm bg-slate-100 text-slate-500 italic text-center">
-                Backup folder can be decided on .exe only
+                Auto save is a desktop only feature, please download .exe app from <a href="https://github.com/mdawoodali/LABORATORY-INFORMATION-MANAGEMENT-SYSTEM" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">GitHub</a>.
               </div>
             </div>
           )}
