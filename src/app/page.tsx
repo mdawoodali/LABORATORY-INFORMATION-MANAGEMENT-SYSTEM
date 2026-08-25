@@ -14,6 +14,25 @@ import packageJson from '../../package.json';
 
 export default function HomePage() {
   const router = useRouter();
+  const [appVersion, setAppVersion] = useState(packageJson.version);
+
+  useEffect(() => {
+    const fetchVersion = async () => {
+      try {
+        const isTauri = typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window);
+        if (!isTauri) {
+          const res = await fetch('https://api.github.com/repos/mdawoodali/LABORATORY-INFORMATION-MANAGEMENT-SYSTEM/releases/latest');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.tag_name) {
+              setAppVersion(data.tag_name.replace('v', ''));
+            }
+          }
+        }
+      } catch (e) {}
+    };
+    fetchVersion();
+  }, []);
   const { data: recentReports = [], isLoading: reportsLoading } = useQuery({
     queryKey: ['recentReports'],
     queryFn: async () => {
@@ -201,7 +220,7 @@ export default function HomePage() {
               <span className="text-2xl font-black text-gray-800">L.I.M.S</span>
               <span className="text-xs font-semibold ml-3 text-gray-500 uppercase tracking-widest hidden md:inline-block">
                 Laboratory Information Management System
-                <span className="ml-2 text-gray-400 font-mono text-[10px] bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v{packageJson.version}</span>
+                <span className="ml-2 text-gray-400 font-mono text-[10px] bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v{appVersion}</span>
               </span>
             </div>
           </div>
