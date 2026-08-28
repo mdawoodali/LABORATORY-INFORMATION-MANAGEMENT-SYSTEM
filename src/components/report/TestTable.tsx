@@ -3,11 +3,11 @@ import { TestRow, ReportFormData } from '@/types';
 
 export default function TestTable({ tests, data }: { tests: TestRow[], data: ReportFormData }) {
   return (
-    <div className="flex flex-col px-10 pt-4 font-sans" style={{ fontSize: '12px' }}>
+    <div className="flex flex-col px-10 pt-4 font-sans" style={{ fontSize: '14px' }}>
       
       {/* Test Conducted / Sample Details */}
       <div className="mb-4">
-        <div className="flex" style={{ lineHeight: '1.6' }}>
+        <div className="flex" style={{ lineHeight: '2' }}>
           <span className="font-bold underline" style={{ width: '130px' }}>Test Conducted</span>
           <span className="font-bold">:</span>
         </div>
@@ -15,7 +15,7 @@ export default function TestTable({ tests, data }: { tests: TestRow[], data: Rep
           <span className="font-bold underline">Sample  Details</span>
           <span className="font-bold ml-1">:</span>
         </div>
-        <div className="mt-0.5" style={{ lineHeight: '1.5' }}>
+        <div className="mt-0.5" style={{ lineHeight: '2' }}>
           {data.sampleDetails}
         </div>
       </div>
@@ -26,24 +26,24 @@ export default function TestTable({ tests, data }: { tests: TestRow[], data: Rep
       </div>
 
       {/* Main Table */}
-      <table className="w-full border-collapse text-center mt-2" style={{ fontSize: '14px' }}>
+      <table className="w-full border-collapse text-center mt-2" style={{ fontSize: '15px' }}>
         <thead>
           <tr>
-            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader1 || 'Test'}</th>
-            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '20%' }}>{data.tableHeader2 || 'Test Method'}</th>
-            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '15%' }}>{data.tableHeader3 || 'Value'}</th>
-            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '15%' }}>{data.tableHeader4 || 'Unit'}</th>
-            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader5 || 'Result'}</th>
+            <th className="border border-black px-2 py-6 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader1 || 'Test'}</th>
+            <th className="border border-black px-2 py-6 font-bold text-center" style={{ width: '20%' }}>{data.tableHeader2 || 'Test Method'}</th>
+            <th className="border border-black px-2 py-6 font-bold text-center" style={{ width: '15%' }}>{data.tableHeader3 || 'Value'}</th>
+            <th className="border border-black px-2 py-6 font-bold text-center" style={{ width: '15%' }}>{data.tableHeader4 || 'Unit'}</th>
+            <th className="border border-black px-2 py-6 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader5 || 'Result'}</th>
           </tr>
         </thead>
         <tbody>
           {tests.map((test, idx) => (
             <tr key={test.id || idx}>
-              <td className="border border-black px-2 py-4 text-center whitespace-pre-wrap">{test.test || '-'}</td>
-              <td className="border border-black px-2 py-4 text-center">{test.method || '-'}</td>
-              <td className="border border-black px-2 py-4 text-center">{test.value || '-'}</td>
-              <td className="border border-black px-2 py-4 text-center">{test.unit || '-'}</td>
-              <td className="border border-black px-2 py-4 text-center">{test.result || '-'}</td>
+              <td className="border border-black px-2 py-6 text-center whitespace-pre-wrap">{test.test || '-'}</td>
+              <td className="border border-black px-2 py-6 text-center">{test.method || '-'}</td>
+              <td className="border border-black px-2 py-6 text-center">{test.value || '-'}</td>
+              <td className="border border-black px-2 py-6 text-center">{test.unit || '-'}</td>
+              <td className="border border-black px-2 py-6 text-center">{test.result || '-'}</td>
             </tr>
           ))}
         </tbody>
