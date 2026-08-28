@@ -67,3 +67,25 @@
   font-weight: bold;
   font-style: normal;
 }
+ 
+ /* PDF Generation overrides */
+.is-generating-pdf [class*="react-resizable-handle"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+.is-generating-pdf .canva-wrapper > div {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+.is-generating-pdf .ring-2 {
+  box-shadow: none !important;
+}
+.is-generating-pdf .react-draggable, .is-generating-pdf .react-draggable:hover, .is-generating-pdf .group:hover {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+}
