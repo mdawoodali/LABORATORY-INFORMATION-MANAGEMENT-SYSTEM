@@ -18,7 +18,7 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
 
   // Load options from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem(`sr_options_${fieldKey}`);
+    const saved = localStorage.getItem(`sr_options_${fieldKey.trim().toLowerCase()}`);
     if (saved) {
       try {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -35,7 +35,7 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
   // Listen for sync updates
   useEffect(() => {
     const handleSync = () => {
-      const saved = localStorage.getItem(`sr_options_${fieldKey}`);
+      const saved = localStorage.getItem(`sr_options_${fieldKey.trim().toLowerCase()}`);
       if (saved) {
         try { setOptions(JSON.parse(saved)); } catch {}
       }
@@ -63,7 +63,7 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
     if (!newOptions.includes(trimmed)) {
       newOptions = [trimmed, ...newOptions];
       setOptions(newOptions);
-      localStorage.setItem(`sr_options_${fieldKey}`, JSON.stringify(newOptions));
+      localStorage.setItem(`sr_options_${fieldKey.trim().toLowerCase()}`, JSON.stringify(newOptions));
       pushGlobalSettings();
     }
     

@@ -79,7 +79,42 @@ function InvoiceContent() {
     ntn: '',
     otherInformation: '',
     discountPercent: 0,
+    fieldLabels: {
+      customerName: 'Applicant Name',
+      companyAddress: 'Company Address',
+      responsiblePerson: 'Contact Person',
+      contactDetail: 'Contact detail',
+      email: 'Email',
+      ntn: 'NTN #',
+      otherInformation: 'Other Information',
+      test: 'Test Name',
+      method: 'Test Method',
+      price: 'PRICE (PKR)',
+      samples: 'No of sample'
+    } as Record<string, string>
   });
+
+  const updateLabel = (field: string, newLabel: string) => {
+    setFormData(prev => ({
+      ...prev,
+      fieldLabels: {
+        ...(prev.fieldLabels || {
+          customerName: 'Applicant Name',
+          companyAddress: 'Company Address',
+          responsiblePerson: 'Contact Person',
+          contactDetail: 'Contact detail',
+          email: 'Email',
+          ntn: 'NTN #',
+          otherInformation: 'Other Information',
+          test: 'Test Name',
+          method: 'Test Method',
+          price: 'PRICE (PKR)',
+          samples: 'No of sample'
+        }),
+        [field]: newLabel
+      }
+    }));
+  };
 
   const [items, setItems] = useState<any[]>(/* eslint-disable-line @typescript-eslint/no-explicit-any */
 [
@@ -91,7 +126,14 @@ function InvoiceContent() {
     if (id) {
       supabase.from('receipts').select('*').eq('id', id).single().then(({ data }) => {
         if (data?.data) {
-          setFormData(data.data.formData);
+          setFormData(prev => ({ 
+              ...prev, 
+              ...data.data.formData, 
+              fieldLabels: { 
+                ...(prev.fieldLabels || {}), 
+                ...(data.data.formData.fieldLabels || {}) 
+              } 
+            }));
           setItems(data.data.items || []);
           if (data.password) setPassword(data.password);
         }
@@ -202,7 +244,7 @@ function InvoiceContent() {
     // Bulletproof Auto-Save of all Dropdown options!
     const forceSaveOption = (key: string, val: string) => {
       if (!val || !val.toString().trim()) return;
-      const storageKey = `sr_options_${key}`;
+      const storageKey = `sr_options_${key.trim().toLowerCase()}`;
       let options: string[] = [];
       try {
         const saved = localStorage.getItem(storageKey);
@@ -214,19 +256,19 @@ function InvoiceContent() {
       }
     };
 
-    forceSaveOption('inv_customerName', formData.customerName);
-    forceSaveOption('inv_companyAddress', formData.companyAddress);
-    forceSaveOption('inv_responsiblePerson', formData.responsiblePerson);
-    forceSaveOption('inv_contactDetail', formData.contactDetail);
-    forceSaveOption('inv_email', formData.email);
-    forceSaveOption('inv_ntn', formData.ntn);
-    forceSaveOption('inv_otherInformation', formData.otherInformation);
+    forceSaveOption(formData.fieldLabels?.customerName || 'Applicant Name', formData.customerName);
+    forceSaveOption(formData.fieldLabels?.companyAddress || 'Company Address', formData.companyAddress);
+    forceSaveOption(formData.fieldLabels?.responsiblePerson || 'Contact Person', formData.responsiblePerson);
+    forceSaveOption(formData.fieldLabels?.contactDetail || 'Contact detail', formData.contactDetail);
+    forceSaveOption(formData.fieldLabels?.email || 'Email', formData.email);
+    forceSaveOption(formData.fieldLabels?.ntn || 'NTN #', formData.ntn);
+    forceSaveOption(formData.fieldLabels?.otherInformation || 'Other Information', formData.otherInformation);
 
     items.forEach(item => {
-      forceSaveOption('inv_item_test', item.test);
-      forceSaveOption('inv_item_method', item.method);
-      if (item.price !== '') forceSaveOption('inv_item_price', item.price);
-      if (item.samples !== '') forceSaveOption('inv_item_samples', item.samples);
+      forceSaveOption(formData.fieldLabels?.test || 'Test Name', item.test);
+      forceSaveOption(formData.fieldLabels?.method || 'Test Method', item.method);
+      if (item.price !== '') forceSaveOption(formData.fieldLabels?.price || 'PRICE (PKR)', item.price);
+      if (item.samples !== '') forceSaveOption(formData.fieldLabels?.samples || 'No of sample', item.samples);
     });
 
     setIsGenerating(true);
@@ -356,32 +398,32 @@ function InvoiceContent() {
             <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">Client Details</h3>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-600">Company Name</label>
-                <DropdownInput value={formData.customerName} onChange={v => updateField('customerName', v)} fieldKey="inv_customerName" className="w-full border rounded p-2 text-sm" />
+                <input type="text" value={formData.fieldLabels?.customerName || "Applicant Name"} onChange={e => updateLabel("customerName", e.target.value)} className="text-[11px] font-bold text-slate-500 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                  <DropdownInput value={formData.customerName} onChange={v => updateField("customerName", v)} fieldKey={formData.fieldLabels?.customerName || "Applicant Name"} className="w-full border rounded p-2 text-sm" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">Company Address</label>
-                <DropdownInput value={formData.companyAddress} onChange={v => updateField('companyAddress', v)} fieldKey="inv_companyAddress" className="w-full border rounded p-2 text-sm" />
+                <input type="text" value={formData.fieldLabels?.companyAddress || "Company Address"} onChange={e => updateLabel("companyAddress", e.target.value)} className="text-[11px] font-bold text-slate-500 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                  <DropdownInput value={formData.companyAddress} onChange={v => updateField("companyAddress", v)} fieldKey={formData.fieldLabels?.companyAddress || "Company Address"} className="w-full border rounded p-2 text-sm" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">Contact Person</label>
-                <DropdownInput value={formData.responsiblePerson} onChange={v => updateField('responsiblePerson', v)} fieldKey="inv_responsiblePerson" className="w-full border rounded p-2 text-sm" />
+                <input type="text" value={formData.fieldLabels?.responsiblePerson || "Contact Person"} onChange={e => updateLabel("responsiblePerson", e.target.value)} className="text-[11px] font-bold text-slate-500 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                  <DropdownInput value={formData.responsiblePerson} onChange={v => updateField("responsiblePerson", v)} fieldKey={formData.fieldLabels?.responsiblePerson || "Contact Person"} className="w-full border rounded p-2 text-sm" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">Contact detail</label>
-                <DropdownInput value={formData.contactDetail} onChange={v => updateField('contactDetail', v)} fieldKey="inv_contactDetail" className="w-full border rounded p-2 text-sm" />
+                <input type="text" value={formData.fieldLabels?.contactDetail || "Contact detail"} onChange={e => updateLabel("contactDetail", e.target.value)} className="text-[11px] font-bold text-slate-500 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                  <DropdownInput value={formData.contactDetail} onChange={v => updateField("contactDetail", v)} fieldKey={formData.fieldLabels?.contactDetail || "Contact detail"} className="w-full border rounded p-2 text-sm" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">Email</label>
-                <DropdownInput value={formData.email} onChange={v => updateField('email', v)} fieldKey="inv_email" className="w-full border rounded p-2 text-sm" />
+                <input type="text" value={formData.fieldLabels?.email || "Email"} onChange={e => updateLabel("email", e.target.value)} className="text-[11px] font-bold text-slate-500 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                  <DropdownInput value={formData.email} onChange={v => updateField("email", v)} fieldKey={formData.fieldLabels?.email || "Email"} className="w-full border rounded p-2 text-sm" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">NTN #</label>
-                <DropdownInput value={formData.ntn} onChange={v => updateField('ntn', v)} fieldKey="inv_ntn" className="w-full border rounded p-2 text-sm" />
+                <input type="text" value={formData.fieldLabels?.ntn || "NTN #"} onChange={e => updateLabel("ntn", e.target.value)} className="text-[11px] font-bold text-slate-500 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                  <DropdownInput value={formData.ntn} onChange={v => updateField("ntn", v)} fieldKey={formData.fieldLabels?.ntn || "NTN #"} className="w-full border rounded p-2 text-sm" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600">Other Information</label>
-                <DropdownInput value={formData.otherInformation} onChange={v => updateField('otherInformation', v)} fieldKey="inv_otherInformation" className="w-full border rounded p-2 text-sm" />
+                <input type="text" value={formData.fieldLabels?.otherInformation || "Other Information"} onChange={e => updateLabel("otherInformation", e.target.value)} className="text-[11px] font-bold text-slate-500 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                  <DropdownInput value={formData.otherInformation} onChange={v => updateField("otherInformation", v)} fieldKey={formData.fieldLabels?.otherInformation || "Other Information"} className="w-full border rounded p-2 text-sm" />
               </div>
             </div>
           </section>
@@ -394,8 +436,14 @@ function InvoiceContent() {
                     <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="bg-slate-800 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow"><Trash2 size={12} /></button>
                   </div>
                     <div className="space-y-2">
-                      <DropdownInput fieldKey="testName" value={item.test} onChange={val => updateItem(item.id, 'test', val)} className="w-full border rounded p-1 text-sm font-semibold" placeholder="TEST" />
-                      <DropdownInput fieldKey="testMethod" value={item.method} onChange={val => updateItem(item.id, 'method', val)} className="w-full border rounded p-1 text-sm" placeholder="METHOD" />
+                      <div>
+                        <input type="text" value={formData.fieldLabels?.test || "Test Name"} onChange={e => updateLabel("test", e.target.value)} className="text-[10px] font-bold text-slate-400 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                        <DropdownInput fieldKey={formData.fieldLabels?.test || "Test Name"} value={item.test} onChange={val => updateItem(item.id, 'test', val)} className="w-full border rounded p-1 text-sm font-semibold" placeholder=" " />
+                      </div>
+                      <div>
+                        <input type="text" value={formData.fieldLabels?.method || "Test Method"} onChange={e => updateLabel("method", e.target.value)} className="text-[10px] font-bold text-slate-400 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
+                        <DropdownInput fieldKey={formData.fieldLabels?.method || "Test Method"} value={item.method} onChange={val => updateItem(item.id, 'method', val)} className="w-full border rounded p-1 text-sm" placeholder=" " />
+                      </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="text-[10px] text-slate-500">PRICE (PKR)</label>

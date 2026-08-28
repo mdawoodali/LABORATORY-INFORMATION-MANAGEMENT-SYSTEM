@@ -288,7 +288,7 @@ function EditorContent() {
       // Bulletproof Auto-Save of all Dropdown options!
       const forceSaveOption = (key: string, val: string | undefined) => {
         if (!val || !val.toString().trim()) return;
-        const storageKey = `sr_options_${key}`;
+        const storageKey = `sr_options_${key.trim().toLowerCase()}`;
         let options: string[] = [];
         try {
           const saved = localStorage.getItem(storageKey);
