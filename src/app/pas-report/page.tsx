@@ -378,51 +378,43 @@ function EditorContent() {
         });
       }
 
-      // 3. Build PDF
-      const docDefinition = {
-        pageSize: 'A4' as const,
-        pageMargins: [0, 0, 0, 0] as [number, number, number, number],
-        content: content,
-        userPassword: password,
-        ownerPassword: password,
-        permissions: { printing: 'high', modifying: false, copying: false }
-      };
+      // 3. Build PDF using jsPDF
+      const { jsPDF } = await import('jspdf');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
 
-      // @ts-expect-error pdfmake typing differences
-      const pdfMakeModule = await import('pdfmake/build/pdfmake.js');
-      // @ts-expect-error pdfmake typing differences
-      const pdfFontsModule = await import('pdfmake/build/vfs_fonts.js');
-      
-      const pdfMake = pdfMakeModule.default || pdfMakeModule;
-      const pdfFonts = pdfFontsModule.default || pdfFontsModule;
-      
-      pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts.vfs;
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      const pdfGenerator = pdfMake.createPdf(docDefinition);
+      for (let i = 0; i < content.length; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(content[i].image, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      }
 
-        // Save using Tauri natively, or fallback to browser download
-        const { saveSilentBackup } = await import('@/utils/exportManager');
-        await new Promise<void>((resolve, reject) => {
-          try {
-            pdfGenerator.getBlob(async (blob: Blob) => {
-              try {
-                await saveSilentBackup(formData.reportNo, blob, isSilent);
-                if (!isSilent) {
-                  setIsSuccess(true);
-                  setTimeout(() => setIsSuccess(false), 5000);
-                  toast.success("PDF generated and secured successfully!");
-                }
-                resolve();
-              } catch (e) {
-                reject(e);
-              } finally {
-                if (!isSilent) setIsGenerating(false);
-              }
-            });
-          } catch (e) {
-            reject(e);
-          }
+      if (password) {
+        // @ts-expect-error jsPDF encryption typings
+        pdf.setEncryption({
+          userPassword: password,
+          ownerPassword: password,
+          userPermissions: ['print']
         });
+      }
+
+      const blob = pdf.output('blob');
+
+      // Save using Tauri natively, or fallback to browser download
+      const { saveSilentBackup } = await import('@/utils/exportManager');
+      await saveSilentBackup(formData.reportNo, blob, isSilent, 'report');
+      
+      if (!isSilent) {
+        setIsSuccess(true);
+        setTimeout(() => setIsSuccess(false), 5000);
+        toast.success("PDF generated and secured successfully!");
+        setIsGenerating(false);
+      }
       } catch (err: unknown) {
         console.error(err);
         if (!isSilent) {
