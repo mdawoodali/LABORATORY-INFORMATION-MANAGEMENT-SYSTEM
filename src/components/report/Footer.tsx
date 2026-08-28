@@ -12,7 +12,7 @@ export default function Footer({ companyName }: { companyName?: string }) {
       </div>
 
       {/* Crosshair divider */}
-      <div className="border-l-[1.5px] border-black h-12 mx-2"></div>
+      <div className="border-l-[2px] border-black h-12 mx-2"></div>
 
       {/* Right Contact Info */}
       <div className="w-[50%] flex flex-col text-[10px] text-gray-800 font-bold leading-[1.3] pl-2">

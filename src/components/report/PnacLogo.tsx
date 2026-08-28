@@ -5,7 +5,7 @@ export default function PnacLogo() {
     <div className="absolute top-[-25px] left-8 bg-white border-2 border-black rounded-xl flex items-center h-16 w-64 shadow-sm">
       
       {/* Left PNAC Section */}
-      <div className="w-1/2 flex flex-col items-center justify-center h-full pt-1 px-2 border-r-[1.5px] border-black relative">
+      <div className="w-1/2 flex flex-col items-center justify-center h-full pt-1 px-2 border-r-[2px] border-black relative">
         <div className="bg-green-800 text-white font-sans font-bold italic px-4 py-0.5 rounded-full text-[14px] z-10 relative">
           PNAC
         </div>
