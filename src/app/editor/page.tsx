@@ -20,6 +20,7 @@ import Signature from '@/components/report/Signature';
 import CanvaImage from '@/components/report/CanvaImage';
 import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage } from '@/types';
 import { supabase } from '@/lib/supabase';
+import { extractAndSaveOptions } from '@/lib/sync';
 import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut } from 'lucide-react';
 
@@ -35,7 +36,7 @@ function EditorContent() {
   }));
 
   const [tests, setTests] = useState<TestRow[]>([...DEFAULT_TESTS]);
-  const [sampleImages, setSampleImages] = useState<{id: string, src: string}[]>([]);
+  const [sampleImages, setSampleImages] = useState<{id: string, src: string, name?: string}[]>([]);
   const [extraPages, setExtraPages] = useState<ExtraPage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -184,7 +185,8 @@ function EditorContent() {
       // Force auto backup to always be enabled
       const autoBackup = true;
       if (autoBackup) {
-        supabase.from('receipts').upsert({
+        extractAndSaveOptions(formData, 'report');
+          supabase.from('receipts').upsert({
             id: formData.reportNo,
             password: password || '1234',
             data: { formData, tests, sampleImages, extraPages }
@@ -358,7 +360,7 @@ function EditorContent() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSampleImages(prev => [...prev, { id: Date.now().toString() + Math.random(), src: reader.result as string }]);
+        setSampleImages(prev => [...prev, { id: Date.now().toString() + Math.random(), src: reader.result as string, name: file.name }]);
       };
       reader.readAsDataURL(file);
     }
@@ -492,7 +494,8 @@ function EditorContent() {
                         {sampleImages.map(img => (
                           <CanvaImage 
                             key={img.id}
-                            src={img.src} 
+                            src={img.src}
+                            caption={sampleImages.length > 1 ? `Product Picture #${sampleImages.indexOf(img) + 1}` : 'Product Picture'} 
                             defaultWidth={400} 
                             defaultHeight={400} 
                             className="border border-gray-200 shadow-sm bg-white p-2 absolute" 

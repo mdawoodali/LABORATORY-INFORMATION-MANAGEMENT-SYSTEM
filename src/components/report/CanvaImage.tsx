@@ -9,9 +9,10 @@ interface CanvaImageProps {
   onRemove?: () => void;
   onReplace?: (newSrc: string) => void;
   className?: string;
+  caption?: string;
 }
 
-export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90, onRemove, onReplace, className = '' }: CanvaImageProps) {
+export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90, onRemove, onReplace, className = '', caption }: CanvaImageProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [blendMode, setBlendMode] = useState<'normal' | 'multiply' | 'screen' | 'darken'>('multiply');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -64,7 +65,7 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
           left: false, right: false, top: false, topLeft: true, topRight: true
         }}
       >
-        <div className={`w-full h-full relative transition-all cursor-move ${isHovered ? 'ring-2 ring-blue-500' : ''}`}>
+        <div className={`w-full h-full relative flex flex-col transition-all cursor-move ${isHovered ? 'ring-2 ring-blue-500' : ''}`} style={{ containerType: 'inline-size' }}>
           
           {/* Floating Toolbar */}
           {isHovered && (
@@ -108,9 +109,14 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
           <img 
             src={src} 
             alt="Element" 
-            className={`w-full h-full object-contain pointer-events-none ${className}`}
+            className={`w-full flex-1 min-h-0 object-contain pointer-events-none ${className}`}
             style={{ mixBlendMode: blendMode }}
           />
+          {caption && (
+            <div className="font-bold text-center w-full pb-2 text-slate-800 tracking-wide pt-2" style={{ fontSize: '4.5cqw' }}>
+              {caption}
+            </div>
+          )}
 
           <style jsx global>{`
             .is-generating-pdf .react-draggable {

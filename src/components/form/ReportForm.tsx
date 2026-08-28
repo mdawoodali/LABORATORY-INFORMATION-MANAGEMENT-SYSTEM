@@ -11,7 +11,7 @@ interface ReportFormProps {
   addTest: () => void;
   updateTest: (id: string, field: keyof TestRow, value: string) => void;
   removeTest: (id: string) => void;
-  sampleImages: {id: string, src: string}[];
+  sampleImages: {id: string, src: string, name?: string}[];
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   removeImage: (id: string) => void;
   handlePrint: (password?: string) => void;

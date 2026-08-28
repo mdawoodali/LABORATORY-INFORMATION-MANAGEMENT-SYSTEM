@@ -16,21 +16,20 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
   const [options, setOptions] = useState<string[]>(defaultOptions || []);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load options from localStorage on mount
+  // Load options from localStorage on mount and when fieldKey changes
   useEffect(() => {
     const saved = localStorage.getItem(`sr_options_${fieldKey.trim().toLowerCase()}`);
     if (saved) {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setOptions(JSON.parse(saved));
       } catch {
         console.error("Failed to parse options for", fieldKey);
-        if (defaultOptions) setOptions(defaultOptions);
+        setOptions(defaultOptions || []);
       }
-    } else if (defaultOptions) {
-      setOptions(defaultOptions);
+    } else {
+      setOptions(defaultOptions || []);
     }
-  }, [fieldKey]);
+  }, [fieldKey, defaultOptions]);
 
   // Listen for sync updates
   useEffect(() => {
@@ -38,11 +37,13 @@ export default function DropdownInput({ value, onChange, fieldKey, className = '
       const saved = localStorage.getItem(`sr_options_${fieldKey.trim().toLowerCase()}`);
       if (saved) {
         try { setOptions(JSON.parse(saved)); } catch {}
+      } else {
+        setOptions(defaultOptions || []);
       }
     };
     window.addEventListener('local-storage-synced', handleSync);
     return () => window.removeEventListener('local-storage-synced', handleSync);
-  }, [fieldKey]);
+  }, [fieldKey, defaultOptions]);
 
   // Click outside to close
   useEffect(() => {

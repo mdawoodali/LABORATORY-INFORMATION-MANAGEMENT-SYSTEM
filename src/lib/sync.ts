@@ -1,4 +1,4 @@
-﻿import { supabase } from './supabase';
+import { supabase } from './supabase';
 
 export async function pullGlobalSettings() {
   if (typeof window === 'undefined') return;
@@ -94,5 +94,67 @@ export async function pushGlobalSettings() {
     
   } catch (err) {
     console.error("Failed to push global settings", err);
+  }
+}
+
+export function extractAndSaveOptions(formData: any, type: 'report' | 'invoice') {
+  if (typeof window === 'undefined') return;
+  
+  let changed = false;
+
+  const processField = (label?: string, value?: string) => {
+    if (!label || !value) return;
+    const l = label.trim().toLowerCase();
+    const v = value.trim();
+    if (!l || !v) return;
+
+    const key = `sr_options_${l}`;
+    let opts: string[] = [];
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) opts = JSON.parse(saved);
+    } catch {}
+
+    if (!opts.includes(v)) {
+      opts = [v, ...opts];
+      localStorage.setItem(key, JSON.stringify(opts));
+      changed = true;
+    }
+  };
+
+  if (type === 'invoice') {
+    processField(formData.fieldLabels?.customerName || 'Applicant Name', formData.customerName);
+    processField(formData.fieldLabels?.companyAddress || 'Company Address', formData.companyAddress);
+    processField(formData.fieldLabels?.responsiblePerson || 'Contact Person', formData.responsiblePerson);
+    processField(formData.fieldLabels?.contactDetail || 'Contact detail', formData.contactDetail);
+    processField(formData.fieldLabels?.email || 'Email', formData.email);
+    processField(formData.fieldLabels?.ntn || 'NTN #', formData.ntn);
+    processField(formData.fieldLabels?.otherInformation || 'Other Information', formData.otherInformation);
+    
+    // Also process invoice items
+    if (formData.items) {
+      formData.items.forEach((item: any) => {
+        processField(formData.fieldLabels?.test || 'Test Name', item.test);
+        processField(formData.fieldLabels?.method || 'Test Method', item.method);
+      });
+    }
+  } else {
+    // Process dynamic fields
+    const dynamicFields = formData.dynamicFields || [];
+    dynamicFields.forEach((f: any) => {
+      processField(f.label, f.value);
+    });
+    // Process static dropdowns
+    processField('tableHeader1', formData.tableHeader1);
+    processField('tableHeader2', formData.tableHeader2);
+    processField('tableHeader3', formData.tableHeader3);
+    processField('tableHeader4', formData.tableHeader4);
+    processField('tableHeader5', formData.tableHeader5);
+    processField('footerText', formData.footerText);
+  }
+
+  if (changed) {
+    pushGlobalSettings();
+    window.dispatchEvent(new Event('local-storage-synced'));
   }
 }

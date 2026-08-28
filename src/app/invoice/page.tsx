@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { extractAndSaveOptions } from '@/lib/sync';
 import { Printer, ArrowLeft, Plus, Trash2, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
@@ -171,6 +172,7 @@ function InvoiceContent() {
           : '1234';
           
         const { supabase } = await import('@/lib/supabase');
+        extractAndSaveOptions(formData, 'invoice');
         supabase.from('receipts').upsert({
             id: formData.invoiceNo,
             password: password || defaultPwd || '1234',
