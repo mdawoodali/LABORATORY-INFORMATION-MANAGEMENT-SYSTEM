@@ -114,11 +114,9 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
               style={{ mixBlendMode: blendMode }}
             />
             {caption && (
-              <svg viewBox="0 0 400 40" className="w-full h-auto mt-2 pointer-events-none" preserveAspectRatio="xMidYMid meet">
-                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fontWeight="bold" fill="#1e293b" fontSize="24" fontFamily="sans-serif">
-                  {caption}
-                </text>
-              </svg>
+              <div className="w-full text-center mt-2 pointer-events-none font-bold text-slate-800 text-[16px] leading-tight flex-shrink-0" style={{ fontFamily: 'sans-serif' }}>
+                {caption}
+              </div>
             )}
           </div>
 

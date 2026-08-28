@@ -9,7 +9,7 @@ export default function PnacLogo() {
         <div className="bg-green-800 text-white font-sans font-bold italic px-4 py-0.5 rounded-full text-[14px] z-10 relative">
           PNAC
         </div>
-        <svg className="absolute inset-0 w-full h-full text-green-800 opacity-20 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 w-full h-full text-green-800 opacity-20 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
            <ellipse cx="50" cy="50" rx="42" ry="24" fill="none" stroke="currentColor" strokeWidth="2" />
         </svg>
         <div className="text-[6.5px] text-center mt-0.5 text-black font-sans leading-tight">

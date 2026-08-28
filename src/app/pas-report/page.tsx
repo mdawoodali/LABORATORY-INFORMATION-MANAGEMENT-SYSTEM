@@ -2,7 +2,7 @@
 
 const EndOfReportMarker = () => (
   <div className="w-full flex items-center mt-6 px-10 mb-4">
-    <div className="flex-1 border-b-[1.5px] border-black mr-4"></div>
+    <div className="flex-1 border-b-[2px] border-black mr-4"></div>
     <div className="font-bold whitespace-nowrap text-[#002f6c]" style={{ fontSize: '14px', fontFamily: 'sans-serif' }}>End of Report</div>
   </div>
 );
@@ -358,19 +358,22 @@ function EditorContent() {
 
       for (let i = 0; i < pages.length; i++) {
         // Dynamically import html2canvas to prevent blocking initial load
-                const { toPng } = await import('html-to-image');
+        const { toPng } = await import('html-to-image');
         const pageEl = pages[i] as HTMLElement;
-        const imgData = await toPng(pageEl, {
-          cacheBust: true,
-          pixelRatio: 2,
-          backgroundColor: '#ffffff',
-          style: {
-            transform: 'none',
-            transformOrigin: 'top left',
-            margin: '0',
-            position: 'relative',
-          }
-        });
+        const imgData = await Promise.race([
+          toPng(pageEl, {
+            cacheBust: true,
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+            style: {
+              transform: 'none',
+              transformOrigin: 'top left',
+              margin: '0',
+              position: 'relative',
+            }
+          }),
+          new Promise<string>((_, reject) => setTimeout(() => reject(new Error(`PDF Generation timed out on page ${i + 1}. The page may contain an invalid image or SVG.`)), 15000))
+        ]);
         content.push({
           image: imgData,
           width: 595.28,
