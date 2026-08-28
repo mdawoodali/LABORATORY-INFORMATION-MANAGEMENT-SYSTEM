@@ -11,9 +11,9 @@ interface ReportFormProps {
   addTest: () => void;
   updateTest: (id: string, field: keyof TestRow, value: string) => void;
   removeTest: (id: string) => void;
-  sampleImage: string | null;
+  sampleImages: {id: string, src: string}[];
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  removeImage: () => void;
+  removeImage: (id: string) => void;
   handlePrint: (password?: string) => void;
   onSaveTemplate?: () => void;
   onGoHome?: () => void;
@@ -36,7 +36,7 @@ export default function ReportForm({
   addTest,
   updateTest,
   removeTest,
-  sampleImage,
+  sampleImages,
   handleImageUpload,
   removeImage,
   handlePrint,
@@ -276,12 +276,12 @@ export default function ReportForm({
               <ImageIcon size={28} className="text-slate-400 mb-3" />
               <span className="text-sm font-bold text-slate-600">Select Image Proof</span>
               <span className="text-xs text-slate-400 mt-1">PNG, JPG, JPEG</span>
-              <input type='file' className="hidden" accept="image/*" onChange={handleImageUpload} />
+              <input type='file' multiple className="hidden" accept="image/*" onChange={handleImageUpload} />
           </label>
-          {sampleImage && (
+          {sampleImages && sampleImages.length > 0 && (
             <div className="mt-4 relative group">
-              <img src={sampleImage} alt="Sample" className="w-full h-40 object-cover rounded-lg border shadow-sm" />
-              <button onClick={removeImage} className="absolute top-2 right-2 bg-slate-900 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"><X size={14}/></button>
+              <img src={sampleImages && sampleImages[0] ? sampleImages[0].src : ""} alt="Sample" className="w-full h-40 object-cover rounded-lg border shadow-sm" />
+              <button onClick={() => removeImage("legacy")} className="absolute top-2 right-2 bg-slate-900 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"><X size={14}/></button>
             </div>
           )}
             </>
@@ -290,7 +290,7 @@ export default function ReportForm({
 
         {/* Extra Pages */}
         {extraPages?.map((page, index) => {
-          const pageName = `Page ${sampleImage ? 4 + index : 3 + index} Appendix`;
+          const pageName = `Page ${(sampleImages && sampleImages.length > 0) ? 4 + index : 3 + index} Appendix`;
           return (
             <section key={page.id} className="pt-4 border-t mt-4">
               <div className="flex justify-between items-center mb-2">

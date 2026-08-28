@@ -37,7 +37,7 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
 
   return (
     <div 
-      className="relative w-full h-full flex items-center justify-center canva-wrapper"
+      className="absolute inset-0 pointer-events-none canva-wrapper"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -52,7 +52,7 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
           height: defaultHeight,
         }}
         bounds="parent"
-        className={`group ${isHovered ? 'z-50' : 'z-10'}`}
+        className={`group pointer-events-auto ${isHovered ? 'z-50' : 'z-10'}`}
         resizeHandleStyles={{
           bottomRight: { ...handleStyle, right: '-6px', bottom: '-6px' },
           bottomLeft: { ...handleStyle, left: '-6px', bottom: '-6px' },

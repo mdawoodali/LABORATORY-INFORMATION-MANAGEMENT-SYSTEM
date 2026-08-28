@@ -132,7 +132,7 @@ function EditorContent() {
   });
 
   const [tests, setTests] = useState<TestRow[]>([...DEFAULT_TESTS]);
-  const [sampleImage, setSampleImage] = useState<string | null>(null);
+  const [sampleImages, setSampleImages] = useState<{id: string, src: string}[]>([]);
   const [extraPages, setExtraPages] = useState<ExtraPage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -173,7 +173,11 @@ function EditorContent() {
         const reportData = data.data as Record<string, unknown>;
         if (reportData.formData) setFormData(reportData.formData as ReportFormData);
         if (reportData.tests) setTests(reportData.tests as TestRow[]);
-        if (reportData.sampleImage) setSampleImage(reportData.sampleImage as string);
+        if (reportData.sampleImages) {
+            setSampleImages(reportData.sampleImages as any[]);
+          } else if (reportData.sampleImage) {
+            setSampleImages([{ id: '1', src: reportData.sampleImage as string }]);
+          }
         if (reportData.extraPages) setExtraPages(reportData.extraPages as ExtraPage[]);
       }
     } catch (e) {
@@ -202,7 +206,7 @@ function EditorContent() {
     }
   }, [brandSettings.companyName]);
 
-  const totalPages = (sampleImage ? 3 : 2) + extraPages.length;
+  const totalPages = (sampleImages.length > 0 ? 3 : 2) + extraPages.length;
 
   // Load template or existing report
   useEffect(() => {
@@ -337,7 +341,7 @@ function EditorContent() {
         supabase.from('receipts').upsert({
             id: formData.reportNo,
             password: password || '1234',
-            data: { formData, tests, sampleImage, extraPages }
+            data: { formData, tests, sampleImages, extraPages }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
         
@@ -453,7 +457,7 @@ function EditorContent() {
         supabase.from('receipts').upsert({
             id: formData.reportNo,
             password: password || '1234',
-            data: { formData, tests, sampleImage, extraPages }
+            data: { formData, tests, sampleImages, extraPages }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
         lastBackedUpDataRef.current = currentData;
@@ -463,7 +467,7 @@ function EditorContent() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [isLoaded, formData, tests, extraPages, sampleImage]);
+  }, [isLoaded, formData, tests, extraPages, sampleImages]);
 
   const updateField = (field: keyof ReportFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -525,7 +529,7 @@ function EditorContent() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSampleImage(reader.result as string);
+        setSampleImages(prev => [...prev, { id: Date.now().toString() + Math.random(), src: reader.result as string }]);
       };
       reader.readAsDataURL(file);
     }
@@ -595,9 +599,9 @@ function EditorContent() {
           addTest={addTest}
           updateTest={updateTest}
           removeTest={removeTest}
-          sampleImage={sampleImage}
+          sampleImages={sampleImages}
           handleImageUpload={handleImageUpload}
-          removeImage={() => setSampleImage(null)}
+          removeImage={(id) => setSampleImages(prev => prev.filter(img => img.id !== id))}
           handlePrint={handlePrint}
           isGenerating={isGenerating}
           isSuccess={isSuccess}
@@ -662,24 +666,28 @@ function EditorContent() {
           <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
           <div className="flex-1 px-10">
             <TestTable tests={tests} data={formData} />
-              {!sampleImage && extraPages.length === 0 && <EndOfReportMarker />}
+              
             </div>
             <PASFooter pageNum={2} totalPages={totalPages} />
         </div>
 
         {/* PAGE 3 - Sample Image */}
-        {sampleImage && (
+        {sampleImages.length > 0 && (
           <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
             <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
             <div className="flex-1 flex flex-col px-10">
-                <div className="flex-1 flex justify-center items-start">
-                  <CanvaImage 
-                src={sampleImage} 
-                defaultWidth={400} 
-                defaultHeight={400} 
-                className="border border-gray-200 shadow-sm bg-white p-2" />
-                </div>
-                {extraPages.length === 0 && <EndOfReportMarker />}
+                <div className="flex-1 w-full relative">
+                        {sampleImages.map(img => (
+                          <CanvaImage 
+                            key={img.id}
+                            src={img.src} 
+                            defaultWidth={400} 
+                            defaultHeight={400} 
+                            className="border border-gray-200 shadow-sm bg-white p-2 absolute" 
+                          />
+                        ))}
+                      </div>
+                
               </div>
               <PASFooter pageNum={3} totalPages={totalPages} />
           </div>
@@ -687,7 +695,7 @@ function EditorContent() {
 
         {/* Extra Pages */}
         {extraPages.map((page, index) => {
-          const pageNum = (sampleImage ? 4 : 3) + index;
+          const pageNum = (sampleImages.length > 0 ? 4 : 3) + index;
           return (
             <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
               <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />

@@ -26,24 +26,24 @@ export default function TestTable({ tests, data }: { tests: TestRow[], data: Rep
       </div>
 
       {/* Main Table */}
-      <table className="w-full border-collapse text-center" style={{ fontSize: '12px' }}>
+      <table className="w-full border-collapse text-center mt-2" style={{ fontSize: '14px' }}>
         <thead>
           <tr>
-            <th className="border border-black px-1.5 py-1 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader1 || 'Test'}</th>
-            <th className="border border-black px-1.5 py-1 font-bold text-center" style={{ width: '20%' }}>{data.tableHeader2 || 'Test Method'}</th>
-            <th className="border border-black px-1.5 py-1 font-bold text-center" style={{ width: '15%' }}>{data.tableHeader3 || 'Value'}</th>
-            <th className="border border-black px-1.5 py-1 font-bold text-center" style={{ width: '15%' }}>{data.tableHeader4 || 'Unit'}</th>
-            <th className="border border-black px-1.5 py-1 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader5 || 'Result'}</th>
+            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader1 || 'Test'}</th>
+            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '20%' }}>{data.tableHeader2 || 'Test Method'}</th>
+            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '15%' }}>{data.tableHeader3 || 'Value'}</th>
+            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '15%' }}>{data.tableHeader4 || 'Unit'}</th>
+            <th className="border border-black px-2 py-4 font-bold text-center" style={{ width: '25%' }}>{data.tableHeader5 || 'Result'}</th>
           </tr>
         </thead>
         <tbody>
           {tests.map((test, idx) => (
             <tr key={test.id || idx}>
-              <td className="border border-black px-1.5 py-1 text-center whitespace-pre-wrap">{test.test || '-'}</td>
-              <td className="border border-black px-1.5 py-1 text-center">{test.method || '-'}</td>
-              <td className="border border-black px-1.5 py-1 text-center">{test.value || '-'}</td>
-              <td className="border border-black px-1.5 py-1 text-center">{test.unit || '-'}</td>
-              <td className="border border-black px-1.5 py-1 text-center">{test.result || '-'}</td>
+              <td className="border border-black px-2 py-4 text-center whitespace-pre-wrap">{test.test || '-'}</td>
+              <td className="border border-black px-2 py-4 text-center">{test.method || '-'}</td>
+              <td className="border border-black px-2 py-4 text-center">{test.value || '-'}</td>
+              <td className="border border-black px-2 py-4 text-center">{test.unit || '-'}</td>
+              <td className="border border-black px-2 py-4 text-center">{test.result || '-'}</td>
             </tr>
           ))}
         </tbody>
@@ -57,8 +57,13 @@ export default function TestTable({ tests, data }: { tests: TestRow[], data: Rep
         </div>
       )}
 
+      {/* End of Report Marker */}
+      <div className="w-full text-center mt-12 mb-4">
+        <div className="font-bold tracking-widest text-gray-800 whitespace-nowrap overflow-hidden text-[16px]">
+          -------------------------------------------------- END OF PAGE --------------------------------------------------
+        </div>
+      </div>
 
-      
     </div>
   );
 }
