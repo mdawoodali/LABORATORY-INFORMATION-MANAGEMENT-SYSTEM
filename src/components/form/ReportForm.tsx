@@ -193,7 +193,11 @@ export default function ReportForm({
             <div className="col-span-2">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Testing Sentence</label>
                 <textarea value={formData.sampleDetails} onChange={e => updateField('sampleDetails', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm resize-y focus:ring-2 focus:ring-blue-500 outline-none transition-all" rows={2} />
-            </div>
+              </div>
+              <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Remarks</label>
+                  <textarea value={formData.remarks || ''} onChange={e => updateField('remarks', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm resize-y focus:ring-2 focus:ring-blue-500 outline-none transition-all" rows={2} placeholder="Optional remarks to show below table" />
+              </div>
             <div className="col-span-1">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Col 1 Header</label>
               <DropdownInput fieldKey="tableHeader1" placeholder="Test" value={formData.tableHeader1} onChange={val => updateField('tableHeader1', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />

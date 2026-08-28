@@ -49,6 +49,15 @@ export default function TestTable({ tests, data }: { tests: TestRow[], data: Rep
         </tbody>
       </table>
 
+      {/* Remarks */}
+      {data.remarks && (
+        <div className="mt-4 text-[13px]">
+          <span className="font-bold mr-2">Remarks:</span>
+          <span className="font-bold underline decoration-dotted">{data.remarks}</span>
+        </div>
+      )}
+
+
       
     </div>
   );
