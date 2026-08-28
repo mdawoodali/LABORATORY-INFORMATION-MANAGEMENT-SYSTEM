@@ -293,33 +293,29 @@ function InvoiceContent() {
       const pages = document.querySelectorAll('.a4-page');
       if (pages.length === 0) throw new Error("No pages found");
 
-      const { toPng } = await import('html-to-image');
-      const { jsPDF } = await import('jspdf');
+        const html2canvasModule = await import('html2canvas-pro');
+        const html2canvas = html2canvasModule.default;
+        const { jsPDF } = await import('jspdf');
 
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-
-      for (let i = 0; i < pages.length; i++) {
-        const pageEl = pages[i] as HTMLElement;
-        const imgData = await toPng(pageEl, {
-          cacheBust: true,
-          pixelRatio: 3,
-          backgroundColor: '#ffffff',
-          width: pageEl.offsetWidth,
-          height: pageEl.offsetHeight,
-          skipFonts: true,
-          style: {
-            transform: 'none',
-            transformOrigin: 'top left',
-            margin: '0',
-            position: 'relative',
-          }
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
         });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+
+        for (let i = 0; i < pages.length; i++) {
+          const pageEl = pages[i] as HTMLElement;
+          await new Promise(r => setTimeout(r, 100));
+          const canvas = await html2canvas(pageEl, {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            width: pageEl.offsetWidth,
+            height: pageEl.offsetHeight
+          });
+          const imgData = canvas.toDataURL('image/png');
         
         if (i > 0) pdf.addPage();
         

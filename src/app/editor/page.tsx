@@ -204,22 +204,19 @@ function EditorContent() {
 
       for (let i = 0; i < pages.length; i++) {
         // Dynamically import html2canvas to prevent blocking initial load
-        const { toPng } = await import('html-to-image');
+        const html2canvasModule = await import('html2canvas-pro');
+        const html2canvas = html2canvasModule.default;
         const pageEl = pages[i] as HTMLElement;
-        const imgData = await Promise.race([
-          toPng(pageEl, {
-            cacheBust: true,
-            pixelRatio: 2,
-            backgroundColor: '#ffffff',
-            style: {
-              transform: 'none',
-              transformOrigin: 'top left',
-              margin: '0',
-              position: 'relative',
-            }
-          }),
-          new Promise<string>((_, reject) => setTimeout(() => reject(new Error(`PDF Generation timed out on page ${i + 1}. The page may contain an invalid image or SVG.`)), 15000))
-        ]);
+        
+        // Wait an extra moment to ensure fonts/images are painted
+        await new Promise(r => setTimeout(r, 100));
+        
+        const canvas = await html2canvas(pageEl, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        });
+        const imgData = canvas.toDataURL('image/png');
         content.push({
           image: imgData,
           width: 595.28,
