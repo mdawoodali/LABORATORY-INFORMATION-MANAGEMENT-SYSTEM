@@ -107,7 +107,7 @@ function EditorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const templateId = searchParams.get('template');
-  const reportId = searchParams.get('report');
+  const reportId = searchParams.get('report') || searchParams.get('id');
 
   const [formData, setFormData] = useState<ReportFormData>(() => {
     const today = new Date();
@@ -342,7 +342,7 @@ function EditorContent() {
         extractAndSaveOptions(formData, 'report');
           supabase.from('receipts').upsert({
             id: formData.reportNo,
-            password: password || '1234',
+            password: password || formData.reportNo.slice(-4) || '1234',
             data: { formData, tests, sampleImages, extraPages }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -458,7 +458,7 @@ function EditorContent() {
           
         supabase.from('receipts').upsert({
             id: formData.reportNo,
-            password: password || '1234',
+            password: password || formData.reportNo.slice(-4) || '1234',
             data: { formData, tests, sampleImages, extraPages }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           

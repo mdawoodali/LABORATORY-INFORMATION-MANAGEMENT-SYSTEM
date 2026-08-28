@@ -175,7 +175,7 @@ function InvoiceContent() {
         extractAndSaveOptions(formData, 'invoice');
         supabase.from('receipts').upsert({
             id: formData.invoiceNo,
-            password: password || defaultPwd || '1234',
+            password: password || formData.invoiceNo.slice(-4) || '1234',
             data: { formData, items, type: 'invoice' }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -282,7 +282,7 @@ function InvoiceContent() {
         const { supabase } = await import('@/lib/supabase');
         supabase.from('receipts').upsert({
             id: formData.invoiceNo,
-            password: password, // use the explicitly entered password
+            password: password || formData.invoiceNo.slice(-4) || '1234', // use the explicitly entered password
             data: { formData, items, type: 'invoice' }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
