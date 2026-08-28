@@ -35,7 +35,7 @@ const convertDate = (d: string) => {
 };
 
 const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportNo: string, reportingDate: string, onReportingDateChange?: (date: string) => void }) => {
-  const verifyUrl = `https://sr-laboratories-nine.vercel.app/verify/${reportNo}`;
+  const verifyUrl = `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}`;
 
   return (
     <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
@@ -445,13 +445,12 @@ function EditorContent() {
     // Debounce auto-save by 3 seconds of inactivity
     const timer = setTimeout(async () => {
       try {
-        const password = localStorage.getItem('sr_settings') 
-          ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword 
-          : '1234';
+        // Use per-report password: last 4 digits of report number
+        const reportPassword = formData.reportNo.slice(-4) || '1234';
           
         supabase.from('receipts').upsert({
             id: formData.reportNo,
-            password: password || formData.reportNo.slice(-4) || '1234',
+            password: reportPassword,
             data: { formData, tests, sampleImages, extraPages }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
