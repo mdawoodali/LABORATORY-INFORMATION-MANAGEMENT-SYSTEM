@@ -380,11 +380,22 @@ function EditorContent() {
 
       // 3. Build PDF using jsPDF
       const { jsPDF } = await import('jspdf');
-      const pdf = new jsPDF({
+      
+      const jsPdfOptions: any = {
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
-      });
+      };
+
+      if (password) {
+        jsPdfOptions.encryption = {
+          userPassword: password,
+          ownerPassword: password,
+          userPermissions: ['print']
+        };
+      }
+
+      const pdf = new jsPDF(jsPdfOptions);
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -392,15 +403,6 @@ function EditorContent() {
       for (let i = 0; i < content.length; i++) {
         if (i > 0) pdf.addPage();
         pdf.addImage(content[i].image, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      }
-
-      if (password) {
-        // @ts-expect-error jsPDF encryption typings
-        pdf.setEncryption({
-          userPassword: password,
-          ownerPassword: password,
-          userPermissions: ['print']
-        });
       }
 
       const blob = pdf.output('blob');
