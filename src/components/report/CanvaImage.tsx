@@ -65,7 +65,7 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
           left: false, right: false, top: false, topLeft: true, topRight: true
         }}
       >
-        <div className={`w-full h-full relative flex flex-col transition-all cursor-move ${isHovered ? 'ring-2 ring-blue-500' : ''}`} style={{ containerType: 'inline-size' }}>
+        <div className={`w-full h-full relative flex flex-col transition-all cursor-move ${isHovered ? 'ring-2 ring-blue-500' : ''}`}>
           
           {/* Floating Toolbar */}
           {isHovered && (
@@ -113,7 +113,7 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
             style={{ mixBlendMode: blendMode }}
           />
           {caption && (
-            <div className="font-bold text-center w-full pb-2 text-slate-800 tracking-wide pt-2" style={{ fontSize: '4.5cqw' }}>
+            <div className="font-bold text-center w-full pb-2 text-slate-800 tracking-wide pt-2" style={{ fontSize: '18px' }}>
               {caption}
             </div>
           )}
@@ -134,7 +134,7 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
               display: none !important;
             }
             .is-generating-pdf .canva-wrapper > div > div {
-              ring: none !important;
+              box-shadow: none !important;
               border: none !important;
             }
           `}</style>
