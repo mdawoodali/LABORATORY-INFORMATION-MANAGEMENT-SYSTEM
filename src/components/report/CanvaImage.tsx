@@ -106,17 +106,21 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
             </div>
           )}
 
-          <img 
-            src={src} 
-            alt="Element" 
-            className={`w-full flex-1 min-h-0 object-contain pointer-events-none ${className}`}
-            style={{ mixBlendMode: blendMode }}
-          />
-          {caption && (
-            <div className="font-bold text-center w-full pb-2 text-slate-800 tracking-wide pt-2" style={{ fontSize: '18px' }}>
-              {caption}
-            </div>
-          )}
+          <div className={`w-full flex-1 flex flex-col min-h-0 ${className.replace('absolute', '').trim()}`}>
+            <img 
+              src={src} 
+              alt="Element" 
+              className={`w-full flex-1 min-h-0 object-contain pointer-events-none`}
+              style={{ mixBlendMode: blendMode }}
+            />
+            {caption && (
+              <svg viewBox="0 0 400 40" className="w-full h-auto mt-2 pointer-events-none" preserveAspectRatio="xMidYMid meet">
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fontWeight="bold" fill="#1e293b" fontSize="24" fontFamily="sans-serif">
+                  {caption}
+                </text>
+              </svg>
+            )}
+          </div>
 
           <style jsx global>{`
             .is-generating-pdf .react-draggable {

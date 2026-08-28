@@ -278,12 +278,25 @@ export default function ReportForm({
               <span className="text-xs text-slate-400 mt-1">PNG, JPG, JPEG</span>
               <input type='file' multiple className="hidden" accept="image/*" onChange={handleImageUpload} />
           </label>
-          {sampleImages && sampleImages.length > 0 && (
-            <div className="mt-4 relative group">
-              <img src={sampleImages && sampleImages[0] ? sampleImages[0].src : ""} alt="Sample" className="w-full h-40 object-cover rounded-lg border shadow-sm" />
-              <button onClick={() => removeImage("legacy")} className="absolute top-2 right-2 bg-slate-900 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"><X size={14}/></button>
-            </div>
-          )}
+            {sampleImages && sampleImages.length > 0 && (
+              <div className="mt-4 flex flex-col gap-4">
+                {sampleImages.map(img => (
+                  <div key={img.id} className="relative group flex flex-col">
+                    <div className="relative rounded-lg overflow-hidden border shadow-sm">
+                      <img src={img.src} alt="Sample" className="w-full h-40 object-cover" />
+                      <button onClick={() => removeImage(img.id)} className="absolute top-2 right-2 bg-slate-900 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
+                        <X size={14}/>
+                      </button>
+                    </div>
+                    {img.name && (
+                      <div className="mt-1.5 text-xs font-medium text-slate-500 truncate px-1 text-center" title={img.name}>
+                        {img.name}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
             </>
           )}
         </section>
