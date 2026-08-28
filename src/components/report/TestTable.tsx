@@ -49,11 +49,7 @@ export default function TestTable({ tests, data }: { tests: TestRow[], data: Rep
         </tbody>
       </table>
 
-      {/* End of Report */}
-      <div className="flex items-center w-full mt-8">
-        <div className="border-b border-black flex-1"></div>
-        <div className="font-bold pl-3" style={{ fontSize: '12px' }}>End of Report</div>
-      </div>
+      
     </div>
   );
 }

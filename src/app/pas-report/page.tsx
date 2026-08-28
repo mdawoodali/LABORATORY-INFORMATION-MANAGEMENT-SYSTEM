@@ -1,5 +1,14 @@
 "use client";
 
+const EndOfReportMarker = () => (
+  <div className="w-full flex justify-center mt-8 px-10 mb-4 opacity-90">
+    <div className="text-[12px] font-bold text-center w-full overflow-hidden whitespace-nowrap tracking-widest text-slate-800">
+      --------------------------------------------------------------------------------xx End of Report xx--------------------------------------------------------------------------------
+    </div>
+  </div>
+);
+
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SettingsModal from '@/components/SettingsModal';
@@ -654,23 +663,26 @@ function EditorContent() {
           <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
           <div className="flex-1 px-10">
             <TestTable tests={tests} data={formData} />
-          </div>
-          <PASFooter pageNum={2} totalPages={totalPages} />
+              {!sampleImage && extraPages.length === 0 && <EndOfReportMarker />}
+            </div>
+            <PASFooter pageNum={2} totalPages={totalPages} />
         </div>
 
         {/* PAGE 3 - Sample Image */}
         {sampleImage && (
           <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
             <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
-            <div className="flex-1 flex justify-center items-start px-10">
-              <CanvaImage 
+            <div className="flex-1 flex flex-col px-10">
+                <div className="flex-1 flex justify-center items-start">
+                  <CanvaImage 
                 src={sampleImage} 
                 defaultWidth={400} 
                 defaultHeight={400} 
-                className="border border-gray-200 shadow-sm bg-white p-2"
-              />
-            </div>
-            <PASFooter pageNum={3} totalPages={totalPages} />
+                className="border border-gray-200 shadow-sm bg-white p-2" />
+                </div>
+                {extraPages.length === 0 && <EndOfReportMarker />}
+              </div>
+              <PASFooter pageNum={3} totalPages={totalPages} />
           </div>
         )}
 

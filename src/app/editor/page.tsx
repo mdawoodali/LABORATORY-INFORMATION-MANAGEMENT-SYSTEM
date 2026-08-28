@@ -1,5 +1,14 @@
 "use client";
 
+const EndOfReportMarker = () => (
+  <div className="w-full flex justify-center mt-8 px-10 mb-4 opacity-90">
+    <div className="text-[12px] font-bold text-center w-full overflow-hidden whitespace-nowrap tracking-widest text-slate-800">
+      --------------------------------------------------------------------------------xx End of Report xx--------------------------------------------------------------------------------
+    </div>
+  </div>
+);
+
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SettingsModal from '@/components/SettingsModal';
@@ -457,7 +466,8 @@ function EditorContent() {
             <SubHeader reportNo={formData.reportNo} pageNum={2} totalPages={totalPages} />
             <div className="pt-[175px] flex-1 flex flex-col">
               <TestTable tests={tests} data={formData} />
-              <div className="flex-1"></div>
+                {!sampleImage && extraPages.length === 0 && <EndOfReportMarker />}
+                <div className="flex-1"></div>
               <div className="pb-[55px] relative">
                 <Signature companyName={brandSettings.companyName} />
                 <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
@@ -474,15 +484,17 @@ function EditorContent() {
             <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
             <div className="relative z-10 w-full h-full flex flex-col">
             <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
-              <div className="pt-[175px] flex-1 flex justify-center items-start px-10 relative">
-                <CanvaImage 
+              <div className="pt-[175px] flex-1 flex flex-col px-10 relative">
+                  <div className="flex-1 flex justify-center items-start">
+                    <CanvaImage 
                   src={sampleImage} 
                   defaultWidth={400} 
                   defaultHeight={400} 
-                  className="border border-gray-200 shadow-sm bg-white p-2"
-                />
-              </div>
-              <div className="pb-[55px] relative">
+                  className="border border-gray-200 shadow-sm bg-white p-2" />
+                  </div>
+                  {extraPages.length === 0 && <EndOfReportMarker />}
+                </div>
+                <div className="pb-[55px] relative">
                 <Signature companyName={brandSettings.companyName} />
                 <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 font-sans tracking-wide">
                   This document was generated digitally and doesn&apos;t require a signature
