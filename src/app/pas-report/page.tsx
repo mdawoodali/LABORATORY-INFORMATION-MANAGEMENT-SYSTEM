@@ -352,6 +352,31 @@ function EditorContent() {
       // Wait a tick for isGenerating state to apply CSS class hiding handles
       await new Promise(r => setTimeout(r, 300));
 
+      // Force-hide react-rnd resize handles and ring borders before capture
+      const hiddenElements: {el: HTMLElement, prev: string}[] = [];
+      document.querySelectorAll('[class*="react-resizable-handle"], .react-draggable > div > div:first-child + div, .toolbar-hide').forEach(el => {
+        const htmlEl = el as HTMLElement;
+        hiddenElements.push({ el: htmlEl, prev: htmlEl.style.display });
+        htmlEl.style.display = 'none';
+      });
+      // Hide the blue ring-2 border on hovered canva images
+      const ringElements: {el: HTMLElement, prev: string}[] = [];
+      document.querySelectorAll('.ring-2, .ring-blue-500').forEach(el => {
+        const htmlEl = el as HTMLElement;
+        ringElements.push({ el: htmlEl, prev: htmlEl.style.boxShadow });
+        htmlEl.style.boxShadow = 'none';
+      });
+      // Hide ALL resize handle dots (they are small divs with inline width:12px, height:12px, border-radius:50%)
+      const handleDots: {el: HTMLElement, prev: string}[] = [];
+      document.querySelectorAll('.canva-wrapper div[style]').forEach(el => {
+        const htmlEl = el as HTMLElement;
+        const style = htmlEl.getAttribute('style') || '';
+        if (style.includes('border-radius') && style.includes('12px')) {
+          handleDots.push({ el: htmlEl, prev: htmlEl.style.display });
+          htmlEl.style.display = 'none';
+        }
+      });
+
       // 2. Generate Canvas screenshots
       const pages = document.querySelectorAll('.a4-page');
       const content = [];
@@ -377,6 +402,11 @@ function EditorContent() {
           margin: [0, 0, 0, 0]
         });
       }
+
+      // Restore hidden elements
+      hiddenElements.forEach(({ el, prev }) => { el.style.display = prev; });
+      ringElements.forEach(({ el, prev }) => { el.style.boxShadow = prev; });
+      handleDots.forEach(({ el, prev }) => { el.style.display = prev; });
 
       // 3. Build PDF using jsPDF
       const { jsPDF } = await import('jspdf');
