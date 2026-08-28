@@ -1,17 +1,78 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSearchParams } from 'next/navigation';
-import { ReportFormData, TestRow } from '@/types';
-import SubHeader from '@/components/report/SubHeader';
+import { ReportFormData, TestRow, ExtraPage } from '@/types';
+import PQSWordmark from '@/components/report/PQSWordmark';
+import PQSLogoImage from '@/components/report/PQSLogoImage';
 import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
-import Signature from '@/components/report/Signature';
-import PQSLogoImage from '@/components/report/PQSLogoImage';
-import PQSWordmark from '@/components/report/PQSWordmark';
-import PnacLogo from '@/components/report/PnacLogo';
-import Footer from '@/components/report/Footer';
+import QRCode from 'react-qr-code';
+
+const PASHeader = ({ reportNo, reportingDate }: { reportNo: string, reportingDate: string }) => {
+  const verifyUrl = `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}`;
+
+  return (
+    <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
+      <div className="flex items-center gap-3 shrink-0">
+        <PQSLogoImage className="w-[90px] h-[90px] object-contain" />
+        <div className="flex flex-col">
+          <PQSWordmark className="mb-2" />
+          <div className="text-xs text-gray-500 mt-1">
+            R-332/9, Dastagir, F.B Area, Karachi, 75950.
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            Contact: 03322673373
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            Email: precisionqualityserviceslabs@gmail.com
+          </div>
+        </div>
+      </div>
+      
+      <div className="text-right flex flex-col items-end">
+        <div className="flex items-start mb-4">
+          <div className="flex flex-col items-center mr-4 mt-1">
+            <QRCode 
+              value={verifyUrl} 
+              size={40}
+              level="M"
+            />
+            <span className="text-[7px] mt-0.5 text-gray-500 font-bold uppercase tracking-wider">Scan Me</span>
+          </div>
+          <div className="text-2xl font-bold tracking-wider text-gray-800 border border-gray-800 px-4 py-1">
+            REPORT
+          </div>
+        </div>
+        <div className="flex gap-2 text-sm">
+          <span className="font-bold w-20 text-right whitespace-nowrap">Report #:</span>
+          <span className="w-28 text-left border-b border-gray-400">{reportNo}</span>
+        </div>
+        <div className="flex gap-2 text-sm mt-1">
+          <span className="font-bold w-20 text-right whitespace-nowrap">Report Date:</span>
+          <span className="w-28 text-left border-b border-gray-400">{reportingDate}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PASFooter = ({ pageNum, totalPages }: { pageNum: number, totalPages: number }) => (
+  <div className="absolute bottom-10 left-0 w-full flex flex-col items-center">
+    <div className="w-[80%] flex justify-between border-t border-gray-400 pt-3 text-xs text-gray-500">
+      <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
+      <span className="font-bold text-gray-700">Page {pageNum}/{totalPages}</span>
+    </div>
+  </div>
+);
+
+const EndOfReportMarker = () => (
+  <div className="w-full flex items-center mt-6 px-10 mb-4">
+    <div className="flex-1 border-b-[2px] border-black mr-4"></div>
+    <div className="font-bold whitespace-nowrap text-[#002f6c]" style={{ fontSize: '14px', fontFamily: 'sans-serif' }}>End of Report</div>
+  </div>
+);
 
 function VerifyPage() {
   const searchParams = useSearchParams();
@@ -26,7 +87,7 @@ function VerifyPage() {
     tests: TestRow[];
     sampleImage?: string | null;
     sampleImages?: {id: string, src: string, name?: string}[];
-    extraPages?: any[];
+    extraPages?: ExtraPage[];
   } | null>(null);
 
   const handleVerify = async (e: React.FormEvent) => {
@@ -126,12 +187,10 @@ function VerifyPage() {
         : [];
     
     const hasImages = images.length > 0;
-    const hasExtraPages = extraPages && extraPages.length > 0;
-    const totalPages = 2 + (hasImages ? 1 : 0) + (hasExtraPages ? extraPages.length : 0);
-    let pageNum = 0;
+    const totalPages = 2 + (hasImages ? 1 : 0) + (extraPages?.length || 0);
     
     return (
-      <div className={`min-h-screen bg-slate-200 flex flex-col items-center gap-8 py-10 font-sans print:bg-white print:p-0 print:gap-0 ${isGeneratingPdf ? 'is-generating-pdf' : ''}`}>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center gap-8 py-10 font-sans print:bg-white print:p-0 print:gap-0">
         
         {/* Save PDF button */}
         <div className="fixed bottom-6 right-6 z-50 no-print">
@@ -160,75 +219,63 @@ function VerifyPage() {
         </div>
         
         {/* PAGE 1 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
-          <div className="relative z-10 w-full h-full flex flex-col">
-            <SubHeader reportNo={formData.reportNo} pageNum={++pageNum} totalPages={totalPages} />
-            <div className="pt-[175px]">
-              <PageOneData data={formData} />
-            </div>
-            <div className="flex-1"></div>
-            <div className="pb-[55px]">
-              <Signature />
-            </div>
+        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
+          <div className="flex-1">
+            <PageOneData data={formData} />
           </div>
+          <PASFooter pageNum={1} totalPages={totalPages} />
         </div>
 
         {/* PAGE 2 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-          <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
-          <div className="relative z-10 w-full h-full flex flex-col">
-            <SubHeader reportNo={formData.reportNo} pageNum={++pageNum} totalPages={totalPages} />
-            <div className="pt-[175px] flex-1 flex flex-col">
-              <TestTable tests={tests} data={formData} />
-              <div className="flex-1"></div>
-              <div className="pb-[55px]">
-                <Signature />
-              </div>
-            </div>
+        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
+          <div className="flex-1 px-10">
+            <TestTable tests={tests} data={formData} />
           </div>
+          <PASFooter pageNum={2} totalPages={totalPages} />
         </div>
 
         {/* PAGE 3 - Sample Images */}
         {hasImages && (
-          <div className="a4-page relative overflow-hidden flex flex-col bg-white">
-            <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
-            <div className="relative z-10 w-full h-full flex flex-col">
-              <SubHeader reportNo={formData.reportNo} pageNum={++pageNum} totalPages={totalPages} />
-              <div className="pt-[175px] flex-1 flex flex-col items-center px-10">
-                {images.map((img) => (
-                  <div key={img.id} className="flex flex-col items-center mt-4">
-                    <img src={img.src} alt={img.name || "Sample"} className="max-w-[85%] max-h-[500px] object-contain border border-gray-200 p-2" />
-                    {img.name && (
-                      <p className="text-center mt-2 font-bold text-slate-800 text-[16px]">{img.name}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="pb-[55px]">
-                <Signature />
-              </div>
+          <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
+            <div className="flex-1 flex flex-col items-center px-10 pt-4">
+              {images.map((img) => (
+                <div key={img.id} className="flex flex-col items-center mb-4">
+                  <img src={img.src} alt={img.name || "Product Picture"} className="max-w-[85%] max-h-[500px] object-contain border border-gray-200 p-2" />
+                  <p className="text-center mt-2 font-bold text-slate-800 text-[16px]" style={{ fontFamily: 'sans-serif' }}>
+                    {img.name || (images.length > 1 ? `Product Picture #${images.indexOf(img) + 1}` : 'Product Picture')}
+                  </p>
+                </div>
+              ))}
             </div>
+            <PASFooter pageNum={3} totalPages={totalPages} />
           </div>
         )}
 
-        {/* EXTRA PAGES */}
-        {hasExtraPages && extraPages!.map((page, idx) => (
-          <div key={idx} className="a4-page relative overflow-hidden flex flex-col bg-white">
-            <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" />
-            <div className="relative z-10 w-full h-full flex flex-col">
-              <SubHeader reportNo={formData.reportNo} pageNum={++pageNum} totalPages={totalPages} />
-              <div className="pt-[175px] flex-1 px-10">
-                {page.content && (
-                  <div dangerouslySetInnerHTML={{ __html: page.content }} />
+        {/* Extra Pages */}
+        {extraPages && extraPages.map((page, index) => {
+          const pageNum = (hasImages ? 4 : 3) + index;
+          return (
+            <div key={page.id || index} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
+              <div className="flex-1 flex flex-col px-10 relative">
+                {page.image && (
+                  <div className="flex-1 flex justify-center items-start mb-4">
+                    <img src={page.image} alt="Extra content" className="max-w-full max-h-[850px] object-contain" />
+                  </div>
+                )}
+                {page.text && (
+                  <div className="whitespace-pre-wrap font-sans text-sm pb-10">
+                    {page.text}
+                  </div>
                 )}
               </div>
-              <div className="pb-[55px]">
-                <Signature />
-              </div>
+              <PASFooter pageNum={pageNum} totalPages={totalPages} />
             </div>
-          </div>
-        ))}
+          );
+        })}
 
       </div>
     );
