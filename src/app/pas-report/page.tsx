@@ -495,7 +495,7 @@ function EditorContent() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [isLoaded, formData, tests, extraPages, sampleImages]);
+  }, [isLoaded, formData, tests, extraPages, sampleImages, password]);
 
   const updateField = (field: keyof ReportFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
