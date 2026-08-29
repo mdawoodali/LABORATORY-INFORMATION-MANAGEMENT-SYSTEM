@@ -10,9 +10,10 @@ interface CanvaImageProps {
   onReplace?: (newSrc: string) => void;
   className?: string;
   caption?: string;
+  isReadOnly?: boolean;
 }
 
-export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90, onRemove, onReplace, className = '', caption }: CanvaImageProps) {
+export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90, onRemove, onReplace, className = '', caption, isReadOnly = false }: CanvaImageProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [blendMode, setBlendMode] = useState<'normal' | 'multiply' | 'screen' | 'darken'>('multiply');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,7 +40,7 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
   return (
     <div 
       className="absolute inset-0 pointer-events-none canva-wrapper"
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => !isReadOnly && setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
         setIsMenuOpen(false);
@@ -53,19 +54,20 @@ export default function CanvaImage({ src, defaultWidth = 150, defaultHeight = 90
           height: defaultHeight,
         }}
         bounds="parent"
-        className={`group pointer-events-auto ${isHovered ? 'z-50' : 'z-10'}`}
+        className={`group ${isReadOnly ? 'pointer-events-none' : 'pointer-events-auto'} ${isHovered ? 'z-50' : 'z-10'}`}
+        disableDragging={isReadOnly}
         resizeHandleStyles={{
-          bottomRight: { ...handleStyle, right: '-6px', bottom: '-6px' },
-          bottomLeft: { ...handleStyle, left: '-6px', bottom: '-6px' },
-          topRight: { ...handleStyle, right: '-6px', top: '-6px' },
-          topLeft: { ...handleStyle, left: '-6px', top: '-6px' },
+          bottomRight: { ...handleStyle, right: '-6px', bottom: '-6px', display: isReadOnly ? 'none' : 'block' },
+          bottomLeft: { ...handleStyle, left: '-6px', bottom: '-6px', display: isReadOnly ? 'none' : 'block' },
+          topRight: { ...handleStyle, right: '-6px', top: '-6px', display: isReadOnly ? 'none' : 'block' },
+          topLeft: { ...handleStyle, left: '-6px', top: '-6px', display: isReadOnly ? 'none' : 'block' },
         }}
-        enableResizing={{
+        enableResizing={isReadOnly ? false : {
           bottom: false, bottomLeft: true, bottomRight: true,
           left: false, right: false, top: false, topLeft: true, topRight: true
         }}
       >
-        <div className={`w-full h-full relative flex flex-col transition-all cursor-move ${isHovered ? 'ring-2 ring-blue-500' : ''}`}>
+        <div className={`w-full h-full relative flex flex-col transition-all ${isReadOnly ? '' : 'cursor-move'} ${isHovered ? 'ring-2 ring-blue-500' : ''}`}>
           
           {/* Floating Toolbar */}
           {isHovered && (

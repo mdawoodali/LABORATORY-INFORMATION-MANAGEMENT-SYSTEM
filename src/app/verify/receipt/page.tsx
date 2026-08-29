@@ -251,6 +251,7 @@ function VerifyPage() {
                     defaultWidth={400} 
                     defaultHeight={400} 
                     className="border border-gray-200 shadow-sm bg-white p-2 absolute" 
+                    isReadOnly={true}
                   />
                 ))}
               </div>
@@ -267,8 +268,12 @@ function VerifyPage() {
               <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
               <div className="flex-1 flex flex-col px-10 relative">
                 {page.image && (
-                  <div className="flex-1 flex justify-center items-start mb-4">
-                    <img src={page.image} alt="Extra content" className="max-w-full max-h-[850px] object-contain" />
+                  <div className="flex-1 flex justify-center items-start mb-4 relative">
+                    <CanvaImage 
+                      src={page.image}
+                      className="max-w-full max-h-[850px] object-contain"
+                      isReadOnly={true}
+                    />
                   </div>
                 )}
                 {page.text && (
