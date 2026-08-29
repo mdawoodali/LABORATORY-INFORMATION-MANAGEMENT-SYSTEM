@@ -8,6 +8,7 @@ import PQSWordmark from '@/components/report/PQSWordmark';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
 import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
+import CanvaImage from '@/components/report/CanvaImage';
 import QRCode from 'react-qr-code';
 
 const PASHeader = ({ reportNo, reportingDate }: { reportNo: string, reportingDate: string }) => {
@@ -240,15 +241,19 @@ function VerifyPage() {
         {hasImages && (
           <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
             <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
-            <div className="flex-1 flex flex-col items-center px-10 pt-4">
-              {images.map((img) => (
-                <div key={img.id} className="flex flex-col items-center mb-4">
-                  <img src={img.src} alt={img.name || "Product Picture"} className="max-w-[85%] max-h-[500px] object-contain border border-gray-200 p-2" />
-                  <p className="text-center mt-2 font-bold text-slate-800 text-[16px]" style={{ fontFamily: 'sans-serif' }}>
-                    {img.name || (images.length > 1 ? `Product Picture #${images.indexOf(img) + 1}` : 'Product Picture')}
-                  </p>
-                </div>
-              ))}
+            <div className="flex-1 flex flex-col px-10">
+              <div className="flex-1 w-full relative">
+                {images.map(img => (
+                  <CanvaImage 
+                    key={img.id}
+                    src={img.src}
+                    caption={images.length > 1 ? `Product Picture #${images.indexOf(img) + 1}` : 'Product Picture'} 
+                    defaultWidth={400} 
+                    defaultHeight={400} 
+                    className="border border-gray-200 shadow-sm bg-white p-2 absolute" 
+                  />
+                ))}
+              </div>
             </div>
             <PASFooter pageNum={3} totalPages={totalPages} />
           </div>
