@@ -54,8 +54,8 @@ export default function ReportForm({
   setExtraPages,
   isGenerating,
   isSuccess,
-  password,
-  setPassword
+  password = "",
+  setPassword = () => {}
 }: ReportFormProps) {
   const [isPage1FieldsOpen, setIsPage1FieldsOpen] = React.useState(false);
   const [isPage2TestsOpen, setIsPage2TestsOpen] = React.useState(false);
