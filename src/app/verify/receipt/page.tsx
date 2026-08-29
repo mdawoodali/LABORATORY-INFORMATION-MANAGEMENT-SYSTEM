@@ -136,7 +136,7 @@ function VerifyPage() {
         const pageEl = pages[i] as HTMLElement;
         await new Promise(r => setTimeout(r, 100));
         const canvas = await html2canvas(pageEl, {
-          scale: 2,
+          scale: 3,
           useCORS: true,
           backgroundColor: '#ffffff'
         });
