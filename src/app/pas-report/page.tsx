@@ -138,6 +138,7 @@ function EditorContent() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [password, setPassword] = useState('');
   
   // Undo/Redo state
   const [history, setHistory] = useState<string[]>([]);
@@ -166,7 +167,7 @@ function EditorContent() {
     try {
       const { data } = await supabase
         .from('receipts')
-        .select('data')
+        .select('data, password')
         .eq('id', id)
         .single();
 
@@ -180,6 +181,9 @@ function EditorContent() {
             setSampleImages([{ id: '1', src: reportData.sampleImage as string }]);
           }
         if (reportData.extraPages) setExtraPages(reportData.extraPages as ExtraPage[]);
+      }
+      if (data?.password) {
+        setPassword(data.password);
       }
     } catch (e) {
       console.error('Failed to load report:', e);
@@ -475,8 +479,8 @@ function EditorContent() {
     // Debounce auto-save by 3 seconds of inactivity
     const timer = setTimeout(async () => {
       try {
-        // Use per-report password: last 4 digits of report number
-        const reportPassword = formData.reportNo.slice(-4) || '1234';
+        // Use explicitly set password, or default to last 4 digits of report number
+        const reportPassword = password || formData.reportNo.slice(-4) || '1234';
           
         supabase.from('receipts').upsert({
             id: formData.reportNo,
@@ -635,6 +639,8 @@ function EditorContent() {
           brandSettings={brandSettings}
           extraPages={extraPages}
           setExtraPages={setExtraPages}
+          password={password}
+          setPassword={setPassword}
         />
       </div>
 

@@ -27,6 +27,8 @@ interface ReportFormProps {
   setExtraPages?: (pages: ExtraPage[]) => void;
   isGenerating?: boolean;
   isSuccess?: boolean;
+  password?: string;
+  setPassword?: (val: string) => void;
 }
 
 export default function ReportForm({
@@ -51,9 +53,10 @@ export default function ReportForm({
   extraPages,
   setExtraPages,
   isGenerating,
-  isSuccess
+  isSuccess,
+  password,
+  setPassword
 }: ReportFormProps) {
-  const [password, setPassword] = React.useState('');
   const [isPage1FieldsOpen, setIsPage1FieldsOpen] = React.useState(false);
   const [isPage2TestsOpen, setIsPage2TestsOpen] = React.useState(false);
   const [isPage3AppendixOpen, setIsPage3AppendixOpen] = React.useState(false);
