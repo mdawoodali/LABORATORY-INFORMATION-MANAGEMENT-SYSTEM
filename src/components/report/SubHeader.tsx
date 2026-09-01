@@ -8,7 +8,7 @@ interface SubHeaderProps {
 }
 
 export default function SubHeader({ reportNo, pageNum, totalPages }: SubHeaderProps) {
-  const verifyUrl = `https://sr-laboratories-nine.vercel.app/verify/${reportNo}`;
+  const verifyUrl = `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}`;
 
   return (
     <div className="absolute right-6 top-[110px] flex flex-col items-end z-20">

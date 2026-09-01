@@ -79,6 +79,8 @@ function VerifyPage() {
   const searchParams = useSearchParams();
   const reportNo = searchParams.get('id') || '';
 
+  
+
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -136,11 +138,11 @@ function VerifyPage() {
         const pageEl = pages[i] as HTMLElement;
         await new Promise(r => setTimeout(r, 100));
         const canvas = await html2canvas(pageEl, {
-          scale: 3,
+          scale: 2,
           useCORS: true,
           backgroundColor: '#ffffff'
         });
-        content.push(canvas.toDataURL('image/png'));
+        content.push(canvas.toDataURL('image/jpeg', 0.90));
       }
 
       const { jsPDF } = await import('jspdf');
@@ -165,7 +167,7 @@ function VerifyPage() {
 
       for (let i = 0; i < content.length; i++) {
         if (i > 0) pdf.addPage();
-        pdf.addImage(content[i], 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(content[i], 'JPEG', 0, 0, pdfWidth, pdfHeight);
       }
 
       pdf.save(`Report_${reportNo}.pdf`);

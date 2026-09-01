@@ -216,7 +216,7 @@ function EditorContent() {
           useCORS: true,
           backgroundColor: '#ffffff'
         });
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/jpeg', 0.90);
         content.push({
           image: imgData,
           width: 595.28,
@@ -249,7 +249,7 @@ function EditorContent() {
 
       for (let i = 0; i < content.length; i++) {
         if (i > 0) pdf.addPage();
-        pdf.addImage(content[i].image, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(content[i].image, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       }
 
       const blob = pdf.output('blob');

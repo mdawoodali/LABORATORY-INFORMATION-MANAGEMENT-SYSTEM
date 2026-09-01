@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/verify/:id",
+      "destination": "https://limsreportgenerator.vercel.app/verify/receipt?id=:id",
+      "permanent": true
+    }
+  ]
+}

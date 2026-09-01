@@ -309,20 +309,20 @@ function InvoiceContent() {
           const pageEl = pages[i] as HTMLElement;
           await new Promise(r => setTimeout(r, 100));
           const canvas = await html2canvas(pageEl, {
-            scale: 3,
+            scale: 2,
             useCORS: true,
             backgroundColor: '#ffffff',
             width: pageEl.offsetWidth,
             height: pageEl.offsetHeight
           });
-          const imgData = canvas.toDataURL('image/png');
+          const imgData = canvas.toDataURL('image/jpeg', 0.90);
         
         if (i > 0) pdf.addPage();
         
         const imgProps = pdf.getImageProperties(imgData);
         const calculatedHeight = (imgProps.height * pdfWidth) / imgProps.width;
         
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, calculatedHeight);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, calculatedHeight);
       }
 
       const blob = pdf.output('blob');
