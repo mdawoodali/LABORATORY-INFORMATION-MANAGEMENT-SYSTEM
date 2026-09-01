@@ -2,11 +2,23 @@
   "redirects": [
     {
       "source": "/verify/receipt",
+      "has": [
+        {
+          "type": "host",
+          "value": "sr-laboratories-nine.vercel.app"
+        }
+      ],
       "destination": "https://limsreportgenerator.vercel.app/verify/receipt",
       "permanent": true
     },
     {
       "source": "/verify/:id",
+      "has": [
+        {
+          "type": "host",
+          "value": "sr-laboratories-nine.vercel.app"
+        }
+      ],
       "destination": "https://limsreportgenerator.vercel.app/verify/receipt?id=:id",
       "permanent": true
     }
