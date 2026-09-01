@@ -2,14 +2,7 @@
   "redirects": [
     {
       "source": "/verify/receipt",
-      "has": [
-        {
-          "type": "query",
-          "key": "id",
-          "value": "(?<id>.*)"
-        }
-      ],
-      "destination": "https://limsreportgenerator.vercel.app/verify/receipt?id=(?<id>)",
+      "destination": "https://limsreportgenerator.vercel.app/verify/receipt",
       "permanent": true
     },
     {
