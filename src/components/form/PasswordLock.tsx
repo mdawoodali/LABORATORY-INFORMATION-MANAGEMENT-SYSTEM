@@ -1,54 +1,39 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Lock, Unlock, Edit2, Check } from 'lucide-react';
-import { pushGlobalSettings } from '@/lib/sync';
 import toast from 'react-hot-toast';
 
-export default function PasswordLock({ value, onChange }: { value: string, onChange: (val: string) => void }) {
+export default function PasswordLock({ value, onChange, placeholderFallback = '' }: { value: string, onChange: (val: string) => void, placeholderFallback?: string }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
 
-  useEffect(() => {
-    const handleSync = () => {
-      const saved = localStorage.getItem('sr_settings');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed.defaultPassword !== undefined) {
-            onChange(parsed.defaultPassword);
-          }
-        } catch {}
-      }
-    };
-    handleSync();
-    window.addEventListener('local-storage-synced', handleSync);
-    return () => window.removeEventListener('local-storage-synced', handleSync);
-  }, [onChange]);
+  // Sync localValue with prop value when not editing
+  React.useEffect(() => {
+    if (!isEditing) {
+      setLocalValue(value);
+    }
+  }, [value, isEditing]);
 
   const handleSave = () => {
     setIsEditing(false);
-    const saved = localStorage.getItem('sr_settings');
-    let settings: any = {};
-    if (saved) {
-      try { settings = JSON.parse(saved); } catch {}
-    }
-    const newSettings = { ...settings, defaultPassword: value };
-    localStorage.setItem('sr_settings', JSON.stringify(newSettings));
-    pushGlobalSettings();
-    toast.success("Global password locked and synced!");
+    onChange(localValue);
+    toast.success("Password locked for this document!");
   };
+
+  const displayValue = localValue || placeholderFallback;
 
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-[10px] uppercase font-bold text-slate-400">Global PDF Password Lock</label>
+      <label className="text-[10px] uppercase font-bold text-slate-400">PDF Password Lock</label>
       <div className="flex gap-2">
         <div className="relative flex-1">
           {isEditing ? (
             <input
               type="text"
               className="border border-blue-500 bg-slate-800 rounded p-2 text-sm w-full text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
+              value={localValue}
+              onChange={(e) => setLocalValue(e.target.value)}
               onPaste={(e) => { e.preventDefault(); toast.error("Pasting disabled for security reasons."); }}
-              placeholder="Enter password"
+              placeholder={placeholderFallback ? `Default: ${placeholderFallback}` : "Enter password"}
               autoFocus
               onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); }}
             />
@@ -56,7 +41,7 @@ export default function PasswordLock({ value, onChange }: { value: string, onCha
             <div className="border border-slate-700 bg-slate-800 rounded p-2 text-sm w-full text-slate-300 flex items-center justify-between">
               <div className="flex items-center gap-2 overflow-hidden">
                 <Lock size={14} className="text-emerald-500 shrink-0" />
-                <span className="truncate">{value ? '•'.repeat(Math.max(4, value.length)) : 'No Password'}</span>
+                <span className="truncate">{displayValue ? '•'.repeat(Math.max(4, displayValue.length)) : 'No Password'}</span>
               </div>
             </div>
           )}

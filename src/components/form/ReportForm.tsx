@@ -77,7 +77,7 @@ export default function ReportForm({
           <h2 className="font-bold text-lg tracking-wider flex-1 truncate">L.I.M.S</h2>
         </div>
         
-        <PasswordLock value={password} onChange={setPassword} />
+        <PasswordLock value={password} onChange={setPassword} placeholderFallback={formData.reportNo?.slice(-4) || '1234'} />
 
         <div className="flex gap-2">
           <button 

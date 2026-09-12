@@ -167,15 +167,13 @@ function InvoiceContent() {
 
     const timer = setTimeout(async () => {
       try {
-        const defaultPwd = localStorage.getItem('sr_settings') 
-          ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword 
-          : '1234';
+        const reportPassword = password || formData.invoiceNo?.slice(-4) || '1234';
           
         const { supabase } = await import('@/lib/supabase');
         extractAndSaveOptions(formData, 'invoice');
         supabase.from('receipts').upsert({
             id: formData.invoiceNo,
-            password: password || formData.invoiceNo.slice(-4) || '1234',
+            password: reportPassword,
             data: { formData, items, type: 'invoice' }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -471,9 +469,9 @@ function InvoiceContent() {
           </div>
 
           <div className="p-4 border-t bg-slate-900 flex flex-col gap-3 mt-auto shrink-0 z-10">
-            <PasswordLock value={password} onChange={setPassword} />
+            <PasswordLock value={password} onChange={setPassword} placeholderFallback={formData.invoiceNo?.slice(-4) || '1234'} />
 
-              <div className="flex gap-2">
+            <div className="flex gap-2">
                 <button 
                   onClick={handlePrint}
                   disabled={isGenerating}

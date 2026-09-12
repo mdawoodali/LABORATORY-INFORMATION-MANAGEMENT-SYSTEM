@@ -40,6 +40,7 @@ function EditorContent() {
   const [extraPages, setExtraPages] = useState<ExtraPage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [password, setPassword] = useState('');
   
   // Undo/Redo state
   const [history, setHistory] = useState<string[]>([]);
@@ -288,13 +289,11 @@ function EditorContent() {
     // Debounce auto-save by 3 seconds of inactivity
     const timer = setTimeout(async () => {
       try {
-        const password = localStorage.getItem('sr_settings') 
-          ? JSON.parse(localStorage.getItem('sr_settings')!).defaultPassword 
-          : '1234';
+        const reportPassword = password || formData.reportNo?.slice(-4) || '1234';
           
         supabase.from('receipts').upsert({
             id: formData.reportNo,
-            password: password || formData.reportNo.slice(-4) || '1234',
+            password: reportPassword,
             data: { formData, tests, sampleImages, extraPages }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -426,6 +425,8 @@ function EditorContent() {
         brandSettings={brandSettings}
         extraPages={extraPages}
         setExtraPages={setExtraPages}
+        password={password}
+        setPassword={setPassword}
       />
 
       <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
