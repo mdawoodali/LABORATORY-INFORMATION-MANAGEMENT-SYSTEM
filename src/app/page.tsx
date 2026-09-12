@@ -87,10 +87,21 @@ export default function HomePage() {
 
     const hasPqsReport = loadedTemplates.some((t: Template) => t.id === 'pqs-report');
     const hasPqsInvoice = loadedTemplates.some((t: Template) => t.id === 'pqs-invoice');
+    const hasPqsLetterhead = loadedTemplates.some((t: Template) => t.id === 'pqs-letterhead');
     
     const updatedTemplates = [...loadedTemplates];
     
     // Add PQS templates to the very beginning if they don't exist
+    if (!hasPqsLetterhead) {
+      updatedTemplates.unshift({
+        id: 'pqs-letterhead',
+        name: 'PQS LETTERHEAD',
+        formData: DEFAULT_FORM_DATA,
+        tests: [],
+        createdAt: new Date().toISOString(),
+        thumbnail: 'pqs-letterhead'
+      });
+    }
     if (!hasPqsInvoice) {
       updatedTemplates.unshift({
         id: 'pqs-invoice',
@@ -112,7 +123,7 @@ export default function HomePage() {
       });
     }
     
-    if (!hasPqsReport || !hasPqsInvoice) {
+    if (!hasPqsReport || !hasPqsInvoice || !hasPqsLetterhead) {
       localStorage.setItem('sr_templates', JSON.stringify(updatedTemplates));
     }
 
@@ -214,6 +225,10 @@ export default function HomePage() {
   };
 
   const handleOpenTemplate = (template: Template) => {
+    if (template.id === 'pqs-letterhead') {
+      router.push('/pqs-letterhead');
+      return;
+    }
     if (template.id === 'pqs-report') {
       router.push('/pas-report');
       return;
@@ -327,6 +342,15 @@ export default function HomePage() {
                         <div className="w-full h-2 bg-orange-300 rounded mb-2"></div>
                         <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
                         <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                        <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
+                      </div>
+                    ) : template.thumbnail === 'pqs-letterhead' ? (
+                      <div className="absolute inset-0 bg-white opacity-80 group-hover:opacity-100 transition-opacity flex flex-col items-start justify-start border border-gray-200 rounded p-4 pt-6">
+                        <PQSWordmark style={{ height: '12px', width: 'auto' }} className="mb-2 opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-full h-0.5 bg-[#071b3d] rounded mb-2"></div>
+                        <div className="w-full h-[1px] bg-gray-200 mb-1 mt-4"></div>
+                        <div className="w-3/4 h-[1px] bg-gray-200 mb-1"></div>
+                        <div className="w-5/6 h-[1px] bg-gray-200 mb-1"></div>
                         <div className="w-full h-[1px] bg-gray-200 mb-1"></div>
                       </div>
                     ) : template.thumbnail ? (
