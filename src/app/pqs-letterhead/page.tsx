@@ -53,36 +53,51 @@ export default function PQSLetterheadPage() {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col h-full">
+          
           {/* Header */}
-          <div className="flex justify-between items-start px-12 pt-12 pb-4">
-            <PQSWordmark style={{ height: '65px', width: 'auto' }} />
-            <div className="flex flex-col gap-4 mt-3 text-sm font-bold text-gray-900">
-              <div className="flex items-center gap-2">
-                <span className="w-12 text-right">Ref #:</span>
+          <div className="flex justify-between items-start px-10 pt-10 pb-4">
+            <div className="flex gap-4 items-center">
+              {/* Blue Logo Box */}
+              <div className="w-[105px] h-[105px] bg-[#0d1c33] rounded-[20px] flex items-center justify-center shrink-0">
+                <PQSLogoImage className="w-[80px] h-[80px] object-contain invert brightness-0" />
+              </div>
+              {/* Wordmark and Tagline */}
+              <div className="flex flex-col justify-center">
+                <PQSWordmark className="mb-1" style={{ height: '32px', width: 'auto' }} />
+                <span className="text-[#555] text-[13.5px] font-medium tracking-wide">
+                  Providing Consultancy Services to Textile Industries
+                </span>
+              </div>
+            </div>
+
+            {/* Ref and Date */}
+            <div className="flex flex-col gap-4 mt-4 text-[14px] font-bold text-gray-900">
+              <div className="flex items-end gap-2">
+                <span className="w-12 text-right pb-[2px]">Ref #:</span>
                 <input 
                   type="text" 
                   value={refNo}
                   onChange={(e) => setRefNo(e.target.value)}
-                  className="border-b border-gray-400 bg-transparent outline-none w-56 px-1 font-normal"
+                  className="border-b border-gray-400 bg-transparent outline-none w-56 px-1 font-normal pb-[2px]"
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-12 text-right">Date:</span>
+              <div className="flex items-end gap-2">
+                <span className="w-12 text-right pb-[2px]">Date:</span>
                 <input 
                   type="text" 
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="border-b border-gray-400 bg-transparent outline-none w-56 px-1 font-normal"
+                  className="border-b border-gray-400 bg-transparent outline-none w-56 px-1 font-normal pb-[2px]"
                 />
               </div>
             </div>
           </div>
 
-          <div className="w-full h-1 bg-[#071b3d] mb-12"></div>
+          <div className="w-full h-[2px] bg-[#1a202c] mb-12"></div>
 
           {/* Body */}
           <div 
-            className="flex-1 px-12 outline-none whitespace-pre-wrap font-sans text-gray-800"
+            className="flex-1 px-12 outline-none whitespace-pre-wrap font-sans text-gray-800 text-[15px] leading-relaxed"
             contentEditable
             suppressContentEditableWarning
           >
@@ -91,7 +106,7 @@ export default function PQSLetterheadPage() {
 
           {/* Footer */}
           <div className="px-12 pb-8 mt-auto">
-            <div className="w-full h-[1px] bg-gray-300 mb-3"></div>
+            <div className="w-full h-[1px] bg-gray-400 mb-3"></div>
             <div className="flex justify-between items-center text-[12px] text-gray-600 font-medium tracking-wide">
               <div>R-332/9, Dastagir, F.B Area, Karachi, 75950.</div>
               <div>03322673373 | 03333769174</div>
