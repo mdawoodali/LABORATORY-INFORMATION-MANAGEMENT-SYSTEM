@@ -2,7 +2,7 @@ import { saveAs } from 'file-saver';
 import toast from 'react-hot-toast';
 import { ensureBackupFolder } from './backupValidator';
 
-export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent: boolean = true, type: 'report' | 'invoice' = 'report') => {
+export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent: boolean = true, type: 'report' | 'invoice' | 'letterhead' = 'report') => {
   const isTauri = '__TAURI_INTERNALS__' in window || '__TAURI__' in window;
 
   try {
@@ -32,7 +32,7 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
       
       const safeReportNo = reportNo.replace(/[^a-zA-Z0-9-_ \.]/g, '_');
       
-      const folderCategory = type === 'invoice' ? 'INVOICES' : 'REPORTS';
+      const folderCategory = type === 'invoice' ? 'INVOICES' : type === 'letterhead' ? 'LETTERHEAD' : 'REPORTS';
       const reportFolderPath = `${baseValidPath}\\${folderCategory}\\${y}\\${monthName}\\${dateStr}\\${safeReportNo}`;
       await mkdir(reportFolderPath, { recursive: true });
 
@@ -63,9 +63,9 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
           const opts = { mode: 'readwrite' as const };
           if (await dirHandle.queryPermission(opts) === 'granted' || await dirHandle.requestPermission(opts) === 'granted') {
             
-            // Replicate structure: LIMS BACKUP / {REPORTS|INVOICES} / y / monthName / dateStr / safeReportNo
+            // Replicate structure: LIMS BACKUP / {REPORTS|INVOICES|LETTERHEAD} / y / monthName / dateStr / safeReportNo
             const safeReportNo = reportNo.replace(/[^a-zA-Z0-9-_ \.]/g, '_');
-            const folderCategory = type === 'invoice' ? 'INVOICES' : 'REPORTS';
+            const folderCategory = type === 'invoice' ? 'INVOICES' : type === 'letterhead' ? 'LETTERHEAD' : 'REPORTS';
             
             let currentDir = dirHandle;
             const pathParts = ['LIMS BACKUP', folderCategory, String(y), monthName, dateStr, safeReportNo];
@@ -90,7 +90,7 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
         const url = URL.createObjectURL(pdfBlob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = type === 'invoice' ? `Invoice_${reportNo}.pdf` : `Report_${reportNo}.pdf`;
+        a.download = type === 'invoice' ? `Invoice_${reportNo}.pdf` : type === 'letterhead' ? `Letterhead_${reportNo}.pdf` : `Report_${reportNo}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

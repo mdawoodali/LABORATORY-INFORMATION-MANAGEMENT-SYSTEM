@@ -38,6 +38,10 @@ export default function PQSLetterheadPage() {
           margin: 0;
         }
         @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           body, html {
             margin: 0 !important;
             padding: 0 !important;
@@ -138,23 +142,28 @@ export default function PQSLetterheadPage() {
             <div className="relative z-10 flex flex-col h-full">
               
               {/* Header */}
-              <div className="relative flex justify-center items-start mb-2 border-b-2 border-gray-800 pb-2 px-10 pt-2 z-10">
+              <div 
+                className="relative grid items-end mb-2 border-b-2 border-gray-800 pb-2 px-10 pt-0 z-10" 
+                style={{ gridTemplateColumns: '1fr auto 1fr' }}
+              >
+                {/* Left empty for centering balance */}
+                <div></div>
 
                 {/* Centered Logo Stack */}
-                <div className="flex flex-col items-center gap-1 mx-auto">
+                <div className="flex flex-col items-center gap-1 mx-auto w-full">
                   <PQSLogoImage style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                   <PQSWordmark style={{ height: '26px', width: '252px', objectFit: 'contain' }} />
-                  <div className="text-xs text-gray-500 leading-tight" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
+                  <div className="text-xs text-gray-500 leading-tight whitespace-nowrap" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
                 </div>
 
-                {/* Date field, right above the line */}
-                <div className="absolute bottom-2 right-10 flex gap-2 text-sm items-end">
-                  <span className="font-bold whitespace-nowrap pb-1">Date:</span>
+                {/* Date field, right aligned */}
+                <div className="flex gap-2 text-sm justify-end items-end pb-1 w-full">
+                  <span className="font-bold whitespace-nowrap">Date:</span>
                   <input 
                     type="text" 
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-36 text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
+                    className="w-32 text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
                   />
                 </div>
               </div>
@@ -168,7 +177,7 @@ export default function PQSLetterheadPage() {
               ></div>
 
               {/* Footer */}
-              <div className="absolute bottom-2 left-0 w-full flex flex-col items-center z-10 bg-white">
+              <div className="absolute bottom-1 left-0 w-full flex flex-col items-center z-10 bg-white">
                 <div className="w-[90%] flex justify-between border-t border-gray-400 pt-1 text-[11px] text-gray-500">
                   <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
                   <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
