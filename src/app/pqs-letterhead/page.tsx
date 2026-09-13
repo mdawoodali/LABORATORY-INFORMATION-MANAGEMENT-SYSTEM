@@ -63,6 +63,14 @@ export default function PQSLetterheadPage() {
             height: auto !important;
             min-height: 297mm !important;
           }
+          .print-tfoot {
+            display: table-footer-group !important;
+          }
+          .placeholder-empty:empty:before,
+          .placeholder-empty:has(> br:only-child):before {
+            content: none !important;
+            display: none !important;
+          }
         }
         .placeholder-empty:empty:before,
         .placeholder-empty:has(> br:only-child):before {
@@ -168,7 +176,7 @@ export default function PQSLetterheadPage() {
           style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}
         >
           <div 
-            className="a4-page relative flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto" 
+            className="a4-page relative flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto pb-20" 
             style={{ width: '210mm', minHeight: '297mm' }}
           >
             {/* Watermark */}
@@ -245,21 +253,21 @@ export default function PQSLetterheadPage() {
                 </tr>
               </tbody>
 
-              <tfoot className="w-full">
+              <tfoot className="w-full hidden print-tfoot">
                 <tr>
-                  <td className="align-bottom">
-                    {/* Footer */}
-                    <div className="w-full flex flex-col items-center z-10 bg-white pb-6 pt-4">
-                      <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
-                        <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
-                        <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
-                        <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
-                      </div>
-                    </div>
-                  </td>
+                  <td className="h-[80px]"></td>
                 </tr>
               </tfoot>
             </table>
+
+            {/* Real Footer */}
+            <div className="absolute bottom-0 left-0 w-full flex flex-col items-center z-10 bg-white pb-6 pt-4 print:fixed print:bottom-0">
+              <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
+                <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
+                <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
+                <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
