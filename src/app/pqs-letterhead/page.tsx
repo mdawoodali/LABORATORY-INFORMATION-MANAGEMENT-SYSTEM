@@ -217,13 +217,13 @@ export default function PQSLetterheadPage() {
                       </div>
 
                       {/* Date field, absolute right aligned */}
-                      <div className="absolute right-10 bottom-2 flex gap-2 text-sm justify-end items-end w-32 bg-white/80">
-                        <span className="font-bold whitespace-nowrap text-xs">Date:</span>
+                      <div className="absolute right-10 top-4 flex gap-2 text-sm justify-end items-end w-48 bg-white/80">
+                        <span className="font-bold whitespace-nowrap">Date:</span>
                         <input 
                           type="text" 
                           value={date}
                           onChange={(e) => setDate(e.target.value)}
-                          className="w-full text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5 text-xs"
+                          className="w-full text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
                         />
                       </div>
                     </div>
