@@ -53,6 +53,13 @@ export default function PQSLetterheadPage() {
             min-height: 297mm !important;
           }
         }
+        .placeholder-empty:empty:before,
+        .placeholder-empty:has(> br:only-child):before {
+          content: attr(data-placeholder);
+          color: #9ca3af;
+          pointer-events: none;
+          display: block;
+        }
       `}} />
 
       {/* Sidebar */}
@@ -135,14 +142,14 @@ export default function PQSLetterheadPage() {
 
                 {/* Centered Logo Stack */}
                 <div className="flex flex-col items-center gap-2 mx-auto">
-                  <PQSLogoImage style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                  <PQSLogoImage style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                   <PQSWordmark style={{ height: '26px', width: '252px', objectFit: 'contain' }} />
                   <div className="text-xs text-gray-500" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
                 </div>
 
-                {/* Date field, top right, in place of the old Ref # field */}
-                <div className="absolute top-6 right-10 flex gap-2 text-sm">
-                  <span className="font-bold whitespace-nowrap">Date:</span>
+                {/* Date field, right above the line */}
+                <div className="absolute bottom-4 right-10 flex gap-2 text-sm items-end">
+                  <span className="font-bold whitespace-nowrap pb-1">Date:</span>
                   <input 
                     type="text" 
                     value={date}
@@ -154,16 +161,15 @@ export default function PQSLetterheadPage() {
 
               {/* Body */}
               <div 
-                className="flex-1 px-10 outline-none relative z-10 mt-4 text-sm text-gray-800 whitespace-pre-wrap"
+                className="flex-1 px-10 outline-none relative z-10 mt-4 pb-16 text-sm text-gray-800 whitespace-pre-wrap placeholder-empty"
                 contentEditable
                 suppressContentEditableWarning
-              >
-                Type your letter or report content here...
-              </div>
+                data-placeholder="Type your letter or report content here..."
+              ></div>
 
               {/* Footer */}
-              <div className="w-full flex flex-col items-center mt-auto pb-8 relative z-10">
-                <div className="w-[90%] flex justify-between border-t border-gray-400 pt-3 text-xs text-gray-500">
+              <div className="absolute bottom-6 left-0 w-full flex flex-col items-center z-10 bg-white">
+                <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
                   <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
                   <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
                   <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
@@ -175,4 +181,5 @@ export default function PQSLetterheadPage() {
       </div>
     </div>
   );
+
 }
