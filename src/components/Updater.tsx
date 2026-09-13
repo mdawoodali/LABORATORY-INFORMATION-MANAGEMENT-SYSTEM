@@ -82,7 +82,11 @@ export default function Updater() {
       console.error('Failed to check for updates:', e);
       if (checkToast) {
         const msg = e instanceof Error ? e.message : String(e);
-        toast.error(`Update check failed: ${msg}`, { id: checkToast });
+        if (msg.includes('Could not fetch a valid release JSON') || msg.includes('404')) {
+          toast.success('You are on the latest version!', { id: checkToast });
+        } else {
+          toast.error(`Update check failed: ${msg}`, { id: checkToast });
+        }
       }
     } finally {
       setIsChecking(false);
