@@ -231,7 +231,7 @@ export default function PQSLetterheadPage() {
                 </tr>
               </thead>
               
-              <tbody className="w-full">
+              <tbody className="w-full h-full">
                 <tr>
                   <td className="align-top h-full w-full">
                     {/* Body */}
@@ -247,7 +247,7 @@ export default function PQSLetterheadPage() {
 
               <tfoot className="w-full">
                 <tr>
-                  <td>
+                  <td className="align-bottom">
                     {/* Footer */}
                     <div className="w-full flex flex-col items-center z-10 bg-white pb-6 pt-4">
                       <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
