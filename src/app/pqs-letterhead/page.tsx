@@ -201,7 +201,7 @@ export default function PQSLetterheadPage() {
             )}
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col h-full">
+            <div className="relative z-10 flex flex-col flex-1 w-full h-full">
               
               {/* Header */}
               <div 
@@ -233,14 +233,14 @@ export default function PQSLetterheadPage() {
                 suppressContentEditableWarning
                 data-placeholder="Type your letter or report content here..."
               ></div>
+            </div>
 
-              {/* Footer */}
-              <div className="absolute bottom-0 left-0 w-full flex flex-col items-center z-10 bg-white pb-2">
-                <div className="w-[90%] flex justify-between border-t border-gray-400 pt-1 text-[11px] text-gray-500">
-                  <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
-                  <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
-                  <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
-                </div>
+            {/* Footer */}
+            <div className="absolute bottom-0 left-0 w-full flex flex-col items-center z-10 bg-white pb-2">
+              <div className="w-[90%] flex justify-between border-t border-gray-400 pt-1 text-[11px] text-gray-500">
+                <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
+                <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
+                <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
               </div>
             </div>
           </div>
