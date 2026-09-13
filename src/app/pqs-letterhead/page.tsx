@@ -200,49 +200,66 @@ export default function PQSLetterheadPage() {
               </Rnd>
             )}
 
-            {/* Content */}
-            <div className="relative z-10 flex flex-col flex-1 w-full h-full">
+            {/* Content Table for native print pagination */}
+            <table className="w-full h-full relative z-10">
+              <thead className="w-full">
+                <tr>
+                  <td>
+                    {/* Header */}
+                    <div 
+                      className="relative border-b-2 border-gray-800 pb-2 px-10 z-10 flex flex-col items-center bg-white" 
+                    >
+                      {/* Centered Logo Stack */}
+                      <div className="flex flex-col items-center mx-auto w-full -mt-6">
+                        <PQSLogoImage style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
+                        <PQSWordmark style={{ height: '26px', width: '252px', objectFit: 'contain', marginTop: '-8px' }} />
+                        <div className="text-xs text-gray-500 leading-tight whitespace-nowrap mt-1" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
+                      </div>
+
+                      {/* Date field, absolute right aligned */}
+                      <div className="absolute right-10 top-4 flex gap-2 text-sm justify-end items-end w-48 bg-white/80">
+                        <span className="font-bold whitespace-nowrap">Date:</span>
+                        <input 
+                          type="text" 
+                          value={date}
+                          onChange={(e) => setDate(e.target.value)}
+                          className="w-full text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </thead>
               
-              {/* Header */}
-              <div 
-                className="relative border-b-2 border-gray-800 pb-2 px-10 z-10 flex flex-col items-center" 
-              >
-                {/* Centered Logo Stack */}
-                <div className="flex flex-col items-center mx-auto w-full -mt-6">
-                  <PQSLogoImage style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
-                  <PQSWordmark style={{ height: '26px', width: '252px', objectFit: 'contain', marginTop: '-8px' }} />
-                  <div className="text-xs text-gray-500 leading-tight whitespace-nowrap mt-1" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
-                </div>
+              <tbody className="w-full">
+                <tr>
+                  <td className="align-top h-full w-full">
+                    {/* Body */}
+                    <div 
+                      className="px-10 outline-none relative z-10 mt-2 pb-10 text-sm text-gray-800 whitespace-pre-wrap placeholder-empty min-h-[150mm]"
+                      contentEditable
+                      suppressContentEditableWarning
+                      data-placeholder="Type your letter or report content here..."
+                    ></div>
+                  </td>
+                </tr>
+              </tbody>
 
-                {/* Date field, absolute right aligned */}
-                <div className="absolute right-10 top-4 flex gap-2 text-sm justify-end items-end w-48">
-                  <span className="font-bold whitespace-nowrap">Date:</span>
-                  <input 
-                    type="text" 
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
-                  />
-                </div>
-              </div>
-
-              {/* Body */}
-              <div 
-                className="flex-1 px-10 outline-none relative z-10 mt-2 pb-10 text-sm text-gray-800 whitespace-pre-wrap placeholder-empty"
-                contentEditable
-                suppressContentEditableWarning
-                data-placeholder="Type your letter or report content here..."
-              ></div>
-            </div>
-
-            {/* Footer */}
-            <div className="w-full flex flex-col items-center z-10 bg-white pb-6 mt-auto">
-              <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
-                <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
-                <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
-                <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
-              </div>
-            </div>
+              <tfoot className="w-full">
+                <tr>
+                  <td>
+                    {/* Footer */}
+                    <div className="w-full flex flex-col items-center z-10 bg-white pb-6 pt-4">
+                      <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
+                        <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
+                        <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
+                        <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
         </div>
       </div>
