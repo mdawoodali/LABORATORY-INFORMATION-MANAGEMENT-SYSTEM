@@ -138,38 +138,38 @@ export default function PQSLetterheadPage() {
             <div className="relative z-10 flex flex-col h-full">
               
               {/* Header */}
-              <div className="relative flex justify-center items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6 z-10">
+              <div className="relative flex justify-center items-start mb-2 border-b-2 border-gray-800 pb-2 px-10 pt-2 z-10">
 
                 {/* Centered Logo Stack */}
-                <div className="flex flex-col items-center gap-2 mx-auto">
+                <div className="flex flex-col items-center gap-1 mx-auto">
                   <PQSLogoImage style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                   <PQSWordmark style={{ height: '26px', width: '252px', objectFit: 'contain' }} />
-                  <div className="text-xs text-gray-500" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
+                  <div className="text-xs text-gray-500 leading-tight" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
                 </div>
 
                 {/* Date field, right above the line */}
-                <div className="absolute bottom-4 right-10 flex gap-2 text-sm items-end">
+                <div className="absolute bottom-2 right-10 flex gap-2 text-sm items-end">
                   <span className="font-bold whitespace-nowrap pb-1">Date:</span>
                   <input 
                     type="text" 
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-36 text-left border-b border-gray-400 bg-transparent outline-none font-normal"
+                    className="w-36 text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
                   />
                 </div>
               </div>
 
               {/* Body */}
               <div 
-                className="flex-1 px-10 outline-none relative z-10 mt-4 pb-16 text-sm text-gray-800 whitespace-pre-wrap placeholder-empty"
+                className="flex-1 px-10 outline-none relative z-10 mt-2 pb-10 text-sm text-gray-800 whitespace-pre-wrap placeholder-empty"
                 contentEditable
                 suppressContentEditableWarning
                 data-placeholder="Type your letter or report content here..."
               ></div>
 
               {/* Footer */}
-              <div className="absolute bottom-6 left-0 w-full flex flex-col items-center z-10 bg-white">
-                <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
+              <div className="absolute bottom-2 left-0 w-full flex flex-col items-center z-10 bg-white">
+                <div className="w-[90%] flex justify-between border-t border-gray-400 pt-1 text-[11px] text-gray-500">
                   <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
                   <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
                   <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
