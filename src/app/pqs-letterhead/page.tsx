@@ -5,7 +5,6 @@ import PQSWordmark from '@/components/report/PQSWordmark';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
 import { useRouter } from 'next/navigation';
 import { ZoomIn, ZoomOut, ArrowLeft, Printer } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 import { Rnd } from 'react-rnd';
 import { PQSStampBase64 } from '@/components/report/PQSStampBase64';
 
@@ -22,7 +21,7 @@ export default function PQSLetterheadPage() {
   const [showStamp, setShowStamp] = useState(false);
   const [stampPos, setStampPos] = useState({ x: 500, y: 700 });
   const [stampSize, setStampSize] = useState({ width: 200, height: 200 });
-  const [blendMode, setBlendMode] = useState<any>('normal');
+  const [blendMode, setBlendMode] = useState<string>('normal');
 
   useEffect(() => {
     setIsClient(true);
@@ -189,7 +188,7 @@ export default function PQSLetterheadPage() {
                 }}
                 bounds="parent"
                 className={`z-40 ${isGenerating ? '' : 'hover:outline hover:outline-2 hover:outline-blue-500/50'}`}
-                style={{ mixBlendMode: blendMode }}
+                style={{ mixBlendMode: blendMode as any }}
                 enableResizing={!isGenerating}
                 disableDragging={isGenerating}
               >
