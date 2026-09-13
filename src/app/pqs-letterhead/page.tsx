@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PQSWordmark from '@/components/report/PQSWordmark';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
 
 export default function PQSLetterheadPage() {
-  const [refNo, setRefNo] = useState('');
+  const [isClient, setIsClient] = useState(false);
   const [date, setDate] = useState('');
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null;
 
   return (
     <div className="bg-gray-100 flex flex-col items-center py-10 font-sans min-h-screen">
@@ -32,12 +38,10 @@ export default function PQSLetterheadPage() {
           }
         }
       `}} />
-      <div className="no-print mb-6 text-gray-600 text-sm bg-white p-5 rounded-lg shadow-sm border border-gray-200 max-w-lg w-full">
-        <p className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-          <span className="text-xl">💡</span> How to use:
-        </p>
-        <ul className="list-disc pl-8 space-y-1">
-          <li>Click anywhere inside the text to edit it (like the Ref #, Date, or Body text).</li>
+      <div className="no-print mb-4 text-gray-500 text-sm bg-white p-4 rounded shadow max-w-lg w-full">
+        <p>💡 <b>How to use:</b></p>
+        <ul className="list-disc pl-5 mt-2">
+          <li>Click anywhere inside the text to edit it (like the Date or Body text).</li>
           <li>Press <b>Ctrl + P</b> (or Cmd + P) to print or save as a PDF.</li>
         </ul>
       </div>
@@ -47,70 +51,50 @@ export default function PQSLetterheadPage() {
         style={{ width: '210mm', height: '297mm' }}
       >
         {/* Watermark */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.05]">
-          <PQSLogoImage className="w-[600px] h-[600px] object-contain" />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <PQSLogoImage className="object-contain" style={{ width: '60%', opacity: 0.08 }} />
         </div>
 
         {/* Content */}
         <div className="relative z-10 flex flex-col h-full">
           
           {/* Header */}
-          <div className="flex justify-between items-start px-10 pt-10 pb-4">
-            <div className="flex gap-4 items-center">
-              {/* Blue Logo Box */}
-              <div className="w-[105px] h-[105px] bg-[#0d1c33] rounded-[20px] flex items-center justify-center shrink-0">
-                <PQSLogoImage className="w-[80px] h-[80px] object-contain invert brightness-0" />
-              </div>
-              {/* Wordmark and Tagline */}
-              <div className="flex flex-col justify-center">
-                <PQSWordmark className="mb-1" style={{ height: '32px', width: 'auto' }} />
-                <span className="text-[#555] text-[13.5px] font-medium tracking-wide">
-                  Providing Consultancy Services to Textile Industries
-                </span>
-              </div>
+          <div className="relative flex justify-center items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6 z-10">
+
+            {/* Centered Logo Stack */}
+            <div className="flex flex-col items-center gap-2 mx-auto">
+              <PQSLogoImage style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+              <PQSWordmark style={{ height: '26px', width: '252px', objectFit: 'contain' }} />
+              <div className="text-xs text-gray-500" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
             </div>
 
-            {/* Ref and Date */}
-            <div className="flex flex-col gap-4 mt-4 text-[14px] font-bold text-gray-900">
-              <div className="flex items-end gap-2">
-                <span className="w-12 text-right pb-[2px]">Ref #:</span>
-                <input 
-                  type="text" 
-                  value={refNo}
-                  onChange={(e) => setRefNo(e.target.value)}
-                  className="border-b border-gray-400 bg-transparent outline-none w-56 px-1 font-normal pb-[2px]"
-                />
-              </div>
-              <div className="flex items-end gap-2">
-                <span className="w-12 text-right pb-[2px]">Date:</span>
-                <input 
-                  type="text" 
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="border-b border-gray-400 bg-transparent outline-none w-56 px-1 font-normal pb-[2px]"
-                />
-              </div>
+            {/* Date field, top right, in place of the old Ref # field */}
+            <div className="absolute top-6 right-10 flex gap-2 text-sm">
+              <span className="font-bold whitespace-nowrap">Date:</span>
+              <input 
+                type="text" 
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-36 text-left border-b border-gray-400 bg-transparent outline-none font-normal"
+              />
             </div>
           </div>
-
-          <div className="w-full h-[2px] bg-[#1a202c] mb-12"></div>
 
           {/* Body */}
           <div 
-            className="flex-1 px-12 outline-none whitespace-pre-wrap font-sans text-gray-800 text-[15px] leading-relaxed"
+            className="flex-1 px-10 outline-none relative z-10 mt-4 text-sm text-gray-800 whitespace-pre-wrap"
             contentEditable
             suppressContentEditableWarning
           >
-            Click here to start typing your letter...
+            Type your letter or report content here...
           </div>
 
           {/* Footer */}
-          <div className="px-12 pb-8 mt-auto">
-            <div className="w-full h-[1px] bg-gray-400 mb-3"></div>
-            <div className="flex justify-between items-center text-[12px] text-gray-600 font-medium tracking-wide">
-              <div>R-332/9, Dastagir, F.B Area, Karachi, 75950.</div>
-              <div>03322673373 | 03333769174</div>
-              <div>precisionqualityserviceslabs@gmail.com</div>
+          <div className="w-full flex flex-col items-center mt-auto pb-8 relative z-10">
+            <div className="w-[90%] flex justify-between border-t border-gray-400 pt-3 text-xs text-gray-500">
+              <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
+              <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
+              <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
             </div>
           </div>
         </div>
