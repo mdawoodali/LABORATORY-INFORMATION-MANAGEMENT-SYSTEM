@@ -60,7 +60,7 @@ export default function PQSLetterheadPage() {
             border: none !important;
             margin: 0 !important;
             width: 210mm !important;
-            height: 297mm !important;
+            height: auto !important;
             min-height: 297mm !important;
           }
         }
@@ -168,11 +168,11 @@ export default function PQSLetterheadPage() {
           style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}
         >
           <div 
-            className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto" 
-            style={{ width: '210mm', height: '297mm' }}
+            className="a4-page relative flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto" 
+            style={{ width: '210mm', minHeight: '297mm' }}
           >
             {/* Watermark */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+            <div className="absolute top-0 left-0 w-full h-[297mm] flex items-center justify-center pointer-events-none z-0 overflow-hidden">
               <PQSLogoImage className="object-contain" style={{ width: '60%', opacity: 0.08 }} />
             </div>
 
@@ -236,7 +236,7 @@ export default function PQSLetterheadPage() {
             </div>
 
             {/* Footer */}
-            <div className="absolute bottom-0 left-0 w-full flex flex-col items-center z-10 bg-white pb-6">
+            <div className="w-full flex flex-col items-center z-10 bg-white pb-6 mt-auto">
               <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
                 <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
                 <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
