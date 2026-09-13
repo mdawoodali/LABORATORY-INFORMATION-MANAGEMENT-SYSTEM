@@ -207,23 +207,23 @@ export default function PQSLetterheadPage() {
                   <td>
                     {/* Header */}
                     <div 
-                      className="relative border-b-2 border-gray-800 pb-2 px-10 z-10 flex flex-col items-center bg-white" 
+                      className="relative border-b-2 border-gray-800 pb-2 px-10 pt-6 z-10 flex flex-col items-center bg-white" 
                     >
                       {/* Centered Logo Stack */}
-                      <div className="flex flex-col items-center mx-auto w-full -mt-6">
+                      <div className="flex flex-col items-center mx-auto w-full">
                         <PQSLogoImage style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
                         <PQSWordmark style={{ height: '26px', width: '252px', objectFit: 'contain', marginTop: '-8px' }} />
                         <div className="text-xs text-gray-500 leading-tight whitespace-nowrap mt-1" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
                       </div>
 
                       {/* Date field, absolute right aligned */}
-                      <div className="absolute right-10 top-4 flex gap-2 text-sm justify-end items-end w-48 bg-white/80">
-                        <span className="font-bold whitespace-nowrap">Date:</span>
+                      <div className="absolute right-10 bottom-2 flex gap-2 text-sm justify-end items-end w-32 bg-white/80">
+                        <span className="font-bold whitespace-nowrap text-xs">Date:</span>
                         <input 
                           type="text" 
                           value={date}
                           onChange={(e) => setDate(e.target.value)}
-                          className="w-full text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
+                          className="w-full text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5 text-xs"
                         />
                       </div>
                     </div>
