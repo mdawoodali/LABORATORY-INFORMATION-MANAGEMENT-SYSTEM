@@ -100,7 +100,21 @@ function EditorContent() {
     }
   }, [brandSettings.companyName]);
 
-  const totalPages = (sampleImages.length > 0 ? 3 : 2) + extraPages.length;
+  
+  // Chunk tests for pagination
+  const testChunks = [];
+  const testsCopy = [...tests];
+  if (testsCopy.length > 7) {
+    testChunks.push(testsCopy.splice(0, 7)); // First page: 7 rows
+    while (testsCopy.length > 0) {
+      testChunks.push(testsCopy.splice(0, 10)); // Subsequent pages: 10 rows
+    }
+  } else {
+    testChunks.push(testsCopy);
+  }
+
+  const totalPages = 1 + testChunks.length + (sampleImages.length > 0 ? 1 : 0) + extraPages.length;
+
 
   // Load template or existing report
   useEffect(() => {
@@ -496,7 +510,7 @@ function EditorContent() {
           <div className="a4-page relative overflow-hidden flex flex-col bg-white">
             <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
             <div className="relative z-10 w-full h-full flex flex-col">
-            <SubHeader reportNo={formData.reportNo} pageNum={3} totalPages={totalPages} />
+            <SubHeader reportNo={formData.reportNo} pageNum={1 + testChunks.length + 1} totalPages={totalPages} />
               <div className="pt-[175px] flex-1 flex flex-col px-10 relative">
                   <div className="flex-1 w-full relative">
                         {sampleImages.map(img => (
@@ -524,7 +538,7 @@ function EditorContent() {
 
         {/* Extra Pages */}
         {extraPages.map((page, index) => {
-          const pageNum = (sampleImages.length > 0 ? 4 : 3) + index;
+          const pageNum = 1 + testChunks.length + (sampleImages.length > 0 ? 1 : 0) + 1 + index;
           return (
             <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 mt-8" style={{ width: '794px', height: '1123px' }}>
               <img src="/frame.png" alt="Frame" className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none object-fill" style={{ imageRendering: '-webkit-optimize-contrast', filter: 'contrast(1.02)' }} />
