@@ -6,6 +6,8 @@ import PQSLogoImage from '@/components/report/PQSLogoImage';
 import { useRouter } from 'next/navigation';
 import { ZoomIn, ZoomOut, ArrowLeft, Printer } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { Rnd } from 'react-rnd';
+import { PQSStampBase64 } from '@/components/report/PQSStampBase64';
 
 export default function PQSLetterheadPage() {
   const router = useRouter();
@@ -15,6 +17,12 @@ export default function PQSLetterheadPage() {
   // Zoom state
   const [zoom, setZoom] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Stamp state
+  const [showStamp, setShowStamp] = useState(false);
+  const [stampPos, setStampPos] = useState({ x: 500, y: 700 });
+  const [stampSize, setStampSize] = useState({ width: 200, height: 200 });
+  const [blendMode, setBlendMode] = useState<any>('normal');
 
   useEffect(() => {
     setIsClient(true);
@@ -108,6 +116,37 @@ export default function PQSLetterheadPage() {
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#002f6c]/20 focus:border-[#002f6c] transition-all"
             />
           </div>
+
+          <div className="space-y-4 pt-4 border-t border-slate-200">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-semibold text-slate-700">Add Stamp</label>
+              <button 
+                onClick={() => setShowStamp(!showStamp)}
+                className={`w-12 h-6 rounded-full p-1 transition-colors ${showStamp ? 'bg-[#002f6c]' : 'bg-slate-300'}`}
+              >
+                <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform ${showStamp ? 'translate-x-6' : 'translate-x-0'}`} />
+              </button>
+            </div>
+            
+            {showStamp && (
+              <div className="space-y-3 p-3 bg-slate-100 rounded-xl border border-slate-200">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Stamp Blend Mode</label>
+                <select 
+                  value={blendMode}
+                  onChange={(e) => setBlendMode(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#002f6c]/20"
+                >
+                  <option value="normal">Normal</option>
+                  <option value="multiply">Multiply</option>
+                  <option value="darken">Darken</option>
+                  <option value="color-burn">Color Burn</option>
+                  <option value="screen">Screen</option>
+                  <option value="overlay">Overlay</option>
+                </select>
+                <p className="text-[10px] text-slate-500 italic">Drag to move. Drag edges to resize.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -137,6 +176,30 @@ export default function PQSLetterheadPage() {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
               <PQSLogoImage className="object-contain" style={{ width: '60%', opacity: 0.08 }} />
             </div>
+
+            {/* Stamp Overlay */}
+            {showStamp && (
+              <Rnd
+                size={{ width: stampSize.width, height: stampSize.height }}
+                position={{ x: stampPos.x, y: stampPos.y }}
+                onDragStop={(e, d) => setStampPos({ x: d.x, y: d.y })}
+                onResizeStop={(e, direction, ref, delta, position) => {
+                  setStampSize({ width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) });
+                  setStampPos(position);
+                }}
+                bounds="parent"
+                className={`z-40 ${isGenerating ? '' : 'hover:outline hover:outline-2 hover:outline-blue-500/50'}`}
+                style={{ mixBlendMode: blendMode }}
+                enableResizing={!isGenerating}
+                disableDragging={isGenerating}
+              >
+                <img 
+                  src={PQSStampBase64} 
+                  alt="Stamp" 
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }} 
+                />
+              </Rnd>
+            )}
 
             {/* Content */}
             <div className="relative z-10 flex flex-col h-full">
