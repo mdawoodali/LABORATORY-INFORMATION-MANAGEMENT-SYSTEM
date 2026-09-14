@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation';
 import { ZoomIn, ZoomOut, ArrowLeft, Printer } from 'lucide-react';
 import { Rnd } from 'react-rnd';
 import { PQSStampBase64 } from '@/components/report/PQSStampBase64';
+import dynamic from 'next/dynamic';
+import 'suneditor/dist/css/suneditor.min.css';
+
+const SunEditor = dynamic(() => import('suneditor-react'), { ssr: false });
 
 export default function PQSLetterheadPage() {
   const router = useRouter();
@@ -77,6 +81,28 @@ export default function PQSLetterheadPage() {
             display: none !important;
           }
         }
+
+        /* SunEditor Overrides */
+        .sun-editor {
+          border: none !important;
+          background: transparent !important;
+        }
+        .sun-editor .se-wrapper {
+          margin: 0 !important;
+          border: none !important;
+          z-index: 10 !important;
+        }
+        .sun-editor-editable {
+          padding: 0 !important;
+          font-family: inherit !important;
+          background-color: transparent !important;
+        }
+        
+        /* Hide toolbar container during print */
+        @media print {
+          #toolbar-container { display: none !important; }
+        }
+
         .placeholder-empty:empty:before,
         .placeholder-empty:has(> br:only-child):before {
           content: attr(data-placeholder);
@@ -163,7 +189,12 @@ export default function PQSLetterheadPage() {
       </div>
 
       {/* Main Content Area */}
-      <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
+      <div className={`flex-1 overflow-y-auto flex flex-col items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
+        
+        {/* SunEditor Toolbar Container */}
+        <div id="toolbar-container" className="sticky top-0 w-full z-[100] shadow-sm mb-4 print:hidden"></div>
+        
+        <div className="w-full flex-1 p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center">
         
         {/* Floating Toolbar */}
         <div className="fixed top-4 right-4 md:top-6 md:right-6 z-50 flex flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print items-center">
@@ -253,13 +284,30 @@ export default function PQSLetterheadPage() {
                 <tr>
                   <td className="align-top">
                     {/* Body text */}
-                    <div 
-                      className="px-10 outline-none mt-4 text-sm text-gray-800 whitespace-pre-wrap placeholder-empty pb-10" 
-                      contentEditable 
-                      suppressContentEditableWarning
-                      data-placeholder="Type your letter or report content here..."
-                      style={{ minHeight: '150mm' }}
-                    ></div>
+                    <div className="px-10 mt-4 pb-10" style={{ minHeight: '150mm' }}>
+                      <SunEditor
+                        setOptions={{
+                          toolbarContainer: '#toolbar-container',
+                          showPathLabel: false,
+                          minHeight: '150mm',
+                          resizingBar: false,
+                          buttonList: [
+                            ['undo', 'redo'],
+                            ['font', 'fontSize', 'formatBlock'],
+                            ['paragraphStyle', 'blockquote'],
+                            ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+                            ['fontColor', 'hiliteColor', 'textStyle'],
+                            ['removeFormat'],
+                            ['outdent', 'indent'],
+                            ['align', 'horizontalRule', 'list', 'lineHeight'],
+                            ['table', 'link', 'image', 'video'],
+                            ['fullScreen', 'showBlocks', 'codeView']
+                          ],
+                        }}
+                        placeholder="Type your letter or report content here..."
+                        setDefaultStyle="font-family: inherit; font-size: 14px; padding: 0;"
+                      />
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -284,6 +332,7 @@ export default function PQSLetterheadPage() {
             </table>
 
           </div>
+        </div>
         </div>
       </div>
     </div>
