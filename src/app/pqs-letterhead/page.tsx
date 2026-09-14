@@ -58,13 +58,18 @@ export default function PQSLetterheadPage() {
           .a4-page {
             box-shadow: none !important;
             border: none !important;
-            margin: 0 !important;
             width: 210mm !important;
             height: auto !important;
             min-height: 297mm !important;
+            margin: 0 !important;
+            page-break-after: avoid;
           }
-          .print-tfoot {
-            display: table-footer-group !important;
+          body {
+            counter-reset: page;
+          }
+          .print-page-number::after {
+            counter-increment: page;
+            content: "Page " counter(page);
           }
           .placeholder-empty:empty:before,
           .placeholder-empty:has(> br:only-child):before {
@@ -176,12 +181,12 @@ export default function PQSLetterheadPage() {
           style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}
         >
           <div 
-            className="a4-page relative flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto pb-20" 
-            style={{ width: '210mm', minHeight: '297mm' }}
+            className="a4-page relative flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto" 
+            style={{ width: '210mm', minHeight: '297mm', height: '297mm' }}
           >
-            {/* Watermark */}
-            <div className="absolute top-0 left-0 w-full h-[297mm] flex items-center justify-center pointer-events-none z-0 overflow-hidden">
-              <PQSLogoImage className="object-contain" style={{ width: '60%', opacity: 0.08 }} />
+            {/* Watermark Background */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+              <PQSLogoImage className="w-1/2 opacity-[0.03] object-contain" />
             </div>
 
             {/* Stamp Overlay */}
@@ -208,66 +213,76 @@ export default function PQSLetterheadPage() {
               </Rnd>
             )}
 
-            {/* Content Table for native print pagination */}
-            <table className="w-full h-full relative z-10">
-              <thead className="w-full">
+            <table className="w-full relative z-10">
+              <thead className="w-full table-header-group">
                 <tr>
                   <td>
                     {/* Header */}
-                    <div 
-                      className="relative border-b-2 border-gray-800 pb-2 px-10 pt-6 z-10 flex flex-col items-center bg-white" 
-                    >
-                      {/* Centered Logo Stack */}
-                      <div className="flex flex-col items-center mx-auto w-full">
-                        <PQSLogoImage style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
-                        <PQSWordmark style={{ height: '26px', width: '252px', objectFit: 'contain', marginTop: '-8px' }} />
-                        <div className="text-xs text-gray-500 leading-tight whitespace-nowrap mt-1" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
+                    <div className="w-full flex justify-between items-start px-10 pt-8 pb-4 border-b-2 border-gray-800 bg-white">
+                      {/* Left Side */}
+                      <div className="flex flex-col items-center gap-1 w-[280px]">
+                        <PQSLogoImage className="h-24 w-24 object-contain" />
+                        <div className="flex flex-col items-center -mt-2">
+                          <PQSWordmark className="h-8 object-contain" />
+                          <div className="text-xs text-gray-500 mt-1" contentEditable suppressContentEditableWarning>Providing Consultancy Service to Textile Industries</div>
+                        </div>
                       </div>
-
-                      {/* Date field, absolute right aligned */}
-                      <div className="absolute right-10 top-4 flex gap-2 text-sm justify-end items-end w-48 bg-white/80">
-                        <span className="font-bold whitespace-nowrap">Date:</span>
-                        <input 
-                          type="text" 
-                          value={date}
-                          onChange={(e) => setDate(e.target.value)}
-                          className="w-full text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
-                        />
+                      
+                      {/* Right Side */}
+                      <div className="text-right flex flex-col items-end pt-2">
+                        <div className="flex gap-2 text-sm mt-1 items-center">
+                          <span className="font-bold w-16 text-right whitespace-nowrap">Ref #:</span>
+                          <span className="w-36 text-left border-b border-gray-400 outline-none" contentEditable suppressContentEditableWarning></span>
+                        </div>
+                        <div className="flex gap-2 text-sm mt-3 items-end">
+                          <span className="font-bold w-16 text-right whitespace-nowrap">Date:</span>
+                          <input 
+                            type="text" 
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-36 text-left border-b border-gray-400 bg-transparent outline-none font-normal leading-tight pb-0.5"
+                          />
+                        </div>
                       </div>
                     </div>
                   </td>
                 </tr>
               </thead>
-              
-              <tbody className="w-full h-full">
+
+              <tbody className="w-full">
                 <tr>
-                  <td className="align-top h-full w-full">
-                    {/* Body */}
+                  <td className="align-top">
+                    {/* Body text */}
                     <div 
-                      className="px-10 outline-none relative z-10 mt-2 pb-10 text-sm text-gray-800 whitespace-pre-wrap placeholder-empty min-h-[150mm]"
-                      contentEditable
+                      className="px-10 outline-none mt-4 text-sm text-gray-800 whitespace-pre-wrap placeholder-empty pb-10" 
+                      contentEditable 
                       suppressContentEditableWarning
                       data-placeholder="Type your letter or report content here..."
+                      style={{ minHeight: '150mm' }}
                     ></div>
                   </td>
                 </tr>
               </tbody>
 
-              <tfoot className="w-full hidden print-tfoot">
+              <tfoot className="w-full table-footer-group">
                 <tr>
-                  <td className="h-[80px]"></td>
+                  <td>
+                    {/* Footer */}
+                    <div className="w-full flex flex-col items-center pt-6 pb-8 bg-white">
+                      <div className="w-[90%] flex justify-between border-t border-gray-400 pt-3 text-xs text-gray-500">
+                        <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
+                        <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
+                        <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
+                      </div>
+                      <div className="w-[90%] flex justify-end pt-2 text-[10px] text-gray-400">
+                        <span className="print-page-number hidden print:inline"></span>
+                      </div>
+                    </div>
+                  </td>
                 </tr>
               </tfoot>
             </table>
 
-            {/* Real Footer */}
-            <div className="absolute bottom-0 left-0 w-full flex flex-col items-center z-10 bg-white pb-6 pt-4 print:fixed print:bottom-0">
-              <div className="w-[90%] flex justify-between border-t border-gray-400 pt-2 text-[11px] text-gray-500">
-                <span contentEditable suppressContentEditableWarning>R-332/9, Dastagir, F.B Area, Karachi, 75950.</span>
-                <span contentEditable suppressContentEditableWarning>03322673373 | 03333769174</span>
-                <span contentEditable suppressContentEditableWarning>precisionqualityserviceslabs@gmail.com</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
