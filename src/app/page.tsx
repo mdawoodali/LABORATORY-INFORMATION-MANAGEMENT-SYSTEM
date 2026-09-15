@@ -18,21 +18,7 @@ export default function HomePage() {
   const [appVersion, setAppVersion] = useState(packageJson.version);
 
   useEffect(() => {
-    const fetchVersion = async () => {
-      try {
-        const isTauri = typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window);
-        if (!isTauri) {
-          const res = await fetch('https://api.github.com/repos/mdawoodali/LABORATORY-INFORMATION-MANAGEMENT-SYSTEM/releases/latest');
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.tag_name) {
-              setAppVersion(data.tag_name.replace('v', ''));
-            }
-          }
-        }
-      } catch (e) {}
-    };
-    fetchVersion();
+    // Relying on packageJson.version directly
   }, []);
   const { data: recentReports = [], isLoading: reportsLoading } = useQuery({
     queryKey: ['recentReports'],
