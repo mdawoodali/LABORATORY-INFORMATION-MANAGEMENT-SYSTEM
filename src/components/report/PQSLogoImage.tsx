@@ -1,5 +1,4 @@
 import React from "react";
-import { PQSLogoBase64 } from "./PQSLogoBase64";
 
 interface PQSLogoImageProps {
   className?: string;
@@ -9,7 +8,7 @@ interface PQSLogoImageProps {
 export default function PQSLogoImage({ className, style }: PQSLogoImageProps) {
   return (
     <img 
-      src={PQSLogoBase64} 
+      src="/pqs-logo.png" 
       alt="PQS Logo" 
       className={className} 
       style={style} 
