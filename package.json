@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
+    "@syncfusion/ej2-react-documenteditor": "^34.2.7",
+    "@syncfusion/ej2-react-spreadsheet": "^34.2.8",
     "@tanstack/react-query": "^5.101.4",
     "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-dialog": "^2.7.2",

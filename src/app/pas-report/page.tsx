@@ -211,7 +211,14 @@ function EditorContent() {
     }
   }, [brandSettings.companyName]);
 
-  const totalPages = (sampleImages.length > 0 ? 3 : 2) + extraPages.length;
+  const ROWS_PER_PAGE = 8;
+  const testPagesCount = Math.max(1, Math.ceil(tests.length / ROWS_PER_PAGE));
+  const testChunks = [];
+  for (let i = 0; i < tests.length; i += ROWS_PER_PAGE) {
+    testChunks.push(tests.slice(i, i + ROWS_PER_PAGE));
+  }
+  if (testChunks.length === 0) testChunks.push([]);
+  const totalPages = 1 + testPagesCount + (sampleImages.length > 0 ? 1 : 0) + extraPages.length;
 
   // Load template or existing report
   useEffect(() => {
@@ -691,15 +698,21 @@ function EditorContent() {
           <PASFooter pageNum={1} totalPages={totalPages} />
         </div>
 
-        {/* PAGE 2 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
-          <div className="flex-1 px-10">
-            <TestTable tests={tests} data={formData} />
-              
+        {/* TEST PAGES (Dynamically chunked) */}
+        {testChunks.map((chunk, index) => (
+          <div key={`test-page-${index}`} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
+            <div className="flex-1">
+              <TestTable 
+                tests={chunk} 
+                data={formData} 
+                isFirstPage={index === 0}
+                isLastPage={index === testChunks.length - 1}
+              />
             </div>
-            <PASFooter pageNum={2} totalPages={totalPages} />
-        </div>
+            <PASFooter pageNum={2 + index} totalPages={totalPages} />
+          </div>
+        ))}
 
         {/* PAGE 3 - Sample Image */}
         {sampleImages.length > 0 && (
@@ -720,13 +733,13 @@ function EditorContent() {
                       </div>
                 
               </div>
-              <PASFooter pageNum={3} totalPages={totalPages} />
+              <PASFooter pageNum={1 + testPagesCount + 1} totalPages={totalPages} />
           </div>
         )}
 
         {/* Extra Pages */}
         {extraPages.map((page, index) => {
-          const pageNum = (sampleImages.length > 0 ? 4 : 3) + index;
+          const pageNum = 1 + testPagesCount + (sampleImages.length > 0 ? 1 : 0) + 1 + index;
           return (
             <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
               <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
