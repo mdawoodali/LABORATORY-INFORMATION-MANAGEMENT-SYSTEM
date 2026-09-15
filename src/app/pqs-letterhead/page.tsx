@@ -54,6 +54,10 @@ export default function PQSLetterheadPage() {
             height: 100%;
           }
           .no-print { display: none !important; }
+          .zoom-wrapper {
+            transform: none !important;
+            margin-bottom: 0 !important;
+          }
           .a4-page {
             box-shadow: none !important;
             border: none !important;
@@ -92,7 +96,7 @@ export default function PQSLetterheadPage() {
         </div>
 
         <div 
-          className="w-full origin-top md:transform-none print:scale-100 print:mb-0 flex flex-col items-center transition-transform"
+          className="zoom-wrapper w-full origin-top md:transform-none flex flex-col items-center transition-transform"
           style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}
         >
           <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto" style={{ width: "210mm", height: "297mm" }}>
