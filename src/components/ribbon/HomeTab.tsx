@@ -7,8 +7,9 @@ import {
 } from 'lucide-react';
 
 const FONTS = [
-  "Arial", "Calibri", "Cambria", "Comic Sans MS", "Courier New", 
-  "Georgia", "Helvetica", "Impact", "Times New Roman", "Trebuchet MS", "Verdana"
+  "Arial", "Calibri", "Cambria", "Courier New", 
+  "Georgia", "Helvetica", "Impact", "Times New Roman", "Trebuchet MS", "Verdana",
+  "Inter", "Lora", "Merriweather", "Montserrat", "Open Sans", "Playfair Display", "Roboto"
 ];
 
 const GroupBorder = () => <div className="w-px h-10 bg-slate-300 mx-2"></div>;
@@ -34,6 +35,24 @@ export default function HomeTab() {
   return (
     <div className="flex flex-col gap-4 w-full text-sm">
       
+      {/* Styles Group */}
+      <div className="flex flex-col gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 shadow-sm">
+        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Styles (Headings)</div>
+        <select 
+          onChange={(e) => exec('formatBlock', e.target.value)}
+          className="border border-slate-300 rounded px-2 py-1 text-xs w-full bg-white"
+          defaultValue="P"
+        >
+          <option value="P">Normal Text</option>
+          <option value="H1">Heading 1</option>
+          <option value="H2">Heading 2</option>
+          <option value="H3">Heading 3</option>
+          <option value="H4">Heading 4</option>
+          <option value="H5">Heading 5</option>
+          <option value="H6">Heading 6</option>
+        </select>
+      </div>
+
       {/* Font Group */}
       <div className="flex flex-col gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 shadow-sm">
         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Font</div>
