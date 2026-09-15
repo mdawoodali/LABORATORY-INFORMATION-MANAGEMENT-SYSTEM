@@ -28,7 +28,7 @@ export async function pullGlobalSettings() {
                 localStorage.setItem(key, mergedStr);
                 hasChanges = true;
               }
-            } catch (e) {
+            } catch (e: unknown) {
               // ignore parse errors
             }
           } else {

@@ -17,6 +17,19 @@ interface RibbonSidebarProps {
   setMargins: React.Dispatch<React.SetStateAction<{ top: number, right: number, bottom: number, left: number }>>;
 }
 
+const TabButton = ({ name, activeTab, setActiveTab }: { name: 'Home' | 'Insert' | 'Layout', activeTab: string, setActiveTab: (n: 'Home' | 'Insert' | 'Layout') => void }) => (
+  <button 
+    onClick={() => setActiveTab(name)}
+    className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors border-b-2 ${
+      activeTab === name 
+        ? 'bg-white text-[#002f6c] border-[#002f6c]' 
+        : 'text-slate-600 hover:bg-slate-200 border-transparent'
+    }`}
+  >
+    {name}
+  </button>
+);
+
 export default function RibbonSidebar({ 
   handlePrint, 
   showStamp, setShowStamp, blendMode, setBlendMode,
@@ -24,19 +37,6 @@ export default function RibbonSidebar({
 }: RibbonSidebarProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'Home' | 'Insert' | 'Layout'>('Home');
-
-  const TabButton = ({ name }: { name: 'Home' | 'Insert' | 'Layout' }) => (
-    <button 
-      onClick={() => setActiveTab(name)}
-      className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors border-b-2 ${
-        activeTab === name 
-          ? 'bg-white text-[#002f6c] border-[#002f6c]' 
-          : 'text-slate-600 hover:bg-slate-200 border-transparent'
-      }`}
-    >
-      {name}
-    </button>
-  );
 
   return (
     <div className="w-full md:w-[450px] h-auto md:h-full bg-slate-100 border-r border-slate-300 flex flex-col z-20 shadow-xl md:shadow-none no-print overflow-hidden shrink-0">
@@ -62,9 +62,9 @@ export default function RibbonSidebar({
 
       {/* Tabs */}
       <div className="flex px-2 pt-2 gap-1 bg-slate-200 border-b border-slate-300">
-        <TabButton name="Home" />
-        <TabButton name="Insert" />
-        <TabButton name="Layout" />
+        <TabButton name="Home" activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabButton name="Insert" activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabButton name="Layout" activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
       {/* Tab Content */}

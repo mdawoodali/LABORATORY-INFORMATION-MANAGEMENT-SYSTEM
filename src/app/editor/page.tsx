@@ -128,7 +128,7 @@ function EditorContent() {
             ...template.formData,
             reportNo: String(Math.floor(100000 + Math.random() * 900000)),
           });
-          // eslint-disable-next-line react-hooks/set-state-in-effect
+           
           setTests(template.tests);
           sessionStorage.removeItem('sr_template_data');
         } catch (e: unknown) {
@@ -138,7 +138,7 @@ function EditorContent() {
     } else if (reportId) {
       loadReport(reportId);
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setIsLoaded(true);
   }, [templateId, reportId]);
 

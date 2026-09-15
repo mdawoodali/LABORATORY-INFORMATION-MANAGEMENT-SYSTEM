@@ -8,6 +8,16 @@ interface InsertTabProps {
   setBlendMode: (val: string) => void;
 }
 
+const Button = ({ icon: Icon, label, onClick }: { icon: any, label: string, onClick: any }) => (
+  <button 
+    onClick={onClick}
+    className="flex flex-col items-center justify-center gap-1 p-2 w-16 h-16 rounded transition-colors text-slate-700 hover:bg-slate-200"
+  >
+    <Icon size={24} className="text-[#002f6c]" />
+    <span className="text-[10px]">{label}</span>
+  </button>
+);
+
 export default function InsertTab({ showStamp, setShowStamp, blendMode, setBlendMode }: InsertTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,16 +71,6 @@ export default function InsertTab({ showStamp, setShowStamp, blendMode, setBlend
       exec('createLink', url);
     }
   };
-
-  const Button = ({ icon: Icon, label, onClick }: any) => (
-    <button 
-      onClick={onClick}
-      className="flex flex-col items-center justify-center gap-1 p-2 w-16 h-16 rounded transition-colors text-slate-700 hover:bg-slate-200"
-    >
-      <Icon size={24} className="text-[#002f6c]" />
-      <span className="text-[10px]">{label}</span>
-    </button>
-  );
 
   return (
     <div className="flex flex-col gap-4 w-full text-sm">

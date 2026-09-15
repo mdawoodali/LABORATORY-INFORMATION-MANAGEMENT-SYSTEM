@@ -1,4 +1,3 @@
-import { saveAs } from 'file-saver';
 import toast from 'react-hot-toast';
 import { ensureBackupFolder } from './backupValidator';
 

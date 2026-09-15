@@ -11,7 +11,17 @@ const FONTS = [
   "Georgia", "Helvetica", "Impact", "Times New Roman", "Trebuchet MS", "Verdana"
 ];
 
-const SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
+const GroupBorder = () => <div className="w-px h-10 bg-slate-300 mx-2"></div>;
+
+const Button = ({ icon: Icon, onClick, title, active = false }: { icon: any, onClick: any, title?: string, active?: boolean }) => (
+  <button 
+    onClick={onClick}
+    title={title}
+    className={`p-1.5 rounded transition-colors ${active ? 'bg-slate-300 text-black' : 'text-slate-700 hover:bg-slate-200'} flex items-center justify-center`}
+  >
+    <Icon size={16} />
+  </button>
+);
 
 export default function HomeTab() {
   const exec = (command: string, value: string = '') => {
@@ -20,18 +30,6 @@ export default function HomeTab() {
     const editor = document.querySelector('[contentEditable="true"]:focus') as HTMLElement;
     if (editor) editor.focus();
   };
-
-  const GroupBorder = () => <div className="w-px h-10 bg-slate-300 mx-2"></div>;
-
-  const Button = ({ icon: Icon, onClick, title, active = false }: any) => (
-    <button 
-      onClick={onClick}
-      title={title}
-      className={`p-1.5 rounded transition-colors ${active ? 'bg-slate-300 text-black' : 'text-slate-700 hover:bg-slate-200'} flex items-center justify-center`}
-    >
-      <Icon size={16} />
-    </button>
-  );
 
   return (
     <div className="flex flex-col gap-4 w-full text-sm">
@@ -54,7 +52,6 @@ export default function HomeTab() {
             className="border border-slate-300 rounded px-2 py-1 text-xs w-16 bg-white"
             defaultValue="3"
           >
-            {/* execCommand fontSize takes 1-7, but we can map them or just use 1-7 */}
             <option value="1">10</option>
             <option value="2">13</option>
             <option value="3">16</option>

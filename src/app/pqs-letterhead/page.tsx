@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { Rnd } from 'react-rnd';
-import { PQSStampBase64 } from '@/components/report/PQSStampBase64';
+
 import RibbonSidebar from '@/components/ribbon/RibbonSidebar';
 
 export default function PQSLetterheadPage() {
@@ -117,7 +117,7 @@ export default function PQSLetterheadPage() {
                 disableDragging={isGenerating}
               >
                 <img 
-                  src={PQSStampBase64} 
+                  src="/stamp.png" 
                   alt="Stamp" 
                   style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }} 
                 />
