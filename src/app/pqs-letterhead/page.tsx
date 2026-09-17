@@ -67,6 +67,49 @@ export default function PQSLetterheadPage() {
   const [blendMode, setBlendMode] = useState<string>('normal');
 
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
+  const [imageRect, setImageRect] = useState<DOMRect | null>(null);
+  
+  useEffect(() => {
+    if (selectedImage) {
+      const updateRect = () => setImageRect(selectedImage.getBoundingClientRect());
+      updateRect();
+      window.addEventListener('resize', updateRect);
+      window.addEventListener('scroll', updateRect, true);
+      const observer = new ResizeObserver(updateRect);
+      observer.observe(selectedImage);
+      return () => {
+        window.removeEventListener('resize', updateRect);
+        window.removeEventListener('scroll', updateRect, true);
+        observer.disconnect();
+      };
+    } else {
+      setImageRect(null);
+    }
+  }, [selectedImage]);
+
+  // Handle visual resize handle drag
+  const startImageResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!selectedImage) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = selectedImage.offsetWidth;
+    const startHeight = selectedImage.offsetHeight;
+    const ratio = startWidth / startHeight;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      selectedImage.style.width = `${startWidth + deltaX}px`;
+      selectedImage.style.height = `${(startWidth + deltaX) / ratio}px`;
+    };
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
   const [activeFont, setActiveFont] = useState(FONTS[0].class);
   const [activeStyles, setActiveStyles] = useState({
     bold: false,
@@ -111,18 +154,40 @@ export default function PQSLetterheadPage() {
     setPages(prev => prev.filter(p => p.id !== id));
   };
 
-  const updateImageStyle = (style: string, value: string) => {
-    if (selectedImage) {
-      if (style === 'float') {
-        selectedImage.style.float = value;
-        selectedImage.style.margin = value === 'none' ? '0' : '10px';
-        selectedImage.style.display = value === 'none' ? 'inline-block' : 'block';
-      } else if (style === 'width') {
-        selectedImage.style.width = value + '%';
-        selectedImage.style.height = 'auto';
-      }
-      setSelectedImage({...selectedImage} as any); // trigger re-render? No, just rely on the DOM.
-      // To force react re-render if needed, but not strictly necessary since DOM updates immediately.
+  const setWrapStyle = (wrapType: string) => {
+    if (!selectedImage) return;
+    
+    // Reset all wrap related styles first
+    selectedImage.style.float = 'none';
+    selectedImage.style.display = 'inline';
+    selectedImage.style.margin = '0';
+    selectedImage.style.position = 'static';
+    selectedImage.style.zIndex = 'auto';
+    selectedImage.style.clear = 'none';
+
+    switch (wrapType) {
+      case 'In Line with Text':
+        break;
+      case 'Square':
+      case 'Tight':
+      case 'Through':
+        selectedImage.style.display = 'block';
+        selectedImage.style.float = 'left';
+        selectedImage.style.margin = '10px';
+        break;
+      case 'Top and Bottom':
+        selectedImage.style.display = 'block';
+        selectedImage.style.clear = 'both';
+        selectedImage.style.margin = '10px auto';
+        break;
+      case 'Behind Text':
+        selectedImage.style.position = 'absolute';
+        selectedImage.style.zIndex = '-1';
+        break;
+      case 'In Front of Text':
+        selectedImage.style.position = 'absolute';
+        selectedImage.style.zIndex = '50';
+        break;
     }
   };
 
@@ -292,18 +357,21 @@ export default function PQSLetterheadPage() {
               
               {selectedImage && (
               <div className="pt-2 border-t border-slate-100 mb-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Image Formatting</label>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">Size:</span>
-                    <input type="range" min="10" max="100" defaultValue="50" onChange={(e) => updateImageStyle('width', e.target.value)} className="flex-1" />
-                  </div>
-                  <div className="flex gap-1">
-                    <button onClick={() => updateImageStyle('float', 'left')} className="flex-1 py-1 px-2 bg-white border border-slate-200 rounded text-xs hover:bg-slate-50">Wrap Left</button>
-                    <button onClick={() => updateImageStyle('float', 'none')} className="flex-1 py-1 px-2 bg-white border border-slate-200 rounded text-xs hover:bg-slate-50">In-line</button>
-                    <button onClick={() => updateImageStyle('float', 'right')} className="flex-1 py-1 px-2 bg-white border border-slate-200 rounded text-xs hover:bg-slate-50">Wrap Right</button>
-                  </div>
-                  <button onClick={deleteSelectedImage} className="w-full py-1.5 px-3 bg-red-50 text-red-600 rounded border border-red-200 text-xs font-bold hover:bg-red-100">Delete Image</button>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Wrap Text</label>
+                <div className="flex flex-col gap-2 relative">
+                  <select 
+                    onChange={(e) => setWrapStyle(e.target.value)}
+                    className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-xs focus:outline-none focus:border-blue-500 shadow-sm"
+                  >
+                    <option value="In Line with Text">In Line with Text</option>
+                    <option value="Square">Square</option>
+                    <option value="Tight">Tight</option>
+                    <option value="Through">Through</option>
+                    <option value="Top and Bottom">Top and Bottom</option>
+                    <option value="Behind Text">Behind Text</option>
+                    <option value="In Front of Text">In Front of Text</option>
+                  </select>
+                  <button onClick={deleteSelectedImage} className="w-full py-1.5 px-3 bg-white text-red-600 rounded border border-red-200 text-xs font-bold hover:bg-red-50 shadow-sm">Delete Image</button>
                 </div>
               </div>
             )}
@@ -320,6 +388,23 @@ export default function PQSLetterheadPage() {
         </div>
       </div>
 
+      {selectedImage && imageRect && (
+        <div 
+          className="fixed z-[9999] border-2 border-blue-500 pointer-events-none"
+          style={{
+            top: imageRect.top,
+            left: imageRect.left,
+            width: imageRect.width,
+            height: imageRect.height,
+          }}
+        >
+          {/* Resize Handle */}
+          <div 
+            className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-500 rounded-full cursor-nwse-resize pointer-events-auto"
+            onMouseDown={startImageResize}
+          />
+        </div>
+      )}
       <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-100 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
         <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print items-center">
           <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} className="p-2 rounded-lg hover:bg-slate-100"><ZoomIn size={18} /></button>
