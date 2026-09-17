@@ -43,7 +43,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
           tagName: "v6.2.${{ github.run_number }}"
-          releaseName: "SR-LAB Windows Executable (v6.2.${{ github.run_number }})"
+          releaseName: "SR-LAB Windows Executable (v3.0.0)"
           releaseBody: "Automated build triggered by a push to main."
           releaseDraft: false
           prerelease: false
