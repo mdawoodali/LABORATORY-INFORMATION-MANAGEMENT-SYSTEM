@@ -347,8 +347,8 @@ export default function PQSLetterheadPage() {
             </span>
           </div>
           {pages.length > 1 && (
-            <div className="absolute bottom-2 right-10 text-[10px] text-gray-400 font-sans">
-              Page {index + 1} of {pages.length}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] text-gray-400 font-sans tracking-widest uppercase">
+              PAGE {index + 1} OF {pages.length}
             </div>
           )}
         </div>
