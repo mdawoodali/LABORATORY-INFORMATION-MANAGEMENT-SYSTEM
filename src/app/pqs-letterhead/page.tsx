@@ -30,7 +30,7 @@ const bannerStyle: CSSProperties = { height: "30px", width: "auto", objectFit: "
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ZoomIn, ZoomOut, ArrowLeft, Printer, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, Heading3, Palette } from 'lucide-react';
+import { ZoomIn, ZoomOut, ArrowLeft, Printer, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, Heading3, Palette, Strikethrough, List, ListOrdered, Highlighter, AlignJustify, Baseline } from 'lucide-react';
 import { Rnd } from 'react-rnd';
 
 import { Roboto, Open_Sans, Lato, Montserrat, Merriweather, Playfair_Display, Source_Serif_4 } from 'next/font/google';
@@ -67,6 +67,39 @@ export default function PQSLetterheadPage() {
   const [blendMode, setBlendMode] = useState<string>('normal');
 
   const [activeFont, setActiveFont] = useState(FONTS[0].class);
+  const [activeStyles, setActiveStyles] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+    strikeThrough: false,
+    justifyLeft: true,
+    justifyCenter: false,
+    justifyRight: false,
+    justifyFull: false,
+    insertUnorderedList: false,
+    insertOrderedList: false,
+  });
+
+  const checkFormatting = () => {
+    setActiveStyles({
+      bold: document.queryCommandState('bold'),
+      italic: document.queryCommandState('italic'),
+      underline: document.queryCommandState('underline'),
+      strikeThrough: document.queryCommandState('strikeThrough'),
+      justifyLeft: document.queryCommandState('justifyLeft'),
+      justifyCenter: document.queryCommandState('justifyCenter'),
+      justifyRight: document.queryCommandState('justifyRight'),
+      justifyFull: document.queryCommandState('justifyFull'),
+      insertUnorderedList: document.queryCommandState('insertUnorderedList'),
+      insertOrderedList: document.queryCommandState('insertOrderedList'),
+    });
+  };
+
+  // Run format text and immediately check state
+  const handleFormat = (command: string, value?: string) => {
+    formatText(command, value);
+    setTimeout(checkFormatting, 50);
+  };
   const [pages, setPages] = useState([{ id: 'page-1' }]);
 
   const handleAddPage = () => {
@@ -163,32 +196,53 @@ export default function PQSLetterheadPage() {
             </label>
             <div className="space-y-3 p-3 bg-slate-100 rounded-xl border border-slate-200">
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Document Font</label>
-                <select onChange={(e) => setActiveFont(e.target.value)} value={activeFont} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#002f6c]/20">
-                  {FONTS.map(f => <option key={f.name} value={f.class}>{f.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Style & Align</label>
-                <div className="flex flex-wrap gap-1">
-                  <button onClick={() => formatText('bold')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50"><Bold size={14}/></button>
-                  <button onClick={() => formatText('italic')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50"><Italic size={14}/></button>
-                  <button onClick={() => formatText('underline')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50"><Underline size={14}/></button>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Font & Size</label>
+                <div className="flex gap-2 mb-2">
+                  <select onChange={(e) => setActiveFont(e.target.value)} value={activeFont} className="flex-1 px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50">
+                    {FONTS.map(f => <option key={f.name} value={f.class}>{f.name}</option>)}
+                  </select>
+                  <select onChange={(e) => handleFormat('fontSize', e.target.value)} defaultValue="3" className="w-16 px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50">
+                    <option value="1">8pt</option>
+                    <option value="2">10pt</option>
+                    <option value="3">12pt</option>
+                    <option value="4">14pt</option>
+                    <option value="5">18pt</option>
+                    <option value="6">24pt</option>
+                    <option value="7">36pt</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-wrap gap-1 mb-2">
+                  <button onClick={() => handleFormat('bold')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.bold ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Bold"><Bold size={14}/></button>
+                  <button onClick={() => handleFormat('italic')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.italic ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Italic"><Italic size={14}/></button>
+                  <button onClick={() => handleFormat('underline')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.underline ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Underline"><Underline size={14}/></button>
+                  <button onClick={() => handleFormat('strikeThrough')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.strikeThrough ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Strikethrough"><Strikethrough size={14}/></button>
+                  
                   <div className="w-px h-6 bg-slate-300 mx-1 self-center"></div>
-                  <button onClick={() => formatText('justifyLeft')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50"><AlignLeft size={14}/></button>
-                  <button onClick={() => formatText('justifyCenter')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50"><AlignCenter size={14}/></button>
-                  <button onClick={() => formatText('justifyRight')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50"><AlignRight size={14}/></button>
+                  
+                  <div className="relative flex items-center justify-center p-1.5 bg-white border border-slate-200 rounded hover:bg-slate-50" title="Text Color">
+                    <Baseline size={14} className="text-slate-700" />
+                    <input type="color" onChange={(e) => handleFormat('foreColor', e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+                  </div>
+                  <div className="relative flex items-center justify-center p-1.5 bg-white border border-slate-200 rounded hover:bg-slate-50" title="Highlight Color">
+                    <Highlighter size={14} className="text-slate-700" />
+                    <input type="color" onChange={(e) => handleFormat('backColor', e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1 mb-2">
+                  <button onClick={() => handleFormat('justifyLeft')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.justifyLeft ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Align Left"><AlignLeft size={14}/></button>
+                  <button onClick={() => handleFormat('justifyCenter')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.justifyCenter ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Center"><AlignCenter size={14}/></button>
+                  <button onClick={() => handleFormat('justifyRight')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.justifyRight ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Align Right"><AlignRight size={14}/></button>
+                  <button onClick={() => handleFormat('justifyFull')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.justifyFull ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Justify"><AlignJustify size={14}/></button>
+                  
+                  <div className="w-px h-6 bg-slate-300 mx-1 self-center"></div>
+                  
+                  <button onClick={() => handleFormat('insertUnorderedList')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.insertUnorderedList ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Bullet List"><List size={14}/></button>
+                  <button onClick={() => handleFormat('insertOrderedList')} className={`p-1.5 border rounded hover:bg-slate-100 ${activeStyles.insertOrderedList ? 'bg-slate-200 border-slate-400 shadow-inner' : 'bg-white border-slate-200'}`} title="Numbered List"><ListOrdered size={14}/></button>
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Headings</label>
-                <div className="flex flex-wrap gap-1">
-                  <button onClick={() => formatText('formatBlock', 'H1')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 font-bold text-xs">H1</button>
-                  <button onClick={() => formatText('formatBlock', 'H2')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 font-bold text-xs">H2</button>
-                  <button onClick={() => formatText('formatBlock', 'H3')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 font-bold text-xs">H3</button>
-                  <button onClick={() => formatText('formatBlock', 'P')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 font-bold text-xs">P</button>
-                </div>
-              </div>
+              
               <div className="pt-2 border-t border-slate-100">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Insert</label>
                 <div className="flex flex-wrap gap-2">
@@ -269,6 +323,8 @@ export default function PQSLetterheadPage() {
           className={`flex-1 px-10 outline-none relative z-10 mt-4 ${activeFont}`}
           contentEditable
           suppressContentEditableWarning
+          onKeyUp={checkFormatting}
+          onMouseUp={checkFormatting}
         >
           <p className="text-sm text-gray-800">Type your letter or report content here...</p>
         </div>
