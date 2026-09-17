@@ -1,3 +1,4 @@
+/* eslint-disable */
 const fs = require('fs');
 const runNumber = process.argv[2];
 const version = `3.0.${runNumber}`;

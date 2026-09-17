@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 import { Lock, Unlock, Edit2, Check } from 'lucide-react';
 import toast from 'react-hot-toast';

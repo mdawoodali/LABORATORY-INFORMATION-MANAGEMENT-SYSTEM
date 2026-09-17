@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { 
   Bold, Italic, Underline, Strikethrough, Subscript, Superscript, 

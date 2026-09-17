@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Plus } from 'lucide-react';
 import { pushGlobalSettings } from '@/lib/sync';

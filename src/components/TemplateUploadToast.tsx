@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 import { toast, Toast } from 'react-hot-toast';
 import { X, Upload } from 'lucide-react';

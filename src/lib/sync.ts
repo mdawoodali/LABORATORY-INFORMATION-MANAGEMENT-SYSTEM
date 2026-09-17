@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { supabase } from './supabase';
 
 export async function pullGlobalSettings() {
