@@ -30,7 +30,7 @@ const bannerStyle: CSSProperties = { height: "30px", width: "auto", objectFit: "
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ZoomIn, ZoomOut, ArrowLeft, Printer, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, Heading3, Palette, Strikethrough, List, ListOrdered, Highlighter, AlignJustify, Baseline } from 'lucide-react';
+import { ZoomIn, ZoomOut, ArrowLeft, Printer, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, Heading3, Palette, Strikethrough, List, ListOrdered, Highlighter, AlignJustify, Baseline, Trash2 } from 'lucide-react';
 import { Rnd } from 'react-rnd';
 
 import { Roboto, Open_Sans, Lato, Montserrat, Merriweather, Playfair_Display, Source_Serif_4 } from 'next/font/google';
@@ -104,6 +104,10 @@ export default function PQSLetterheadPage() {
 
   const handleAddPage = () => {
     setPages(prev => [...prev, { id: `page-${Date.now()}` }]);
+  };
+
+  const handleDeletePage = (id: string) => {
+    setPages(prev => prev.filter(p => p.id !== id));
   };
 
   const handleAddImage = () => {
@@ -265,8 +269,19 @@ export default function PQSLetterheadPage() {
           <div className="relative flex flex-col gap-8 pb-8">
             {pages.map((page, index) => (
               <div
-        key={page.id}
-        className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
+        key={page.id} className="flex flex-col mx-auto w-fit group">
+                {pages.length > 1 && (
+                  <div className="w-full flex justify-end mb-2 no-print opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleDeletePage(page.id)}
+                      className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 size={14} /> Delete Page {index + 1}
+                    </button>
+                  </div>
+                )}
+                <div
+                  className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
         style={pageStyle}
       >
         {index === 0 && showStamp && (
@@ -354,6 +369,7 @@ export default function PQSLetterheadPage() {
           )}
         </div>
       </div>
+              </div>
             ))}
           </div>
         </div>
