@@ -179,7 +179,13 @@ export default function PQSLetterheadPage() {
         </div>
         <div className="zoom-wrapper w-full origin-top md:transform-none flex flex-col items-center transition-transform" style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}>
           <div className="relative">
-            {showStamp && (
+            
+            
+            <div
+        className="pqs-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
+        style={pageStyle}
+      >
+        {showStamp && (
               <Rnd
                 size={{ width: stampSize.width, height: stampSize.height }}
                 position={{ x: stampPos.x, y: stampPos.y }}
@@ -189,6 +195,7 @@ export default function PQSLetterheadPage() {
                   setStampPos(position);
                 }}
                 bounds="parent"
+                scale={zoom}
                 className={`z-50 ${isGenerating ? '' : 'hover:outline hover:outline-2 hover:outline-blue-500/50'}`}
                 style={{ mixBlendMode: blendMode as any }}
                 enableResizing={!isGenerating}
@@ -197,12 +204,7 @@ export default function PQSLetterheadPage() {
                 <img src={'/stamp.png'} alt="Stamp" style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }} />
               </Rnd>
             )}
-            
-            <div
-        className="pqs-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
-        style={pageStyle}
-      >
-        {/* Watermark */}
+{/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
           <img src={WATERMARK_SRC} alt="Watermark" style={watermarkStyle} />
         </div>
