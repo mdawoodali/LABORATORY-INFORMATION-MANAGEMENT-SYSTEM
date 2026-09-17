@@ -27,7 +27,7 @@
   .font-gothic {
     font-family: "Old English Text MT", "Engravers Old English BT", "Diploma", "Blackletter", serif;
   }
-  .a4-page {
+  .report-a4-page {
     width: 210mm;
     min-width: 210mm;
     height: 297mm;
@@ -57,7 +57,7 @@
     display: none !important;
   }
 
-  .a4-page {
+  .report-a4-page {
     margin: 0;
     box-shadow: none;
     width: 210mm;
@@ -67,7 +67,7 @@
     page-break-after: always;
   }
   
-  .a4-page:last-child {
+  .report-a4-page:last-child {
     page-break-after: auto;
   }
 }

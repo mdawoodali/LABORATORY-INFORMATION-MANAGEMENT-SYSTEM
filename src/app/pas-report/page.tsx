@@ -690,7 +690,7 @@ function EditorContent() {
         >
         
         {/* PAGE 1 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+        <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
           <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
           <div className="flex-1">
             <PageOneData data={formData} />
@@ -700,7 +700,7 @@ function EditorContent() {
 
         {/* TEST PAGES (Dynamically chunked) */}
         {testChunks.map((chunk, index) => (
-          <div key={`test-page-${index}`} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+          <div key={`test-page-${index}`} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
             <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
             <div className="flex-1">
               <TestTable 
@@ -716,7 +716,7 @@ function EditorContent() {
 
         {/* PAGE 3 - Sample Image */}
         {sampleImages.length > 0 && (
-          <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+          <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
             <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
             <div className="flex-1 flex flex-col px-10">
                 <div className="flex-1 w-full relative">
@@ -741,7 +741,7 @@ function EditorContent() {
         {extraPages.map((page, index) => {
           const pageNum = 1 + testPagesCount + (sampleImages.length > 0 ? 1 : 0) + 1 + index;
           return (
-            <div key={page.id} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+            <div key={page.id} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
               <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
               <div className="flex-1 flex flex-col px-10 relative">
                 {page.image && (

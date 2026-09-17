@@ -503,7 +503,7 @@ function InvoiceContent() {
           const isLastPage = pageIndex === chunks.length - 1;
           
           return (
-            <div id={`invoice-page-${pageIndex}`} key={pageIndex} className="a4-page bg-white shadow-2xl border border-gray-300 shrink-0 py-8 px-10 flex flex-col font-sans relative mb-16" style={{ width: '794px', height: '1123px', fontSize: '13px' }}>
+            <div id={`invoice-page-${pageIndex}`} key={pageIndex} className="report-a4-page bg-white shadow-2xl border border-gray-300 shrink-0 py-8 px-10 flex flex-col font-sans relative mb-16" style={{ width: '794px', height: '1123px', fontSize: '13px' }}>
               
               {/* Header */}
               <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4">

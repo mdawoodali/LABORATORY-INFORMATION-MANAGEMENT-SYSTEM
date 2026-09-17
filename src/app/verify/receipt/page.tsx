@@ -222,7 +222,7 @@ function VerifyPage() {
         </div>
         
         {/* PAGE 1 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+        <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
           <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
           <div className="flex-1">
             <PageOneData data={formData} />
@@ -231,7 +231,7 @@ function VerifyPage() {
         </div>
 
         {/* PAGE 2 */}
-        <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+        <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
           <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
           <div className="flex-1 px-10">
             <TestTable tests={tests} data={formData} />
@@ -241,7 +241,7 @@ function VerifyPage() {
 
         {/* PAGE 3 - Sample Images */}
         {hasImages && (
-          <div className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+          <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
             <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
             <div className="flex-1 flex flex-col px-10">
               <div className="flex-1 w-full relative">
@@ -266,7 +266,7 @@ function VerifyPage() {
         {extraPages && extraPages.map((page, index) => {
           const pageNum = (hasImages ? 4 : 3) + index;
           return (
-            <div key={page.id || index} className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+            <div key={page.id || index} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
               <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
               <div className="flex-1 flex flex-col px-10 relative">
                 {page.image && (
