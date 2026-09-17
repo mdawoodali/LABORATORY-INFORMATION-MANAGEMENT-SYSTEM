@@ -155,7 +155,7 @@ export default function PQSLetterheadPage() {
           body, html { margin: 0 !important; padding: 0 !important; background: white !important; height: 100%; }
           .no-print { display: none !important; }
           .zoom-wrapper { transform: none !important; margin-bottom: 0 !important; }
-          .pqs-a4-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; min-height: 297mm !important; page-break-after: avoid; }
+          .pqs-a4-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; min-height: 297mm !important; page-break-after: always; }
         }
       `}} />
 
@@ -266,7 +266,7 @@ export default function PQSLetterheadPage() {
           <button onClick={() => setZoom(z => Math.max(0.4, z - 0.1))} className="p-2 rounded-lg hover:bg-slate-100"><ZoomOut size={18} /></button>
         </div>
         <div className="zoom-wrapper w-full origin-top md:transform-none flex flex-col items-center transition-transform" style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}>
-          <div className="relative flex flex-col gap-8 pb-8">
+          <div className="relative flex flex-col gap-8 pb-8 print:gap-0 print:pb-0">
             {pages.map((page, index) => (
               <div
         key={page.id} className="flex flex-col mx-auto w-fit group">
