@@ -68,6 +68,7 @@ export default function PQSLetterheadPage() {
 
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
   const [imageRect, setImageRect] = useState<DOMRect | null>(null);
+  const [guides, setGuides] = useState<{ v: number | null, h: number | null, pageId: string | null }>({ v: null, h: null, pageId: null });
   
   useEffect(() => {
     if (selectedImage) {
@@ -88,6 +89,85 @@ export default function PQSLetterheadPage() {
   }, [selectedImage]);
 
   // Handle visual resize handle drag
+  const startImageDrag = (e: React.MouseEvent) => {
+    // Only drag absolute images
+    if (!selectedImage || selectedImage.style.position !== 'absolute') return;
+    e.preventDefault();
+    e.stopPropagation(); // prevent triggering click
+    
+    const page = selectedImage.closest('.a4-page') as HTMLElement;
+    if (!page) return;
+    
+    // Find the page ID
+    const pageWrapper = page.parentElement;
+    const pageIdMatch = pageWrapper ? pageWrapper.getAttribute('data-page-id') : null;
+    
+    const startX = e.clientX;
+    const startY = e.clientY;
+    
+    const currentLeft = selectedImage.offsetLeft;
+    const currentTop = selectedImage.offsetTop;
+    
+    const imgWidth = selectedImage.offsetWidth;
+    const imgHeight = selectedImage.offsetHeight;
+    const pageWidth = page.offsetWidth;
+    const pageHeight = page.offsetHeight;
+    
+    const snapThreshold = 10;
+    
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      let deltaX = moveEvent.clientX - startX;
+      let deltaY = moveEvent.clientY - startY;
+      
+      let newLeft = currentLeft + deltaX / zoom;
+      let newTop = currentTop + deltaY / zoom;
+      
+      let vGuide = null;
+      let hGuide = null;
+      
+      const centerX = newLeft + imgWidth / 2;
+      const centerY = newTop + imgHeight / 2;
+      
+      // Snap X
+      if (Math.abs(centerX - pageWidth / 2) < snapThreshold) {
+        newLeft = pageWidth / 2 - imgWidth / 2;
+        vGuide = pageWidth / 2;
+      } else if (Math.abs(newLeft) < snapThreshold) {
+        newLeft = 0;
+        vGuide = 0;
+      } else if (Math.abs(newLeft + imgWidth - pageWidth) < snapThreshold) {
+        newLeft = pageWidth - imgWidth;
+        vGuide = pageWidth;
+      }
+      
+      // Snap Y
+      if (Math.abs(centerY - pageHeight / 2) < snapThreshold) {
+        newTop = pageHeight / 2 - imgHeight / 2;
+        hGuide = pageHeight / 2;
+      } else if (Math.abs(newTop) < snapThreshold) {
+        newTop = 0;
+        hGuide = 0;
+      } else if (Math.abs(newTop + imgHeight - pageHeight) < snapThreshold) {
+        newTop = pageHeight - imgHeight;
+        hGuide = pageHeight;
+      }
+      
+      selectedImage.style.left = `${newLeft}px`;
+      selectedImage.style.top = `${newTop}px`;
+      
+      setGuides({ v: vGuide, h: hGuide, pageId: pageIdMatch });
+    };
+    
+    const onMouseUp = () => {
+      setGuides({ v: null, h: null, pageId: null });
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
   const startImageResize = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!selectedImage) return;
@@ -99,8 +179,8 @@ export default function PQSLetterheadPage() {
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      selectedImage.style.width = `${startWidth + deltaX}px`;
-      selectedImage.style.height = `${(startWidth + deltaX) / ratio}px`;
+      selectedImage.style.width = `${startWidth + deltaX / zoom}px`;
+      selectedImage.style.height = `${(startWidth + deltaX / zoom) / ratio}px`;
     };
     const onMouseUp = () => {
       window.removeEventListener('mousemove', onMouseMove);
@@ -390,7 +470,8 @@ export default function PQSLetterheadPage() {
 
       {selectedImage && imageRect && (
         <div 
-          className="fixed z-[9999] border-2 border-blue-500 pointer-events-none"
+          className={`fixed z-[9999] border-2 border-blue-500 ${selectedImage?.style.position === 'absolute' ? 'cursor-move pointer-events-auto' : 'pointer-events-none'}`}
+          onMouseDown={selectedImage?.style.position === 'absolute' ? startImageDrag : undefined}
           style={{
             top: imageRect.top,
             left: imageRect.left,
@@ -415,7 +496,7 @@ export default function PQSLetterheadPage() {
           <div className="relative flex flex-col gap-8 pb-8 print:gap-0 print:pb-0">
             {pages.map((page, index) => (
               <div
-        key={page.id} className="flex flex-col mx-auto w-fit group">
+        key={page.id} className="flex flex-col mx-auto w-fit group" data-page-id={page.id}>
                 {pages.length > 1 && (
                   <div className="w-full flex justify-end mb-2 no-print opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -430,11 +511,41 @@ export default function PQSLetterheadPage() {
                   className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
         style={pageStyle}
       >
+        {/* Guides */}
+        {guides.pageId === page.id && guides.v !== null && (
+          <div className="absolute top-0 bottom-0 w-[1px] bg-[#ff00ff] z-[9999] pointer-events-none shadow-[0_0_4px_#ff00ff]" style={{ left: guides.v }} />
+        )}
+        {guides.pageId === page.id && guides.h !== null && (
+          <div className="absolute left-0 right-0 h-[1px] bg-[#ff00ff] z-[9999] pointer-events-none shadow-[0_0_4px_#ff00ff]" style={{ top: guides.h }} />
+        )}
         {index === 0 && showStamp && (
               <Rnd
                 size={{ width: stampSize.width, height: stampSize.height }}
                 position={{ x: stampPos.x, y: stampPos.y }}
-                onDragStop={(e, d) => setStampPos({ x: d.x, y: d.y })}
+                onDrag={(e, d) => {
+                  const snapThreshold = 10;
+                  const pageWidth = 794; // A4 px width
+                  const pageHeight = 1123; // A4 px height
+                  let vGuide = null;
+                  let hGuide = null;
+                  
+                  const centerX = d.x + stampSize.width / 2;
+                  const centerY = d.y + stampSize.height / 2;
+                  
+                  if (Math.abs(centerX - pageWidth / 2) < snapThreshold) { vGuide = pageWidth / 2; }
+                  else if (Math.abs(d.x) < snapThreshold) { vGuide = 0; }
+                  else if (Math.abs(d.x + stampSize.width - pageWidth) < snapThreshold) { vGuide = pageWidth; }
+                  
+                  if (Math.abs(centerY - pageHeight / 2) < snapThreshold) { hGuide = pageHeight / 2; }
+                  else if (Math.abs(d.y) < snapThreshold) { hGuide = 0; }
+                  else if (Math.abs(d.y + stampSize.height - pageHeight) < snapThreshold) { hGuide = pageHeight; }
+                  
+                  setGuides({ v: vGuide, h: hGuide, pageId: page.id });
+                }}
+                onDragStop={(e, d) => {
+                  setGuides({ v: null, h: null, pageId: null });
+                  setStampPos({ x: d.x, y: d.y });
+                }}
                 onResizeStop={(e, direction, ref, delta, position) => {
                   setStampSize({ width: parseInt(ref.style.width, 10), height: parseInt(ref.style.height, 10) });
                   setStampPos(position);
