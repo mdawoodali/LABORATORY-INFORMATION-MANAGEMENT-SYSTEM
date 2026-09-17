@@ -67,6 +67,29 @@ export default function PQSLetterheadPage() {
   const [blendMode, setBlendMode] = useState<string>('normal');
 
   const [activeFont, setActiveFont] = useState(FONTS[0].class);
+  const [pages, setPages] = useState([{ id: 'page-1' }]);
+
+  const handleAddPage = () => {
+    setPages(prev => [...prev, { id: `page-${Date.now()}` }]);
+  };
+
+  const handleAddImage = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (readerEvent) => {
+          const content = readerEvent.target?.result;
+          document.execCommand('insertImage', false, content as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -87,7 +110,7 @@ export default function PQSLetterheadPage() {
   if (!isClient) return null;
 
   return (
-    <div className={`flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden ${activeFont}`}>
+    <div className={`flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans`}>
       <style dangerouslySetInnerHTML={{__html: `
         @page { size: A4; margin: 0; }
         @media print {
@@ -136,7 +159,7 @@ export default function PQSLetterheadPage() {
 
           <div className="space-y-4 pt-4 border-t border-slate-200">
             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <Type size={16} /> Text Formatting (MS Word Style)
+              <Type size={16} /> Text Formatting
             </label>
             <div className="space-y-3 p-3 bg-slate-100 rounded-xl border border-slate-200">
               <div>
@@ -166,6 +189,13 @@ export default function PQSLetterheadPage() {
                   <button onClick={() => formatText('formatBlock', 'P')} className="p-2 bg-white border border-slate-200 rounded hover:bg-slate-50 font-bold text-xs">P</button>
                 </div>
               </div>
+              <div className="pt-2 border-t border-slate-100">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Insert</label>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={handleAddImage} className="flex-1 py-2 px-3 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-bold text-xs text-slate-700 transition-colors shadow-sm">Add Image</button>
+                  <button onClick={handleAddPage} className="flex-1 py-2 px-3 bg-[#002f6c] text-white rounded-lg hover:bg-[#001f4c] font-bold text-xs transition-colors shadow-sm">Add Page</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -178,14 +208,14 @@ export default function PQSLetterheadPage() {
           <button onClick={() => setZoom(z => Math.max(0.4, z - 0.1))} className="p-2 rounded-lg hover:bg-slate-100"><ZoomOut size={18} /></button>
         </div>
         <div className="zoom-wrapper w-full origin-top md:transform-none flex flex-col items-center transition-transform" style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}>
-          <div className="relative">
-            
-            
-            <div
+          <div className="relative flex flex-col gap-8 pb-8">
+            {pages.map((page, index) => (
+              <div
+        key={page.id}
         className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
         style={pageStyle}
       >
-        {showStamp && (
+        {index === 0 && showStamp && (
               <Rnd
                 size={{ width: stampSize.width, height: stampSize.height }}
                 position={{ x: stampPos.x, y: stampPos.y }}
@@ -236,7 +266,7 @@ export default function PQSLetterheadPage() {
 
         {/* Body text */}
         <div
-          className="flex-1 px-10 outline-none relative z-10 mt-4"
+          className={`flex-1 px-10 outline-none relative z-10 mt-4 ${activeFont}`}
           contentEditable
           suppressContentEditableWarning
         >
@@ -260,9 +290,14 @@ export default function PQSLetterheadPage() {
               precisionqualityserviceslabs@gmail.com
             </span>
           </div>
+          {pages.length > 1 && (
+            <div className="absolute bottom-2 right-10 text-[10px] text-gray-400 font-sans">
+              Page {index + 1} of {pages.length}
+            </div>
+          )}
         </div>
       </div>
-            
+            ))}
           </div>
         </div>
       </div>
