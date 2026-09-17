@@ -274,12 +274,12 @@ export default function PQSLetterheadPage() {
         </div>
 
         {/* Footer */}
-        <div className="w-full flex flex-col items-center mt-auto pb-8 relative z-10">
+        <div className="w-full flex flex-col items-center mt-auto relative z-10">
           {/* Uses w-full + px-10 rather than an arbitrary width like w-[95%]: arbitrary
               values only exist if this file is covered by the Tailwind `content` config,
               and when that class goes missing the row collapses to fit its text and
               justify-between has no space left to distribute. */}
-          <div className="w-full px-10 flex justify-between items-center gap-8 border-t border-gray-400 pt-4 text-xs text-gray-500">
+          <div className="w-full px-10 flex justify-between items-center gap-8 border-t border-gray-400 py-6 text-xs text-gray-500">
             <span className="whitespace-nowrap" contentEditable suppressContentEditableWarning>
               R-332/9, Dastagir, F.B Area, Karachi, 75950.
             </span>
