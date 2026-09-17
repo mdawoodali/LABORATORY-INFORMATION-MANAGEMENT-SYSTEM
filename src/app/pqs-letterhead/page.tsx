@@ -320,13 +320,14 @@ export default function PQSLetterheadPage() {
 
         {/* Body text */}
         <div
-          className={`flex-1 px-10 outline-none relative z-10 mt-4 ${activeFont}`}
+          className={`flex-1 px-10 outline-none relative z-10 mt-4 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 empty:before:cursor-text ${activeFont}`}
+          data-placeholder="Type your letter or report content here..."
           contentEditable
           suppressContentEditableWarning
           onKeyUp={checkFormatting}
           onMouseUp={checkFormatting}
         >
-          <p className="text-sm text-gray-800">Type your letter or report content here...</p>
+          
         </div>
 
         {/* Footer */}
