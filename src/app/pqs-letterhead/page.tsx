@@ -66,6 +66,7 @@ export default function PQSLetterheadPage() {
   const [stampSize, setStampSize] = useState({ width: 200, height: 200 });
   const [blendMode, setBlendMode] = useState<string>('normal');
 
+  const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
   const [activeFont, setActiveFont] = useState(FONTS[0].class);
   const [activeStyles, setActiveStyles] = useState({
     bold: false,
@@ -110,6 +111,38 @@ export default function PQSLetterheadPage() {
     setPages(prev => prev.filter(p => p.id !== id));
   };
 
+  const updateImageStyle = (style: string, value: string) => {
+    if (selectedImage) {
+      if (style === 'float') {
+        selectedImage.style.float = value;
+        selectedImage.style.margin = value === 'none' ? '0' : '10px';
+        selectedImage.style.display = value === 'none' ? 'inline-block' : 'block';
+      } else if (style === 'width') {
+        selectedImage.style.width = value + '%';
+        selectedImage.style.height = 'auto';
+      }
+      setSelectedImage({...selectedImage} as any); // trigger re-render? No, just rely on the DOM.
+      // To force react re-render if needed, but not strictly necessary since DOM updates immediately.
+    }
+  };
+
+  const deleteSelectedImage = () => {
+    if (selectedImage) {
+      selectedImage.remove();
+      setSelectedImage(null);
+    }
+  };
+  
+  const handleEditorClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG' && target.closest('[contentEditable="true"]')) {
+      setSelectedImage(target as HTMLImageElement);
+    } else {
+      setSelectedImage(null);
+    }
+    checkFormatting();
+  };
+
   const handleAddImage = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -121,6 +154,16 @@ export default function PQSLetterheadPage() {
         reader.onload = (readerEvent) => {
           const content = readerEvent.target?.result;
           document.execCommand('insertImage', false, content as string);
+          // Find the newly inserted image and cap its max-width
+          setTimeout(() => {
+            const imgs = document.querySelectorAll('.a4-page img');
+            imgs.forEach((img: any) => {
+              if (!img.style.maxWidth) {
+                img.style.maxWidth = '100%';
+                img.style.cursor = 'pointer';
+              }
+            });
+          }, 100);
         };
         reader.readAsDataURL(file);
       }
@@ -247,7 +290,25 @@ export default function PQSLetterheadPage() {
                 </div>
               </div>
               
-              <div className="pt-2 border-t border-slate-100">
+              {selectedImage && (
+              <div className="pt-2 border-t border-slate-100 mb-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Image Formatting</label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500">Size:</span>
+                    <input type="range" min="10" max="100" defaultValue="50" onChange={(e) => updateImageStyle('width', e.target.value)} className="flex-1" />
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => updateImageStyle('float', 'left')} className="flex-1 py-1 px-2 bg-white border border-slate-200 rounded text-xs hover:bg-slate-50">Wrap Left</button>
+                    <button onClick={() => updateImageStyle('float', 'none')} className="flex-1 py-1 px-2 bg-white border border-slate-200 rounded text-xs hover:bg-slate-50">In-line</button>
+                    <button onClick={() => updateImageStyle('float', 'right')} className="flex-1 py-1 px-2 bg-white border border-slate-200 rounded text-xs hover:bg-slate-50">Wrap Right</button>
+                  </div>
+                  <button onClick={deleteSelectedImage} className="w-full py-1.5 px-3 bg-red-50 text-red-600 rounded border border-red-200 text-xs font-bold hover:bg-red-100">Delete Image</button>
+                </div>
+              </div>
+            )}
+            
+            <div className="pt-2 border-t border-slate-100">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Insert</label>
                 <div className="flex flex-wrap gap-2">
                   <button onClick={handleAddImage} className="flex-1 py-2 px-3 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-bold text-xs text-slate-700 transition-colors shadow-sm">Add Image</button>
@@ -340,7 +401,7 @@ export default function PQSLetterheadPage() {
           contentEditable
           suppressContentEditableWarning
           onKeyUp={checkFormatting}
-          onMouseUp={checkFormatting}
+          onMouseUp={handleEditorClick}
         >
           
         </div>
