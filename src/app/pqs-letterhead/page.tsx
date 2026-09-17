@@ -95,7 +95,7 @@ export default function PQSLetterheadPage() {
           body, html { margin: 0 !important; padding: 0 !important; background: white !important; height: 100%; }
           .no-print { display: none !important; }
           .zoom-wrapper { transform: none !important; margin-bottom: 0 !important; }
-          .a4-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; min-height: 297mm !important; page-break-after: avoid; }
+          .pqs-a4-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; min-height: 297mm !important; page-break-after: avoid; }
         }
       `}} />
 
@@ -199,7 +199,7 @@ export default function PQSLetterheadPage() {
             )}
             
             <div
-        className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
+        className="pqs-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
         style={pageStyle}
       >
         {/* Watermark */}
