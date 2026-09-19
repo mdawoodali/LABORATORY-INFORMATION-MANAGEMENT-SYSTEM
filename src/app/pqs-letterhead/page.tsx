@@ -226,6 +226,49 @@ export default function PQSLetterheadPage() {
     setTimeout(checkFormatting, 50);
   };
   const [pages, setPages] = useState([{ id: 'page-1' }]);
+  const [fileName, setFileName] = useState("");
+  const [customFonts, setCustomFonts] = useState<{name: string, class: string}[]>([]);
+
+  const handleImportFont = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.ttf,.woff,.woff2,.otf';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (readerEvent) => {
+          const content = readerEvent.target?.result as string;
+          const fontName = `CustomFont_${Date.now()}`;
+          const newStyle = document.createElement('style');
+          newStyle.innerHTML = `
+            @font-face {
+              font-family: '${fontName}';
+              src: url('${content}');
+            }
+            .font-${fontName} {
+              font-family: '${fontName}' !important;
+            }
+          `;
+          document.head.appendChild(newStyle);
+          const newFontClass = `font-${fontName}`;
+          
+          setCustomFonts(prev => [...prev, { name: file.name.split('.')[0], class: newFontClass }]);
+          setActiveFont(newFontClass);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
+
+  const handleFontChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === 'IMPORT_FONT') {
+      handleImportFont();
+    } else {
+      setActiveFont(e.target.value);
+    }
+  };
 
   const handleAddPage = () => {
     setPages(prev => [...prev, { id: `page-${Date.now()}` }]);
@@ -416,8 +459,16 @@ export default function PQSLetterheadPage() {
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Font & Size</label>
                 <div className="flex gap-2 mb-2">
-                  <select onChange={(e) => setActiveFont(e.target.value)} value={activeFont} className="flex-1 px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50">
-                    {FONTS.map(f => <option key={f.name} value={f.class}>{f.name}</option>)}
+                  <select onChange={handleFontChange} value={activeFont} className="flex-1 px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50">
+                    <option value="IMPORT_FONT" className="font-bold text-[#002f6c] bg-slate-50">+ Import Font...</option>
+                    {customFonts.length > 0 && (
+                      <optgroup label="Custom Fonts">
+                        {customFonts.map(f => <option key={f.name} value={f.class}>{f.name}</option>)}
+                      </optgroup>
+                    )}
+                    <optgroup label="System Fonts">
+                      {FONTS.map(f => <option key={f.name} value={f.class}>{f.name}</option>)}
+                    </optgroup>
                   </select>
                   <select onChange={(e) => handleFormat('fontSize', e.target.value)} defaultValue="3" className="w-16 px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50">
                     <option value="1">8pt</option>
