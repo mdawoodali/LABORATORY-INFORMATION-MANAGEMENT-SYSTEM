@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { extractAndSaveOptions } from '@/lib/sync';
 import { Printer, ArrowLeft, Plus, Trash2, Mail } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
 import PQSWordmark from '@/components/report/PQSWordmark';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
 import DropdownInput from '@/components/form/DropdownInput';
@@ -342,6 +343,97 @@ function InvoiceContent() {
     }
   };
   const [mobileStep, setMobileStep] = React.useState<1 | 2>(1);
+  const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
+  const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
+
+  const isPageEmpty = () => {
+    const hasItems = items.length > 0 && items.some((i: any) => i.description !== '' || i.amount !== 0);
+    const hasClientInfo = formData.customerName !== '' || formData.companyAddress !== '' || formData.contactDetail !== '';
+    return !hasItems && !hasClientInfo;
+  };
+
+  useEffect(() => {
+    let unlisten: () => void;
+    if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+      import('@tauri-apps/api/window').then((module) => {
+        const appWindow = module.getCurrentWindow ? module.getCurrentWindow() : (module as any).appWindow;
+        if (appWindow && appWindow.onCloseRequested) {
+            appWindow.onCloseRequested((event: any) => {
+              if (!isPageEmpty()) {
+                event.preventDefault();
+                setUnsavedAction('CLOSE');
+                setUnsavedModalOpen(true);
+              }
+            }).then((unl: any) => { unlisten = unl; });
+        }
+      });
+    }
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isPageEmpty()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (unlisten) unlisten();
+    };
+  }, [items, formData]);
+
+  const handleSilentSave = async (filename: string) => {
+    setIsGenerating(true);
+    try {
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pageElements = document.querySelectorAll('.a4-page');
+      for (let i = 0; i < pageElements.length; i++) {
+        const page = pageElements[i] as HTMLElement;
+        const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
+        const imgData = canvas.toDataURL('image/png');
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+      }
+
+      const pdfBlob = pdf.output('blob');
+
+      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+         const { saveSilentBackup } = await import('@/utils/exportManager');
+         await saveSilentBackup(filename, pdfBlob, true, 'invoice');
+      } else {
+         pdf.save(filename + ".pdf");
+      }
+      
+      setUnsavedModalOpen(false);
+      
+      if (unsavedAction === 'BACK') {
+        router.push('/');
+      } else if (unsavedAction === 'CLOSE') {
+        if ((window as any).__TAURI__) {
+            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {});
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleUnsavedDontSave = async () => {
+      setUnsavedModalOpen(false);
+      if (unsavedAction === 'BACK') {
+        router.push('/');
+      } else if (unsavedAction === 'CLOSE') {
+        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {});
+        }
+      }
+  };
 
   if (isLoading) {
     return <div className="flex min-h-screen items-center justify-center text-gray-500">Loading invoice...</div>;
@@ -349,6 +441,14 @@ function InvoiceContent() {
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
+      <UnsavedModal 
+        isOpen={unsavedModalOpen}
+        action={unsavedAction}
+        defaultFilename="Untitled Invoice"
+        onCancel={() => setUnsavedModalOpen(false)}
+        onDontSave={handleUnsavedDontSave}
+        onSave={handleSilentSave}
+      />
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t border-gray-200 flex z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <button 
@@ -369,7 +469,14 @@ function InvoiceContent() {
       <div className={`${mobileStep === 1 ? 'flex' : 'hidden'} md:flex w-full md:w-[450px] bg-white border-r shadow-lg flex-col z-10 no-print h-full pb-14 md:pb-0`}>
         <div className="p-4 border-b bg-slate-900 text-white flex gap-3 shrink-0 items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/')} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all">
+            <button onClick={() => {
+            if (!isPageEmpty()) {
+              setUnsavedAction('BACK');
+              setUnsavedModalOpen(true);
+            } else {
+              router.push('/');
+            }
+          }} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all">
               <ArrowLeft size={16} />
             </button>
             <h2 className="font-bold text-lg tracking-wider">Invoice Editor</h2>

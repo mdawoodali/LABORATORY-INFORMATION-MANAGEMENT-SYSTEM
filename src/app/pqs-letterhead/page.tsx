@@ -33,6 +33,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ZoomIn, ZoomOut, ArrowLeft, Printer, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, Heading3, Palette, Strikethrough, List, ListOrdered, Highlighter, AlignJustify, Baseline, Trash2 } from 'lucide-react';
 import { Rnd } from 'react-rnd';
+import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
 
 import { Roboto, Open_Sans, Lato, Montserrat, Merriweather, Playfair_Display, Source_Serif_4 } from 'next/font/google';
 
@@ -295,6 +296,105 @@ export default function PQSLetterheadPage() {
   const [fileName, setFileName] = useState("");
   const [customFonts, setCustomFonts] = useState<{name: string, class: string}[]>([]);
 
+  const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
+  const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
+
+  const isPageEmpty = () => {
+    const pgs = document.querySelectorAll('.a4-page');
+    let hasContent = false;
+    pgs.forEach(p => {
+        if (p.textContent?.trim() !== '' || p.querySelector('img')) hasContent = true;
+    });
+    return !hasContent;
+  };
+
+  useEffect(() => {
+    let unlisten: () => void;
+    if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+      import('@tauri-apps/api/window').then((module) => {
+        const appWindow = module.getCurrentWindow ? module.getCurrentWindow() : (module as any).appWindow;
+        if (appWindow && appWindow.onCloseRequested) {
+            appWindow.onCloseRequested((event: any) => {
+              if (!isPageEmpty()) {
+                event.preventDefault();
+                setUnsavedAction('CLOSE');
+                setUnsavedModalOpen(true);
+              }
+            }).then((unl: any) => { unlisten = unl; });
+        }
+      });
+    }
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isPageEmpty()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (unlisten) unlisten();
+    };
+  }, []);
+
+  const handleSilentSave = async (filename: string) => {
+    setIsGenerating(true);
+    try {
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pageElements = document.querySelectorAll('.a4-page');
+      for (let i = 0; i < pageElements.length; i++) {
+        const page = pageElements[i] as HTMLElement;
+        const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
+        const imgData = canvas.toDataURL('image/png');
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+      }
+
+      const pdfBlob = pdf.output('blob');
+
+      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+         const { saveSilentBackup } = await import('@/utils/exportManager');
+         await saveSilentBackup(filename, pdfBlob, true, 'letterhead');
+      } else {
+         pdf.save(filename + ".pdf");
+      }
+      
+      setUnsavedModalOpen(false);
+      
+      if (unsavedAction === 'BACK') {
+        router.push('/');
+      } else if (unsavedAction === 'CLOSE') {
+        if ((window as any).__TAURI__) {
+            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {
+                import('@tauri-apps/plugin-process').then(m => (m as any).exit(0)).catch(() => {});
+            });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleUnsavedDontSave = async () => {
+      setUnsavedModalOpen(false);
+      if (unsavedAction === 'BACK') {
+        router.push('/');
+      } else if (unsavedAction === 'CLOSE') {
+        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {
+                import('@tauri-apps/plugin-process').then(m => (m as any).exit(0)).catch(() => {});
+            });
+        }
+      }
+  };
+
   const handleImportFont = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -496,10 +596,25 @@ export default function PQSLetterheadPage() {
         }
       `}} />
 
+      <UnsavedModal 
+        isOpen={unsavedModalOpen}
+        action={unsavedAction}
+        defaultFilename="Untitled Letterhead"
+        onCancel={() => setUnsavedModalOpen(false)}
+        onDontSave={handleUnsavedDontSave}
+        onSave={handleSilentSave}
+      />
       {/* Sidebar */}
       <div className="w-full md:w-[400px] h-auto md:h-full bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl md:shadow-none no-print overflow-hidden shrink-0">
         <div className="flex-none p-4 md:p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-          <button onClick={() => router.push('/')} className="p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-xl transition-all" title="Back to Home">
+          <button onClick={() => {
+            if (!isPageEmpty()) {
+              setUnsavedAction('BACK');
+              setUnsavedModalOpen(true);
+            } else {
+              router.push('/');
+            }
+          }} className="p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-xl transition-all" title="Back to Home">
             <ArrowLeft size={20} />
           </button>
           <div className="text-sm font-semibold text-slate-700">PQS Letterhead</div>

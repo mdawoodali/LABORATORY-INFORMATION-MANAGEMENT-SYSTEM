@@ -24,6 +24,7 @@ import { supabase } from '@/lib/supabase';
 import { extractAndSaveOptions } from '@/lib/sync';
 import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut } from 'lucide-react';
+import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
 
 function EditorContent() {
   const router = useRouter();
@@ -42,6 +43,105 @@ function EditorContent() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [password, setPassword] = useState('');
+  
+  const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
+  const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
+
+  const isPageEmpty = () => {
+    if (reportId || templateId) return false;
+    const isFormModified = (formData as any).customerName !== '' || (formData as any).sampleName !== '';
+    const hasTests = tests.some(t => (t as any).parameter !== '' || t.result !== '');
+    const hasImages = sampleImages.length > 0;
+    const hasExtraPages = extraPages.length > 0;
+    return !isFormModified && !hasTests && !hasImages && !hasExtraPages;
+  };
+
+  useEffect(() => {
+    let unlisten: () => void;
+    if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+      import('@tauri-apps/api/window').then((module) => {
+        const appWindow = module.getCurrentWindow ? module.getCurrentWindow() : (module as any).appWindow;
+        if (appWindow && appWindow.onCloseRequested) {
+            appWindow.onCloseRequested((event: any) => {
+              if (!isPageEmpty()) {
+                event.preventDefault();
+                setUnsavedAction('CLOSE');
+                setUnsavedModalOpen(true);
+              }
+            }).then((unl: any) => { unlisten = unl; });
+        }
+      });
+    }
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isPageEmpty()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (unlisten) unlisten();
+    };
+  }, [formData, tests, sampleImages, extraPages, reportId, templateId]);
+
+  const handleSilentSave = async (filename: string) => {
+    setIsGenerating(true);
+    try {
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pageElements = document.querySelectorAll('.a4-page');
+      for (let i = 0; i < pageElements.length; i++) {
+        const page = pageElements[i] as HTMLElement;
+        const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
+        const imgData = canvas.toDataURL('image/png');
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+      }
+
+      const pdfBlob = pdf.output('blob');
+
+      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+         const { saveSilentBackup } = await import('@/utils/exportManager');
+         await saveSilentBackup(filename, pdfBlob, true, 'report');
+      } else {
+         pdf.save(filename + ".pdf");
+      }
+      
+      setUnsavedModalOpen(false);
+      
+      if (unsavedAction === 'BACK') {
+        router.push('/');
+      } else if (unsavedAction === 'CLOSE') {
+        if ((window as any).__TAURI__) {
+            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {
+                import('@tauri-apps/plugin-process').then(m => (m as any).exit(0)).catch(() => {});
+            });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleUnsavedDontSave = async () => {
+      setUnsavedModalOpen(false);
+      if (unsavedAction === 'BACK') {
+        router.push('/');
+      } else if (unsavedAction === 'CLOSE') {
+        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {
+                import('@tauri-apps/plugin-process').then(m => (m as any).exit(0)).catch(() => {});
+            });
+        }
+      }
+  };
   
   // Undo/Redo state
   const [history, setHistory] = useState<string[]>([]);
@@ -419,6 +519,14 @@ function EditorContent() {
           setBrandSettings={setBrandSettings}
         />
       )}
+      <UnsavedModal 
+        isOpen={unsavedModalOpen}
+        action={unsavedAction}
+        defaultFilename="Untitled Report"
+        onCancel={() => setUnsavedModalOpen(false)}
+        onDontSave={handleUnsavedDontSave}
+        onSave={handleSilentSave}
+      />
       <ReportForm 
         formData={formData}
         updateField={updateField}
@@ -435,7 +543,14 @@ function EditorContent() {
         removeImage={(id) => setSampleImages(prev => prev.filter(img => img.id !== id))}
         handlePrint={handlePrint}
         onSaveTemplate={handleSaveTemplate}
-        onGoHome={() => router.push('/')}
+        onGoHome={() => {
+            if (!isPageEmpty()) {
+              setUnsavedAction('BACK');
+              setUnsavedModalOpen(true);
+            } else {
+              router.push('/');
+            }
+          }}
         onOpenSettings={() => setShowSettings(true)}
         brandSettings={brandSettings}
         extraPages={extraPages}
