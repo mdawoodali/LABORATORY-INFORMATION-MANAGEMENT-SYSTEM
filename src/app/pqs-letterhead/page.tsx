@@ -298,6 +298,7 @@ export default function PQSLetterheadPage() {
   const [customFonts, setCustomFonts] = useState<{name: string, class: string}[]>([]);
 
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
+    const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
   const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
 
   const isPageEmpty = () => {
@@ -420,8 +421,8 @@ export default function PQSLetterheadPage() {
           document.head.appendChild(newStyle);
           const newFontClass = `font-${fontName}`;
           
-          setCustomFonts(prev => [...prev, { name: file.name.split('.')[0], class: newFontClass }]);
-          setActiveFont(newFontClass);
+          setCustomFonts(prev => [...prev, { name: file.name.split('.')[0], class: fontName }]);
+          handleFontChange(fontName);
         };
         reader.readAsDataURL(file);
       }
@@ -429,12 +430,15 @@ export default function PQSLetterheadPage() {
     input.click();
   };
 
-  const handleFontChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (e.target.value === 'IMPORT_FONT') {
-      handleImportFont();
-    } else {
-      setActiveFont(e.target.value);
+  const handleFontChange = (fontValue: string) => {
+    if (lastSelection.current) {
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(lastSelection.current);
     }
+    document.execCommand('fontName', false, fontValue);
+    setActiveFont(fontValue);
+    checkFormatting();
   };
 
   const handleAddPage = () => {
@@ -666,17 +670,60 @@ export default function PQSLetterheadPage() {
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Font & Size</label>
                 <div className="flex gap-2 mb-2">
-                  <select onChange={handleFontChange} value={activeFont} className="flex-1 px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50">
-                    <option value="IMPORT_FONT" className="font-bold text-[#002f6c] bg-slate-50">+ Import Font...</option>
-                    {customFonts.length > 0 && (
-                      <optgroup label="Custom Fonts">
-                        {customFonts.map(f => <option key={f.name} value={f.class}>{f.name}</option>)}
-                      </optgroup>
+                  
+                  <div className="relative flex-1">
+                    <button 
+                      onClick={() => setFontDropdownOpen(!fontDropdownOpen)}
+                      className="w-full text-left px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50 flex justify-between items-center"
+                    >
+                      <span className="truncate">{FONTS.find(f => f.class === activeFont)?.name || customFonts.find(f => f.class === activeFont)?.name || activeFont || 'Default (System)'}</span>
+                      <span className="text-slate-400 text-[10px]">▼</span>
+                    </button>
+                    
+                    {fontDropdownOpen && (
+                      <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-slate-200 shadow-xl rounded-lg z-50 flex flex-col max-h-64">
+                        <button 
+                          onClick={() => { setFontDropdownOpen(false); handleImportFont(); }}
+                          className="sticky top-0 z-10 w-full text-left px-3 py-2 text-sm font-bold text-[#002f6c] bg-slate-50 hover:bg-slate-100 border-b border-slate-200"
+                        >
+                          + Import Font...
+                        </button>
+                        
+                        <div className="overflow-y-auto overflow-x-hidden flex-1">
+                          {customFonts.length > 0 && (
+                            <div className="py-1">
+                              <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50">Custom Fonts</div>
+                              {customFonts.map(f => (
+                                <button 
+                                  key={f.name}
+                                  onClick={() => { setFontDropdownOpen(false); handleFontChange(f.class); }}
+                                  className="w-full text-left px-3 py-1.5 text-sm hover:bg-slate-100 truncate"
+                                  style={{ fontFamily: f.class }}
+                                >
+                                  {f.name}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          
+                          <div className="py-1">
+                            <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50">System Fonts</div>
+                            {FONTS.map(f => (
+                              <button 
+                                key={f.name}
+                                onClick={() => { setFontDropdownOpen(false); handleFontChange(f.class); }}
+                                className="w-full text-left px-3 py-1.5 text-sm hover:bg-slate-100 truncate"
+                                style={{ fontFamily: f.class }}
+                              >
+                                {f.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     )}
-                    <optgroup label="System Fonts">
-                      {FONTS.map(f => <option key={f.name} value={f.class}>{f.name}</option>)}
-                    </optgroup>
-                  </select>
+                  </div>
+
                   <input
                     type="number"
                     step="0.5"
