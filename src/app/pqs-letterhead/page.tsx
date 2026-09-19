@@ -46,6 +46,17 @@ const fontSourceSerif = Source_Serif_4({ subsets: ['latin'] });
 
 const FONTS = [
   { name: 'Default (System)', class: 'font-sans' },
+  { name: 'Arial', class: 'font-arial' },
+  { name: 'Calibri', class: 'font-calibri' },
+  { name: 'Comic Sans MS', class: 'font-comic' },
+  { name: 'Courier New', class: 'font-courier' },
+  { name: 'Garamond', class: 'font-garamond' },
+  { name: 'Georgia', class: 'font-georgia' },
+  { name: 'Impact', class: 'font-impact' },
+  { name: 'Tahoma', class: 'font-tahoma' },
+  { name: 'Times New Roman', class: 'font-times' },
+  { name: 'Trebuchet MS', class: 'font-trebuchet' },
+  { name: 'Verdana', class: 'font-verdana' },
   { name: 'Roboto', class: fontRoboto.className },
   { name: 'Open Sans', class: fontOpenSans.className },
   { name: 'Lato', class: fontLato.className },
