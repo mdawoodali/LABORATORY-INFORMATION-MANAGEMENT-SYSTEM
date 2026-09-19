@@ -28,7 +28,7 @@ export default function Updater() {
         
         toast((t) => (
           <div className="flex flex-col gap-2">
-            <span className="font-semibold">Update Available ({update.version})</span>
+            <span className="font-semibold">Update Available ({update.version.split('.').slice(0, 2).join('.')})</span>
             <span className="text-sm">A new version is available. Would you like to install it now?</span>
             <div className="flex gap-2 mt-2">
               <button 
