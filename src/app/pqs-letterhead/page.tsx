@@ -102,13 +102,25 @@ export default function PQSLetterheadPage() {
 
   // Handle visual resize handle drag
   const startImageDrag = (e: React.MouseEvent) => {
-    // Only drag absolute images
-    if (!selectedImage || selectedImage.style.position !== 'absolute') return;
+    if (!selectedImage) return;
     e.preventDefault();
     e.stopPropagation(); // prevent triggering click
     
     const page = selectedImage.closest('.a4-page') as HTMLElement;
     if (!page) return;
+
+    if (selectedImage.style.position !== 'absolute') {
+      const rect = selectedImage.getBoundingClientRect();
+      const pageRect = page.getBoundingClientRect();
+      selectedImage.style.position = 'absolute';
+      selectedImage.style.zIndex = '50';
+      selectedImage.style.left = `${(rect.left - pageRect.left) / zoom}px`;
+      selectedImage.style.top = `${(rect.top - pageRect.top) / zoom}px`;
+      selectedImage.style.display = 'block';
+      selectedImage.style.margin = '0';
+      selectedImage.style.float = 'none';
+      selectedImage.style.clear = 'none';
+    }
     
     // Find the page ID
     const pageWrapper = page.parentElement;
@@ -167,6 +179,7 @@ export default function PQSLetterheadPage() {
       selectedImage.style.left = `${newLeft}px`;
       selectedImage.style.top = `${newTop}px`;
       
+      setImageRect(selectedImage.getBoundingClientRect());
       setGuides({ v: vGuide, h: hGuide, pageId: pageIdMatch });
     };
     
@@ -622,8 +635,8 @@ export default function PQSLetterheadPage() {
 
       {selectedImage && imageRect && (
         <div 
-          className={`fixed z-[9999] border-2 border-blue-500 ${selectedImage?.style.position === 'absolute' ? 'cursor-move pointer-events-auto' : 'pointer-events-none'}`}
-          onMouseDown={selectedImage?.style.position === 'absolute' ? startImageDrag : undefined}
+          className="fixed z-[9999] border-2 border-blue-500 cursor-move pointer-events-auto"
+          onMouseDown={startImageDrag}
           style={{
             top: imageRect.top,
             left: imageRect.left,
