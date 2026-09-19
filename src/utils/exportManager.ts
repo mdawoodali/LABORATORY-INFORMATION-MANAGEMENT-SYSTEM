@@ -31,7 +31,7 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
       
       const safeReportNo = reportNo.replace(/[^a-zA-Z0-9-_ \.]/g, '_');
       
-      const folderCategory = type === 'invoice' ? 'INVOICES' : type === 'letterhead' ? 'LETTERHEAD' : 'REPORTS';
+      const folderCategory = type === 'invoice' ? 'INVOICES' : type === 'letterhead' ? 'Letterhead' : 'REPORTS';
       const reportFolderPath = `${baseValidPath}\\${folderCategory}\\${y}\\${monthName}\\${dateStr}\\${safeReportNo}`;
       await mkdir(reportFolderPath, { recursive: true });
 
@@ -62,9 +62,9 @@ export const saveSilentBackup = async (reportNo: string, pdfBlob: Blob, isSilent
           const opts = { mode: 'readwrite' as const };
           if (await dirHandle.queryPermission(opts) === 'granted' || await dirHandle.requestPermission(opts) === 'granted') {
             
-            // Replicate structure: LIMS BACKUP / {REPORTS|INVOICES|LETTERHEAD} / y / monthName / dateStr / safeReportNo
+            // Replicate structure: LIMS BACKUP / {REPORTS|INVOICES|Letterhead} / y / monthName / dateStr / safeReportNo
             const safeReportNo = reportNo.replace(/[^a-zA-Z0-9-_ \.]/g, '_');
-            const folderCategory = type === 'invoice' ? 'INVOICES' : type === 'letterhead' ? 'LETTERHEAD' : 'REPORTS';
+            const folderCategory = type === 'invoice' ? 'INVOICES' : type === 'letterhead' ? 'Letterhead' : 'REPORTS';
             
             let currentDir = dirHandle;
             const pathParts = ['LIMS BACKUP', folderCategory, String(y), monthName, dateStr, safeReportNo];

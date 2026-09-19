@@ -290,6 +290,13 @@ export default function PQSLetterheadPage() {
   };
 
   const handleAddImage = () => {
+    // save selection before input opens and steals focus
+    const selection = window.getSelection();
+    let savedRange: Range | null = null;
+    if (selection && selection.rangeCount > 0) {
+      savedRange = selection.getRangeAt(0).cloneRange();
+    }
+
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -298,18 +305,36 @@ export default function PQSLetterheadPage() {
       if (file) {
         const reader = new FileReader();
         reader.onload = (readerEvent) => {
-          const content = readerEvent.target?.result;
-          document.execCommand('insertImage', false, content as string);
-          // Find the newly inserted image and cap its max-width
-          setTimeout(() => {
-            const imgs = document.querySelectorAll('.a4-page img');
-            imgs.forEach((img: any) => {
-              if (!img.style.maxWidth) {
-                img.style.maxWidth = '100%';
-                img.style.cursor = 'pointer';
-              }
-            });
-          }, 100);
+          const content = readerEvent.target?.result as string;
+          
+          if (savedRange) {
+            const sel = window.getSelection();
+            sel?.removeAllRanges();
+            sel?.addRange(savedRange);
+          }
+
+          const inserted = document.execCommand('insertImage', false, content);
+          
+          if (!inserted) {
+            const targetDiv = document.querySelector('.a4-page div[data-placeholder]') as HTMLElement;
+            if (targetDiv) {
+              const img = document.createElement('img');
+              img.src = content;
+              img.style.maxWidth = '100%';
+              img.style.cursor = 'pointer';
+              targetDiv.appendChild(img);
+            }
+          } else {
+            setTimeout(() => {
+              const imgs = document.querySelectorAll('.a4-page img');
+              imgs.forEach((img: any) => {
+                if (!img.style.maxWidth) {
+                  img.style.maxWidth = '100%';
+                  img.style.cursor = 'pointer';
+                }
+              });
+            }, 100);
+          }
         };
         reader.readAsDataURL(file);
       }
