@@ -1,7 +1,7 @@
 /* eslint-disable */
 const fs = require('fs');
 const runNumber = process.argv[2];
-const version = `3.0.${runNumber}`;
+const version = `6.3.${runNumber}`;
 
 // tauri.conf.json
 const tauriConfPath = 'src-tauri/tauri.conf.json';
