@@ -590,7 +590,7 @@ export default function PQSLetterheadPage() {
         @page { size: A4; margin: 0; }
         @media print {
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body, html { margin: 0 !important; padding: 0 !important; background: white !important; height: 100%; }
+          body, html { margin: 0 !important; padding: 0 !important; background: white !important; height: auto !important; }
           .no-print { display: none !important; }
           .zoom-wrapper { transform: none !important; margin-bottom: 0 !important; }
           .pqs-a4-page { box-shadow: none !important; border: none !important; margin: 0 !important; width: 210mm !important; height: 297mm !important; min-height: 297mm !important; page-break-after: always; }
