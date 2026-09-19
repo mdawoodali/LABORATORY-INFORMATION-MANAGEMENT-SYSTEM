@@ -399,7 +399,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
               <Clock size={14} />
-              Recent Reports
+              Recent Files
             </h2>
             <div className="relative w-full sm:w-64">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -407,7 +407,7 @@ export default function HomePage() {
               </div>
               <input
                 type="text"
-                placeholder="Search by date, report #, applicant..."
+                placeholder="Search by date, file #, applicant..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2b579a] transition-shadow"
@@ -431,7 +431,8 @@ export default function HomePage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-3 font-semibold">Report #</th>
+                    <th className="px-6 py-3 font-semibold">File #</th>
+                    <th className="px-6 py-3 font-semibold">File Type</th>
                     <th className="px-6 py-3 font-semibold">Applicant</th>
                     <th className="px-6 py-3 font-semibold">Date</th>
                     <th className="px-6 py-3 font-semibold">Password</th>
@@ -446,6 +447,7 @@ export default function HomePage() {
                       onClick={() => handleOpenReport(report)}
                     >
                       <td className="px-6 py-4 font-mono font-bold text-[#2b579a]">{report.reportNo}</td>
+                      <td className="px-6 py-4 text-gray-500 capitalize">{report.type}</td>
                       <td className="px-6 py-4 text-gray-700">{report.applicant}</td>
                       <td className="px-6 py-4 text-gray-500">{report.date}</td>
                       <td className="px-6 py-4 text-gray-500 font-mono text-xs">{report.password || '-'}</td>

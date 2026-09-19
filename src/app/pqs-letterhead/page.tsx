@@ -71,6 +71,7 @@ export default function PQSLetterheadPage() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   
+    const [filename, setFilename] = useState('');
   const [zoom, setZoom] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -617,11 +618,22 @@ export default function PQSLetterheadPage() {
           }} className="p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-xl transition-all" title="Back to Home">
             <ArrowLeft size={20} />
           </button>
-          <div className="text-sm font-semibold text-slate-700">PQS Letterhead</div>
-          <button onClick={handlePrint} className="flex items-center gap-2 bg-[#002f6c] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#001f4d] transition-all shadow-md hover:shadow-lg active:scale-95">
-            <Printer size={16} />
-            <span>Print / PDF</span>
-          </button>
+          
+          
+  <div className="flex items-center gap-2">
+    <input 
+      type="text" 
+      placeholder="File # (letth-1234)"
+      value={filename}
+      onChange={(e) => setFilename(e.target.value)}
+      className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#002f6c] w-32 md:w-48"
+    />
+    <button onClick={handlePrint} className="flex items-center gap-2 bg-[#002f6c] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#001f4d] transition-all shadow-md hover:shadow-lg active:scale-95">
+      <Printer size={16} />
+      <span>Print / PDF</span>
+    </button>
+  </div>
+  
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
