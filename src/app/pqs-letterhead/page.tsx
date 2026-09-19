@@ -29,7 +29,7 @@ const bannerStyle: CSSProperties = { height: "30px", width: "auto", objectFit: "
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ZoomIn, ZoomOut, ArrowLeft, Printer, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, Heading3, Palette, Strikethrough, List, ListOrdered, Highlighter, AlignJustify, Baseline, Trash2 } from 'lucide-react';
 import { Rnd } from 'react-rnd';
@@ -205,7 +205,48 @@ export default function PQSLetterheadPage() {
     insertOrderedList: false,
   });
 
+  const applyCustomFontSize = (size: string) => {
+    if (!size || typeof document === 'undefined') return;
+    
+    if (lastSelection.current) {
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(lastSelection.current);
+    }
+    
+    // Mark existing size=7 elements so we don't touch them
+    const existing = document.querySelectorAll('font[size="7"]');
+    existing.forEach((el) => el.setAttribute('data-skip-size', 'true'));
+    
+    document.execCommand('fontSize', false, '7');
+    
+    // Only target the newly created ones
+    const newFonts = document.querySelectorAll('font[size="7"]:not([data-skip-size="true"])');
+    newFonts.forEach((font: any) => {
+      font.removeAttribute('size');
+      font.style.fontSize = `${size}pt`;
+    });
+    
+    // Cleanup
+    existing.forEach((el) => el.removeAttribute('data-skip-size'));
+    
+    checkFormatting();
+  };
+
   const checkFormatting = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      let node: Node | null = range.commonAncestorContainer;
+      while (node && node !== document.body) {
+        if ((node as HTMLElement).classList?.contains('a4-page')) {
+          lastSelection.current = range.cloneRange();
+          break;
+        }
+        node = node.parentNode as Node;
+      }
+    }
+
     setActiveStyles({
       bold: document.queryCommandState('bold'),
       italic: document.queryCommandState('italic'),
@@ -226,6 +267,7 @@ export default function PQSLetterheadPage() {
     setTimeout(checkFormatting, 50);
   };
   const [pages, setPages] = useState([{ id: 'page-1' }]);
+  const lastSelection = useRef<Range | null>(null);
   const [fileName, setFileName] = useState("");
   const [customFonts, setCustomFonts] = useState<{name: string, class: string}[]>([]);
 
@@ -329,6 +371,20 @@ export default function PQSLetterheadPage() {
     } else {
       setSelectedImage(null);
     }
+
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      let node: Node | null = range.commonAncestorContainer;
+      while (node && node !== document.body) {
+        if ((node as HTMLElement).classList?.contains('a4-page')) {
+          lastSelection.current = range.cloneRange();
+          break;
+        }
+        node = node.parentNode as Node;
+      }
+    }
+
     checkFormatting();
   };
 
@@ -470,15 +526,23 @@ export default function PQSLetterheadPage() {
                       {FONTS.map(f => <option key={f.name} value={f.class}>{f.name}</option>)}
                     </optgroup>
                   </select>
-                  <select onChange={(e) => handleFormat('fontSize', e.target.value)} defaultValue="3" className="w-16 px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50">
-                    <option value="1">8pt</option>
-                    <option value="2">10pt</option>
-                    <option value="3">12pt</option>
-                    <option value="4">14pt</option>
-                    <option value="5">18pt</option>
-                    <option value="6">24pt</option>
-                    <option value="7">36pt</option>
-                  </select>
+                  <input
+                    type="number"
+                    step="0.5"
+                    list="font-sizes"
+                    defaultValue="12"
+                    onChange={(e) => applyCustomFontSize(e.target.value)}
+                    className="w-20 px-2 py-1.5 bg-white border border-slate-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#002f6c]/50"
+                  />
+                  <datalist id="font-sizes">
+                    <option value="8" />
+                    <option value="10" />
+                    <option value="12" />
+                    <option value="14" />
+                    <option value="18" />
+                    <option value="24" />
+                    <option value="36" />
+                  </datalist>
                 </div>
 
                 <div className="flex flex-wrap gap-1 mb-2">
