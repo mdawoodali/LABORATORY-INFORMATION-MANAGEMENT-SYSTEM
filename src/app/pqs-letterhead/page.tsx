@@ -697,8 +697,7 @@ export default function PQSLetterheadPage() {
                                 <button 
                                   key={f.name}
                                   onClick={() => { setFontDropdownOpen(false); handleFontChange(f.class); }}
-                                  className="w-full text-left px-3 py-1.5 text-sm hover:bg-slate-100 truncate"
-                                  style={{ fontFamily: f.class }}
+                                  className={`w-full text-left px-3 py-1.5 text-sm hover:bg-slate-100 truncate ${f.class}`}
                                 >
                                   {f.name}
                                 </button>
@@ -712,8 +711,7 @@ export default function PQSLetterheadPage() {
                               <button 
                                 key={f.name}
                                 onClick={() => { setFontDropdownOpen(false); handleFontChange(f.class); }}
-                                className="w-full text-left px-3 py-1.5 text-sm hover:bg-slate-100 truncate"
-                                style={{ fontFamily: f.class }}
+                                className={`w-full text-left px-3 py-1.5 text-sm hover:bg-slate-100 truncate ${f.class}`}
                               >
                                 {f.name}
                               </button>

@@ -64,7 +64,7 @@ export default function HomeTab() {
             className="border border-slate-300 rounded px-2 py-1 text-xs w-28 bg-white"
             defaultValue="Arial"
           >
-            {FONTS.map(f => <option key={f} value={f}>{f}</option>)}
+            {FONTS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
           </select>
           
           <select 
