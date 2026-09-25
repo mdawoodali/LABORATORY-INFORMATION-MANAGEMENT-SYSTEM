@@ -583,9 +583,10 @@ export default function PQSLetterheadPage() {
         const { supabase } = await import('@/lib/supabase');
         await supabase.from('receipts').upsert({
           id: filename,
-          report_no: filename,
-          type: 'letterhead',
-          created_at: new Date().toISOString()
+          data: { 
+            type: 'letterhead', 
+            formData: { applicant: 'Letterhead' }
+          }
         });
       } catch (err) {
         console.error('Failed to save to dashboard:', err);
