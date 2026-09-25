@@ -252,12 +252,11 @@ export default function HomePage() {
         <div className="flex items-center gap-6">
           {/* Typographic Logo */}
           <div className="flex items-center gap-4 text-[#2b579a]">
-            <img src="/lab_icon.jpg" alt="Logo Mark" className="w-20 h-20 object-contain mix-blend-multiply contrast-125 brightness-110 scale-125 origin-left" />
-            <div className="font-[family-name:var(--font-montserrat)] tracking-tight leading-none flex items-center">
-              <span className="text-2xl font-black text-gray-800">L.I.M.S</span>
-              <span className="text-xs font-semibold ml-3 text-gray-500 uppercase tracking-widest hidden md:inline-block">
+            <img src="/pqs-logo.png" alt="PQS Logo" className="w-16 h-16 object-contain shrink-0" />
+            <div className="flex flex-col justify-center gap-1 mt-1">
+              <img src="/pqs-wordmark.png" alt="PQS Wordmark" className="h-6 object-contain origin-left" style={{ objectPosition: 'left center' }} />
+              <span className="text-[10.5px] font-semibold text-gray-500 uppercase tracking-widest leading-none">
                 Laboratory Information Management System
-                <span className="ml-2 text-gray-400 font-mono text-[10px] bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v{appVersion.split('.').slice(0, 2).join('.')}</span>
               </span>
             </div>
           </div>

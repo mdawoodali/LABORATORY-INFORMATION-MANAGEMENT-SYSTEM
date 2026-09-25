@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   description: "LIMS Desktop & Web Application",
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon.jpg?v=4',
-    apple: '/icon.jpg?v=4',
+    icon: '/pqs-logo.png',
+    apple: '/pqs-logo.png',
   },
 };
 
