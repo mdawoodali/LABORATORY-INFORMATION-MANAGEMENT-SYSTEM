@@ -282,20 +282,6 @@ export default function HomePage() {
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-5">New</h2>
           <div className="flex gap-5 flex-wrap">
             
-            {/* Default Template Card */}
-            <motion.button
-              whileHover={{ y: -5 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleNewReport}
-              className="group relative w-[180px] h-[240px] bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-[#2b579a] hover:shadow-lg transition-all cursor-pointer flex flex-col justify-end"
-            >
-              <div className="absolute inset-0 bg-[url('/template_preview.png')] bg-cover bg-top bg-no-repeat opacity-80 group-hover:opacity-100 transition-opacity"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/10 to-transparent"></div>
-              <div className="relative z-10 p-3 w-full text-center bg-white/80 backdrop-blur-sm border-t border-gray-100">
-                <span className="text-sm font-bold text-gray-700 group-hover:text-[#2b579a] transition-colors">Default</span>
-              </div>
-            </motion.button>
-
             {/* Template Cards */}
             {templates.map((template, idx) => (
               <motion.div 
@@ -420,7 +406,7 @@ export default function HomePage() {
             <div className="bg-white rounded-lg border border-gray-200 p-10 text-center text-gray-400">
               <FileText size={40} className="mx-auto mb-3 text-gray-300" />
               {recentReports.length === 0 ? (
-                <p className="text-sm">No reports yet. Click <strong>&quot;Default&quot;</strong> to create one.</p>
+                <p className="text-sm">No reports yet. Click a template above to create one.</p>
               ) : (
                 <p className="text-sm">No reports match your search.</p>
               )}
