@@ -169,7 +169,8 @@ function InvoiceContent() {
 
     const timer = setTimeout(async () => {
       try {
-        const reportPassword = password || formData.invoiceNo?.slice(-4) || '1234';
+        const isDefaultPassword = id && password === id.slice(-4);
+          const reportPassword = (!password || isDefaultPassword) ? (formData.invoiceNo?.slice(-4) || '1234') : password;
           
         const { supabase } = await import('@/lib/supabase');
         extractAndSaveOptions(formData, 'invoice');
@@ -238,7 +239,10 @@ function InvoiceContent() {
   };
 
   const handlePrint = async () => {
-    if (!password) {
+    const isDefaultPassword = id && password === id.slice(-4);
+    const effectivePassword = (!password || isDefaultPassword) ? (formData.invoiceNo?.slice(-4) || '1234') : password;
+    
+    if (!effectivePassword) {
       toast.error("Please enter a password to lock the PDF.");
       return;
     }
@@ -282,7 +286,7 @@ function InvoiceContent() {
         const { supabase } = await import('@/lib/supabase');
         supabase.from('receipts').upsert({
             id: formData.invoiceNo,
-            password: password || formData.invoiceNo.slice(-4) || '1234', // use the explicitly entered password
+            password: (!password || (id && password === id.slice(-4))) ? (formData.invoiceNo?.slice(-4) || '1234') : password,
             data: { formData, items, type: 'invoice' }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           

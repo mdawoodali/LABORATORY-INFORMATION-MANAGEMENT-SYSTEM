@@ -289,7 +289,10 @@ function EditorContent() {
   };
 
   const handlePrint = async (password?: string, isSilent: boolean = false) => {
-    if (!password && !isSilent) {
+    const isDefaultPassword = reportId && password === reportId.slice(-4);
+    const effectivePassword = (!password || isDefaultPassword) ? (formData.reportNo?.slice(-4) || '1234') : password;
+    
+    if (!effectivePassword && !isSilent) {
       toast.error("Please enter a password to lock the PDF.");
       return;
     }
@@ -304,7 +307,7 @@ function EditorContent() {
         extractAndSaveOptions(formData, 'report');
           supabase.from('receipts').upsert({
             id: formData.reportNo,
-            password: password || formData.reportNo.slice(-4) || '1234',
+            password: effectivePassword,
             data: { formData, tests, sampleImages, extraPages }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -350,10 +353,10 @@ function EditorContent() {
         format: 'a4'
       };
 
-      if (password) {
+      if (effectivePassword) {
         jsPdfOptions.encryption = {
-          userPassword: password,
-          ownerPassword: password,
+          userPassword: effectivePassword,
+          ownerPassword: effectivePassword,
           userPermissions: ['print']
         };
       }
@@ -404,7 +407,8 @@ function EditorContent() {
     // Debounce auto-save by 3 seconds of inactivity
     const timer = setTimeout(async () => {
       try {
-        const reportPassword = password || formData.reportNo?.slice(-4) || '1234';
+        const isDefaultPassword = reportId && password === reportId.slice(-4);
+        const reportPassword = (!password || isDefaultPassword) ? (formData.reportNo?.slice(-4) || '1234') : password;
           
         supabase.from('receipts').upsert({
             id: formData.reportNo,

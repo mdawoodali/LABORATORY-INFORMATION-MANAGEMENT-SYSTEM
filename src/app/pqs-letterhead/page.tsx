@@ -906,21 +906,24 @@ export default function PQSLetterheadPage() {
         </div>
 
         {/* Header */}
-        <div className="relative flex justify-center items-end mb-6 border-b-2 border-gray-800 pb-2 px-10 pt-4 z-10">
+        <div className="relative w-full grid grid-cols-[1fr_auto_1fr] items-end mb-6 border-b-2 border-gray-800 pb-2 px-10 pt-4 z-10">
+          {/* Empty left column */}
+          <div></div>
+
           {/* Centered logo stack */}
           <div className="flex flex-col items-center gap-1">
             <img src={LOGO_SRC} alt="PQS Logo" style={logoStyle} />
             <img src={BANNER_SRC} alt="Precision Quality Services" style={bannerStyle} />
-            <div className="text-xs text-gray-500" contentEditable suppressContentEditableWarning>
+            <div className="text-xs text-gray-500 whitespace-nowrap" contentEditable suppressContentEditableWarning>
               Providing Consultancy Services to Textile Industries
             </div>
           </div>
 
-          {/* Date field, sitting right above the header divider line */}
-          <div className="absolute right-6 bottom-1 flex items-center gap-1.5 text-xs">
+          {/* Date field, right column */}
+          <div className="flex justify-end items-center gap-1.5 text-xs pb-1">
             <span className="font-bold whitespace-nowrap">Date:</span>
             <span
-              className="w-28 text-left border-b border-gray-400"
+              className="w-28 text-left border-b border-gray-400 outline-none block"
               contentEditable
               suppressContentEditableWarning
             >
