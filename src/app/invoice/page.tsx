@@ -351,7 +351,12 @@ function InvoiceContent() {
   const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
 
   const isPageEmpty = () => {
-    const hasItems = items.length > 0 && items.some((i: any) => i.description !== '' || i.amount !== 0);
+    const hasItems = items.some((i: any) => 
+      (i.test !== '' && i.test !== 'Water Analysis') || 
+      (i.method !== '' && i.method !== 'ISO 1234') || 
+      i.price !== '' || 
+      i.samples !== ''
+    );
     const hasClientInfo = formData.customerName !== '' || formData.companyAddress !== '' || formData.contactDetail !== '';
     return !hasItems && !hasClientInfo;
   };
