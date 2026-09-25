@@ -574,8 +574,24 @@ export default function PQSLetterheadPage() {
     setIsClient(true);
   }, []);
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     setIsGenerating(true);
+    
+    // Save to dashboard recent files
+    if (filename) {
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        await supabase.from('receipts').upsert({
+          id: filename,
+          report_no: filename,
+          type: 'letterhead',
+          created_at: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error('Failed to save to dashboard:', err);
+      }
+    }
+
     setTimeout(() => {
       window.print();
       setIsGenerating(false);
