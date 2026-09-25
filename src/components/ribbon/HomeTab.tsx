@@ -1,10 +1,10 @@
 /* eslint-disable */
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Bold, Italic, Underline, Strikethrough, Subscript, Superscript, 
   AlignLeft, AlignCenter, AlignRight, AlignJustify, 
   List, ListOrdered, IndentDecrease, IndentIncrease,
-  RemoveFormatting, Palette, Highlighter, Type, Scissors, Copy, ClipboardPaste
+  RemoveFormatting, Palette, Highlighter, Type, Scissors, Copy, ClipboardPaste, ChevronDown
 } from 'lucide-react';
 
 const FONTS = [
@@ -25,7 +25,52 @@ const Button = ({ icon: Icon, onClick, title, active = false }: { icon: any, onC
   </button>
 );
 
+
+const FontDropdown = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="border border-slate-300 rounded px-2 py-1 text-xs w-32 bg-white flex justify-between items-center h-[26px]"
+      >
+        <span className="truncate" style={{ fontFamily: value }}>{value}</span>
+        <ChevronDown size={12} className="text-slate-500 flex-shrink-0 ml-1" />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-slate-200 shadow-xl rounded-lg z-50 flex flex-col max-h-64 overflow-y-auto">
+          {FONTS.map(f => (
+            <button
+              key={f}
+              onClick={() => { onChange(f); setIsOpen(false); }}
+              className="w-full text-left px-3 py-1.5 text-sm hover:bg-slate-100 truncate"
+              style={{ fontFamily: f }}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function HomeTab() {
+  const [currentFont, setCurrentFont] = useState("Arial");
+
   const exec = (command: string, value: string = '') => {
     document.execCommand(command, false, value);
     // Keep focus on the editor if it was focused
@@ -59,13 +104,10 @@ export default function HomeTab() {
         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Font</div>
         
         <div className="flex gap-2 items-center">
-          <select 
-            onChange={(e) => exec('fontName', e.target.value)}
-            className="border border-slate-300 rounded px-2 py-1 text-xs w-28 bg-white"
-            defaultValue="Arial"
-          >
-            {FONTS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
-          </select>
+          <FontDropdown 
+            value={currentFont} 
+            onChange={(val) => { setCurrentFont(val); exec('fontName', val); }} 
+          />
           
           <select 
             onChange={(e) => exec('fontSize', e.target.value)}
