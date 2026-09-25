@@ -449,7 +449,15 @@ export default function HomePage() {
               </table>
             </div>
           )}
-        </motion.div>
+                </motion.div>
+
+        {/* Footer */}
+        <div className="mt-8 mb-4 text-center flex flex-col items-center justify-center gap-1 text-[10px] text-gray-400">
+          <span>v{appVersion.split('.').slice(0, 2).join('.')}</span>
+          <span>
+            Powered by <a href="https://www.linkedin.com/in/areeb-iqbal-63b444247/" target="_blank" rel="noopener noreferrer" className="hover:text-[#2b579a] hover:underline font-medium transition-colors">Areeb Iqbal</a>
+          </span>
+        </div>
       </div>
     </div>
   );
