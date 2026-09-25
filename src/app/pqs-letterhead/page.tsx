@@ -955,7 +955,7 @@ export default function PQSLetterheadPage() {
               R-332/9, Dastagir, F.B Area, Karachi, 75950.
             </span>
             <span className="whitespace-nowrap" contentEditable suppressContentEditableWarning>
-              03322673373 | 03333769174
+              03322673373
             </span>
             <span className="whitespace-nowrap" contentEditable suppressContentEditableWarning>
               precisionqualityserviceslabs@gmail.com
