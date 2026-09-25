@@ -343,6 +343,20 @@ export default function PQSLetterheadPage() {
 
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
+    
+    if (filename) {
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        await supabase.from('receipts').upsert({
+          id: filename,
+          data: { type: 'letterhead', formData: { applicant: 'Letterhead' } },
+          created_at: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     try {
       const { jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;

@@ -389,6 +389,20 @@ function InvoiceContent() {
 
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
+    
+    if (filename) {
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        await supabase.from('receipts').upsert({
+          id: formData.invoiceNo || filename,
+          password: (!password || (id && password === id.slice(-4))) ? (formData.invoiceNo?.slice(-4) || '1234') : password,
+          data: { formData, items, type: 'invoice' }
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     try {
       const { jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;
