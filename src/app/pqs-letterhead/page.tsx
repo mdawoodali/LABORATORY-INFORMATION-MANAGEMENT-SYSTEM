@@ -586,7 +586,8 @@ export default function PQSLetterheadPage() {
           data: { 
             type: 'letterhead', 
             formData: { applicant: 'Letterhead' }
-          }
+          },
+          created_at: new Date().toISOString()
         });
       } catch (err) {
         console.error('Failed to save to dashboard:', err);

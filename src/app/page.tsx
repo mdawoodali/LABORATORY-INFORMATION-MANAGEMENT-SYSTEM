@@ -15,7 +15,7 @@ import { pushGlobalSettings } from '@/lib/sync';
 
 export default function HomePage() {
   const router = useRouter();
-  const [appVersion, setAppVersion] = useState(packageJson.version);
+  const appVersion = packageJson.version;
 
   useEffect(() => {
     // Relying on packageJson.version directly

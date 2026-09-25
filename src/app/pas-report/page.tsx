@@ -24,6 +24,7 @@ import CanvaImage from '@/components/report/CanvaImage';
 import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { extractAndSaveOptions } from '@/lib/sync';
+import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
 import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut, Printer } from 'lucide-react';
 import QRCode from 'react-qr-code';
@@ -196,7 +197,7 @@ function EditorContent() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setBrandSettings(parsed);
         if (parsed.companyName) {
           document.title = parsed.companyName;
@@ -238,7 +239,7 @@ function EditorContent() {
             dynamicFields[index] = { ...dynamicFields[index], value: getTodayDate() };
           }
 
-          // eslint-disable-next-line react-hooks/set-state-in-effect
+           
           setFormData({
             ...template.formData,
             dynamicFields,
@@ -353,9 +354,9 @@ function EditorContent() {
       // 1. Try to save to DB (Handle RLS gracefully based on settings)
       // Force auto backup to always be enabled
       const autoBackup = true;
-      if (autoBackup) {
+      if (autoBackup && formData.reportNo) {
         extractAndSaveOptions(formData, 'report');
-          supabase.from('receipts').upsert({
+          if (formData.reportNo) supabase.from('receipts').upsert({
             id: formData.reportNo,
             password: effectivePassword,
             data: { formData, tests, sampleImages, extraPages }
@@ -494,7 +495,7 @@ function EditorContent() {
         const isDefaultPassword = reportId && password === reportId.slice(-4);
         const reportPassword = (!password || isDefaultPassword) ? (formData.reportNo?.slice(-4) || '1234') : password;
           
-        supabase.from('receipts').upsert({
+        if (formData.reportNo) supabase.from('receipts').upsert({
             id: formData.reportNo,
             password: reportPassword,
             data: { formData, tests, sampleImages, extraPages }
@@ -600,8 +601,83 @@ function EditorContent() {
   }
 
 
+  const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
+  const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
+
+  const isPageEmpty = () => {
+    return formData.applicant === '' && tests.every(t => t.test === '' && t.method === '' && t.result === '');
+  };
+
+  useEffect(() => {
+    let unlisten: () => void;
+    if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+      import('@tauri-apps/api/window').then((module) => {
+        const appWindow = module.getCurrentWindow ? module.getCurrentWindow() : (module as any).appWindow;
+        if (appWindow && appWindow.onCloseRequested) {
+            appWindow.onCloseRequested((event: any) => {
+              if (!isPageEmpty()) {
+                event.preventDefault();
+                setUnsavedAction('CLOSE');
+                setUnsavedModalOpen(true);
+              }
+            }).then((unl: any) => { unlisten = unl; });
+        }
+      });
+    }
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isPageEmpty()) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (unlisten) unlisten();
+    };
+  }, [formData, tests]);
+
+  const handleSilentSave = async (filename: string) => {
+    await handlePrint();
+    setUnsavedModalOpen(false);
+    if (unsavedAction === 'BACK') {
+      router.push('/');
+    } else if (unsavedAction === 'CLOSE') {
+      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+        import('@tauri-apps/api/window').then((m) => {
+          const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+          if (w) w.close();
+        });
+      }
+    }
+  };
+
+  const handleUnsavedDontSave = async () => {
+      setUnsavedModalOpen(false);
+      if (unsavedAction === 'BACK') {
+        router.push('/');
+      } else if (unsavedAction === 'CLOSE') {
+        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+          import('@tauri-apps/api/window').then((m) => {
+            const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+            if (w) w.close();
+          });
+        }
+      }
+  };
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
+      <UnsavedModal 
+        isOpen={unsavedModalOpen}
+        action={unsavedAction}
+        defaultFilename={formData.reportNo || "Untitled"}
+        onCancel={() => setUnsavedModalOpen(false)}
+        onDontSave={handleUnsavedDontSave}
+        onSave={handleSilentSave}
+      />
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t border-gray-200 flex z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <button 

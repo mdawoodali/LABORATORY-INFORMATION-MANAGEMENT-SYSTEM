@@ -166,14 +166,14 @@ function EditorContent() {
 
       if (data?.data) {
         const reportData = data.data as Record<string, unknown>;
-        setFormData(reportData.formData as any); /* eslint-disable-line @typescript-eslint/no-explicit-any */
-        setTests(reportData.tests as any[]); /* eslint-disable-line @typescript-eslint/no-explicit-any */
+        setFormData(reportData.formData as any);  
+        setTests(reportData.tests as any[]);  
         if (reportData.sampleImages) {
             setSampleImages(reportData.sampleImages as any[]);
           } else if (reportData.sampleImage) {
             setSampleImages([{ id: '1', src: reportData.sampleImage as string }]);
           }
-        if (reportData.extraPages) setExtraPages(reportData.extraPages as any[]); /* eslint-disable-line @typescript-eslint/no-explicit-any */
+        if (reportData.extraPages) setExtraPages(reportData.extraPages as any[]);  
       }
     } catch (e) {
       console.error('Failed to load report:', e);
@@ -185,7 +185,7 @@ function EditorContent() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setBrandSettings(parsed);
         if (parsed.companyName) {
           document.title = parsed.companyName;
@@ -224,7 +224,7 @@ function EditorContent() {
       if (templateData) {
         try {
           const template: Template = JSON.parse(templateData);
-          // eslint-disable-next-line react-hooks/set-state-in-effect
+           
           setFormData({
             ...template.formData,
             reportNo: String(Math.floor(100000 + Math.random() * 900000)),
@@ -270,9 +270,9 @@ function EditorContent() {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
       const parsed = JSON.parse(history[newIndex]);
-      setFormData(parsed.formData as any); /* eslint-disable-line @typescript-eslint/no-explicit-any */
-      setTests(parsed.tests as any[]); /* eslint-disable-line @typescript-eslint/no-explicit-any */
-      setExtraPages(parsed.extraPages as any[]); /* eslint-disable-line @typescript-eslint/no-explicit-any */
+      setFormData(parsed.formData as any);  
+      setTests(parsed.tests as any[]);  
+      setExtraPages(parsed.extraPages as any[]);  
     }
   };
 
@@ -282,9 +282,9 @@ function EditorContent() {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
       const parsed = JSON.parse(history[newIndex]);
-      setFormData(parsed.formData as any); /* eslint-disable-line @typescript-eslint/no-explicit-any */
-      setTests(parsed.tests as any[]); /* eslint-disable-line @typescript-eslint/no-explicit-any */
-      setExtraPages(parsed.extraPages as any[]); /* eslint-disable-line @typescript-eslint/no-explicit-any */
+      setFormData(parsed.formData as any);  
+      setTests(parsed.tests as any[]);  
+      setExtraPages(parsed.extraPages as any[]);  
     }
   };
 

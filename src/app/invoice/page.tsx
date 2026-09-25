@@ -119,7 +119,7 @@ function InvoiceContent() {
     }));
   };
 
-  const [items, setItems] = useState<any[]>(/* eslint-disable-line @typescript-eslint/no-explicit-any */
+  const [items, setItems] = useState<any[]>( 
 [
     { id: '1', test: 'Water Analysis', method: 'ISO 1234', price: '', samples: '' },
   ]);
@@ -174,7 +174,7 @@ function InvoiceContent() {
           
         const { supabase } = await import('@/lib/supabase');
         extractAndSaveOptions(formData, 'invoice');
-        supabase.from('receipts').upsert({
+        if (formData.invoiceNo) supabase.from('receipts').upsert({
             id: formData.invoiceNo,
             password: reportPassword,
             data: { formData, items, type: 'invoice' }
@@ -281,10 +281,10 @@ function InvoiceContent() {
     try {
       // 1. Try to save to DB (Handle RLS gracefully based on settings)
       const autoBackup = true;
-      if (autoBackup) {
+      if (autoBackup && formData.invoiceNo) {
         // We will need to import supabase, so I'll add it to the top of the file
         const { supabase } = await import('@/lib/supabase');
-        supabase.from('receipts').upsert({
+        if (formData.invoiceNo) supabase.from('receipts').upsert({
             id: formData.invoiceNo,
             password: (!password || (id && password === id.slice(-4))) ? (formData.invoiceNo?.slice(-4) || '1234') : password,
             data: { formData, items, type: 'invoice' }

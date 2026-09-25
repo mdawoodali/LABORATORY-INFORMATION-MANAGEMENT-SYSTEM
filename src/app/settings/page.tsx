@@ -36,7 +36,7 @@ export default function SettingsPage() {
       parsedSettings.backupLocation = srBackupPath;
     }
     
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setSettings(parsedSettings);
 
     if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window && !srBackupPath) {
