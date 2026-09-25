@@ -30,7 +30,7 @@ const bannerStyle: CSSProperties = { height: "30px", width: "auto", objectFit: "
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ZoomIn, ZoomOut, ArrowLeft, Printer, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, Heading3, Palette, Strikethrough, List, ListOrdered, Highlighter, AlignJustify, Baseline, Trash2 } from 'lucide-react';
 import { Rnd } from 'react-rnd';
 import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
@@ -292,7 +292,70 @@ export default function PQSLetterheadPage() {
     formatText(command, value);
     setTimeout(checkFormatting, 50);
   };
+  const searchParams = useSearchParams();
+  const reportId = searchParams.get('id');
   const [pages, setPages] = useState([{ id: 'page-1' }]);
+  
+  // Handle Load
+  useEffect(() => {
+    if (reportId) {
+      setFilename(reportId);
+      import('@/lib/supabase').then(({ supabase }) => {
+        supabase.from('receipts').select('data').eq('id', reportId).single().then(({ data }) => {
+          if (data && data.data && data.data.type === 'letterhead') {
+            const lData = data.data as any;
+            if (lData.pages) {
+              setPages(lData.pages.map((p: any) => ({ id: p.id })));
+              setTimeout(() => {
+                lData.pages.forEach((p: any) => {
+                  const el = document.getElementById(p.id);
+                  if (el) {
+                    const fields = el.querySelectorAll('[contentEditable="true"], [contenteditable]');
+                    if (fields[0] && p.subtitle !== undefined) fields[0].innerHTML = p.subtitle;
+                    if (fields[1] && p.date !== undefined) fields[1].innerHTML = p.date;
+                    if (fields[2] && p.body !== undefined) fields[2].innerHTML = p.body;
+                    if (fields[3] && p.f1 !== undefined) fields[3].innerHTML = p.f1;
+                    if (fields[4] && p.f2 !== undefined) fields[4].innerHTML = p.f2;
+                    if (fields[5] && p.f3 !== undefined) fields[5].innerHTML = p.f3;
+                  }
+                });
+              }, 100);
+            }
+          }
+        });
+      });
+    }
+  }, [reportId]);
+  
+  // Handle Auto-Backup
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (filename) {
+        const pagesData = pages.map(p => {
+          const el = document.getElementById(p.id);
+          if (!el) return { id: p.id };
+          const fields = el.querySelectorAll('[contentEditable="true"], [contenteditable]');
+          return {
+            id: p.id,
+            subtitle: fields[0]?.innerHTML || '',
+            date: fields[1]?.innerHTML || '',
+            body: fields[2]?.innerHTML || '',
+            f1: fields[3]?.innerHTML || '',
+            f2: fields[4]?.innerHTML || '',
+            f3: fields[5]?.innerHTML || ''
+          };
+        });
+        import('@/lib/supabase').then(({ supabase }) => {
+          supabase.from('receipts').upsert({
+            id: filename,
+            password: filename.slice(-4) || '1234',
+            data: { type: 'letterhead', formData: { applicant: 'Letterhead' }, pages: pagesData }
+          }).then(({error}: any) => { if (error) console.error(error); });
+        });
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [filename, pages]);
   const lastSelection = useRef<Range | null>(null);
   const [fileName, setFileName] = useState("");
   const [customFonts, setCustomFonts] = useState<{name: string, class: string}[]>([]);
