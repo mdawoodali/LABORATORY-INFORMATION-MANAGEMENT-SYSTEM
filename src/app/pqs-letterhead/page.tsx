@@ -67,7 +67,7 @@ const FONTS = [
   { name: 'Source Serif (Serif)', class: fontSourceSerif.className },
 ];
 
-export default function PQSLetterheadPage() {
+function LetterheadContent() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   
@@ -1067,5 +1067,14 @@ export default function PQSLetterheadPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function PQSLetterheadPage() {
+  return (
+    <React.Suspense fallback={<div className="flex h-screen items-center justify-center text-gray-500">Loading...</div>}>
+      <LetterheadContent />
+    </React.Suspense>
   );
 }
