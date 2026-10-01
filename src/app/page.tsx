@@ -207,40 +207,42 @@ export default function HomePage() {
   };
 
   const handleNewReport = () => {
-    router.push('/editor');
+    window.location.href = '/editor/';
   };
 
   const handleOpenTemplate = (template: Template) => {
     if (template.id === 'pqs-letterhead') {
-      router.push('/pqs-letterhead');
+      window.location.href = '/pqs-letterhead/';
       return;
     }
     if (template.id === 'pqs-report') {
-      router.push('/pas-report');
+      window.location.href = '/pas-report/';
       return;
     }
     if (template.id === 'pqs-invoice') {
-      router.push('/invoice');
+      window.location.href = '/invoice/';
       return;
     }
     if (template.id === 'pas-report') {
-      router.push('/pas-report');
+      window.location.href = '/pas-report/';
       return;
     }
     if (template.id === 'pas-invoice') {
-      router.push('/invoice');
+      window.location.href = '/invoice/';
       return;
     }
     // Store template data in sessionStorage so editor can pick it up
     sessionStorage.setItem('sr_template_data', JSON.stringify(template));
-    router.push('/editor?template=' + template.id);
+    window.location.href = '/editor/?template=' + template.id;
   };
 
   const handleOpenReport = (report: Record<string, unknown>) => {
     if (report.type === 'invoice') {
-      router.push('/invoice?id=' + report.reportNo);
+      window.location.href = '/invoice/?id=' + report.reportNo;
+    } else if (report.type === 'letterhead') {
+      window.location.href = '/pqs-letterhead/?id=' + report.reportNo;
     } else {
-      router.push('/pas-report?id=' + report.reportNo);
+      window.location.href = '/pas-report/?id=' + report.reportNo;
     }
   };
 
@@ -262,7 +264,7 @@ export default function HomePage() {
           </div>
         </div>
         <button
-          onClick={() => router.push('/settings')}
+          onClick={() => window.location.href = '/settings/'}
           className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-all text-sm text-gray-700"
         >
           <Settings size={16} />

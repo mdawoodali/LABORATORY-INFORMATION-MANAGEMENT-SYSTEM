@@ -644,7 +644,7 @@ function EditorContent() {
     await handlePrint();
     setUnsavedModalOpen(false);
     if (unsavedAction === 'BACK') {
-      router.push('/');
+      window.location.href = '/';
     } else if (unsavedAction === 'CLOSE') {
       if (typeof window !== 'undefined' && (window as any).__TAURI__) {
         import('@tauri-apps/api/window').then((m) => {
@@ -658,7 +658,7 @@ function EditorContent() {
   const handleUnsavedDontSave = async () => {
       setUnsavedModalOpen(false);
       if (unsavedAction === 'BACK') {
-        router.push('/');
+        window.location.href = '/';
       } else if (unsavedAction === 'CLOSE') {
         if (typeof window !== 'undefined' && (window as any).__TAURI__) {
           import('@tauri-apps/api/window').then((m) => {
@@ -722,7 +722,7 @@ function EditorContent() {
           isGenerating={isGenerating}
           isSuccess={isSuccess}
           onSaveTemplate={handleSaveTemplate}
-          onGoHome={() => router.push('/')}
+          onGoHome={() => window.location.href = '/'}
           onOpenSettings={() => setShowSettings(true)}
           brandSettings={brandSettings}
           extraPages={extraPages}

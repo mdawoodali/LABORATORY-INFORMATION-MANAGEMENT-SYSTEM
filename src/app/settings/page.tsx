@@ -164,7 +164,7 @@ export default function SettingsPage() {
       {/* Top Bar */}
       <div className="bg-white px-8 py-4 flex items-center gap-4 shadow-sm border-b border-gray-200">
         <button
-          onClick={() => router.push('/')}
+          onClick={() => window.location.href = '/'}
           className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all"
         >
           <ArrowLeft size={18} />

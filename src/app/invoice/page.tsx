@@ -434,7 +434,7 @@ function InvoiceContent() {
       setUnsavedModalOpen(false);
       
       if (unsavedAction === 'BACK') {
-        router.push('/');
+        window.location.href = '/';
       } else if (unsavedAction === 'CLOSE') {
         if ((window as any).__TAURI__) {
             import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {});
@@ -450,7 +450,7 @@ function InvoiceContent() {
   const handleUnsavedDontSave = async () => {
       setUnsavedModalOpen(false);
       if (unsavedAction === 'BACK') {
-        router.push('/');
+        window.location.href = '/';
       } else if (unsavedAction === 'CLOSE') {
         if (typeof window !== 'undefined' && (window as any).__TAURI__) {
             import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {});
@@ -497,7 +497,7 @@ function InvoiceContent() {
               setUnsavedAction('BACK');
               setUnsavedModalOpen(true);
             } else {
-              router.push('/');
+              window.location.href = '/';
             }
           }} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all">
               <ArrowLeft size={16} />
