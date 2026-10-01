@@ -596,11 +596,6 @@ function EditorContent() {
   };
 
 
-  if (!isLoaded) {
-    return <div className="flex h-screen items-center justify-center bg-slate-200 text-gray-500">Initializing editor...</div>;
-  }
-
-
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
   const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
 
@@ -639,6 +634,10 @@ function EditorContent() {
       if (unlisten) unlisten();
     };
   }, [formData, tests]);
+
+  if (!isLoaded) {
+    return <div className="flex h-screen items-center justify-center bg-slate-200 text-gray-500">Initializing editor...</div>;
+  }
 
   const handleSilentSave = async (filename: string) => {
     await handlePrint();
