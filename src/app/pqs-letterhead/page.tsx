@@ -108,7 +108,7 @@ function LetterheadContent() {
     e.preventDefault();
     e.stopPropagation(); // prevent triggering click
     
-    const page = selectedImage.closest('.a4-page') as HTMLElement;
+    const page = selectedImage.closest('.pqs-a4-page') as HTMLElement;
     if (!page) return;
 
     if (selectedImage.style.position !== 'absolute') {
@@ -265,7 +265,7 @@ function LetterheadContent() {
       const range = sel.getRangeAt(0);
       let node: Node | null = range.commonAncestorContainer;
       while (node && node !== document.body) {
-        if ((node as HTMLElement).classList?.contains('a4-page')) {
+        if ((node as HTMLElement).classList?.contains('pqs-a4-page')) {
           lastSelection.current = range.cloneRange();
           break;
         }
@@ -365,7 +365,7 @@ function LetterheadContent() {
   const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
 
   const isPageEmpty = () => {
-    const pgs = document.querySelectorAll('.a4-page');
+    const pgs = document.querySelectorAll('.pqs-a4-page');
     let hasContent = false;
     pgs.forEach(p => {
         if (p.textContent?.trim() !== '' || p.querySelector('img')) hasContent = true;
@@ -425,7 +425,7 @@ function LetterheadContent() {
       const html2canvas = (await import('html2canvas')).default;
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      const pageElements = document.querySelectorAll('.a4-page');
+      const pageElements = document.querySelectorAll('.pqs-a4-page');
       for (let i = 0; i < pageElements.length; i++) {
         const page = pageElements[i] as HTMLElement;
         const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
@@ -583,7 +583,7 @@ function LetterheadContent() {
       const range = sel.getRangeAt(0);
       let node: Node | null = range.commonAncestorContainer;
       while (node && node !== document.body) {
-        if ((node as HTMLElement).classList?.contains('a4-page')) {
+        if ((node as HTMLElement).classList?.contains('pqs-a4-page')) {
           lastSelection.current = range.cloneRange();
           break;
         }
@@ -621,7 +621,7 @@ function LetterheadContent() {
           const inserted = document.execCommand('insertImage', false, content);
           
           if (!inserted) {
-            const targetDiv = document.querySelector('.a4-page div[data-placeholder]') as HTMLElement;
+            const targetDiv = document.querySelector('.pqs-a4-page div[data-placeholder]') as HTMLElement;
             if (targetDiv) {
               const img = document.createElement('img');
               img.src = content;
@@ -631,7 +631,7 @@ function LetterheadContent() {
             }
           } else {
             setTimeout(() => {
-              const imgs = document.querySelectorAll('.a4-page img');
+              const imgs = document.querySelectorAll('.pqs-a4-page img');
               imgs.forEach((img: any) => {
                 if (!img.style.maxWidth) {
                   img.style.maxWidth = '100%';
@@ -940,7 +940,7 @@ function LetterheadContent() {
                   </div>
                 )}
                 <div
-                  className="a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
+                  className="pqs-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mx-auto"
         style={pageStyle}
       >
         {/* Guides */}

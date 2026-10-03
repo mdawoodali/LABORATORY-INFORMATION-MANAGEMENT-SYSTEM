@@ -129,7 +129,7 @@ function VerifyPage() {
   const handleSavePdf = async () => {
     setIsGeneratingPdf(true);
     try {
-      const pages = document.querySelectorAll('.a4-page');
+      const pages = document.querySelectorAll('.report-a4-page');
       const html2canvasModule = await import('html2canvas-pro');
       const html2canvas = html2canvasModule.default;
       const content: string[] = [];

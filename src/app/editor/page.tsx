@@ -94,7 +94,7 @@ function EditorContent() {
       const html2canvas = (await import('html2canvas')).default;
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      const pageElements = document.querySelectorAll('.a4-page');
+      const pageElements = document.querySelectorAll('.report-a4-page');
       for (let i = 0; i < pageElements.length; i++) {
         const page = pageElements[i] as HTMLElement;
         const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
@@ -318,7 +318,7 @@ function EditorContent() {
       await new Promise(r => setTimeout(r, 300));
 
       // 2. Generate Canvas screenshots
-      const pages = document.querySelectorAll('.a4-page');
+      const pages = document.querySelectorAll('.report-a4-page');
       const content = [];
 
       for (let i = 0; i < pages.length; i++) {

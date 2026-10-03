@@ -394,7 +394,7 @@ function EditorContent() {
       });
 
       // 2. Generate Canvas screenshots
-      const pages = document.querySelectorAll('.a4-page');
+      const pages = document.querySelectorAll('.report-a4-page');
       const content = [];
 
       for (let i = 0; i < pages.length; i++) {

@@ -294,7 +294,7 @@ function InvoiceContent() {
       }
 
       await new Promise(r => setTimeout(r, 300));
-      const pages = document.querySelectorAll('.a4-page');
+      const pages = document.querySelectorAll('.report-a4-page');
       if (pages.length === 0) throw new Error("No pages found");
 
         const html2canvasModule = await import('html2canvas-pro');
@@ -413,7 +413,7 @@ function InvoiceContent() {
       const html2canvas = (await import('html2canvas')).default;
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      const pageElements = document.querySelectorAll('.a4-page');
+      const pageElements = document.querySelectorAll('.report-a4-page');
       for (let i = 0; i < pageElements.length; i++) {
         const page = pageElements[i] as HTMLElement;
         const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
