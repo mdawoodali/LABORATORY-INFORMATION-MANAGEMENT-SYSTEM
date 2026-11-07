@@ -11,7 +11,6 @@ import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
 import PQSWordmark from '@/components/report/PQSWordmark';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
 import DropdownInput from '@/components/form/DropdownInput';
-import PasswordLock from '@/components/form/PasswordLock';
 
 const convertDate = (d: string) => {
   if (!d) return '';
@@ -48,7 +47,6 @@ function InvoiceContent() {
   const id = searchParams?.get('id');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(!!id);
   const initialStateRef = useRef<string>('');
   const allowNavigationRef = useRef(false);
@@ -143,7 +141,6 @@ function InvoiceContent() {
           const loadedItems = loadedData.items || [];
           setFormData(loadedForm);
           setItems(loadedItems);
-          if (data.password) setPassword(data.password);
           initialStateRef.current = JSON.stringify({ formData: loadedForm, items: loadedItems });
         }
         setTimeout(() => setIsLoading(false), 0);
@@ -179,14 +176,11 @@ function InvoiceContent() {
 
     const timer = setTimeout(async () => {
       try {
-        const isDefaultPassword = id && password === id.slice(-4);
-          const reportPassword = (!password || isDefaultPassword) ? (formData.invoiceNo?.slice(-4) || '1234') : password;
-          
         const { supabase } = await import('@/lib/supabase');
         extractAndSaveOptions(formData, 'invoice');
         if (formData.invoiceNo) supabase.from('receipts').upsert({
             id: formData.invoiceNo,
-            password: reportPassword,
+            password: null,
             data: { formData, items, type: 'invoice' }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -195,7 +189,7 @@ function InvoiceContent() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [formData, items, password]);
+  }, [formData, items]);
 
   const totalAmount = items.reduce((sum, item) => sum + ((Number(item.price) || 0) * (item.samples === '' ? 1 : (Number(item.samples) || 0))), 0);
   const discountAmount = totalAmount * ((Number(formData.discountPercent) || 0) / 100);
@@ -249,13 +243,6 @@ function InvoiceContent() {
   };
 
   const handlePrint = async () => {
-    const isDefaultPassword = id && password === id.slice(-4);
-    const effectivePassword = (!password || isDefaultPassword) ? (formData.invoiceNo?.slice(-4) || '1234') : password;
-    
-    if (!effectivePassword) {
-      toast.error("Please enter a password to lock the PDF.");
-      return;
-    }
 
     // Bulletproof Auto-Save of all Dropdown options!
     const forceSaveOption = (key: string, val: string) => {
@@ -296,7 +283,7 @@ function InvoiceContent() {
         const { supabase } = await import('@/lib/supabase');
         if (formData.invoiceNo) supabase.from('receipts').upsert({
             id: formData.invoiceNo,
-            password: (!password || (id && password === id.slice(-4))) ? (formData.invoiceNo?.slice(-4) || '1234') : password,
+            password: null,
             data: { formData, items, type: 'invoice' }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -427,7 +414,7 @@ function InvoiceContent() {
         const { supabase } = await import('@/lib/supabase');
         await supabase.from('receipts').upsert({
           id: formData.invoiceNo || filename,
-          password: (!password || (id && password === id.slice(-4))) ? (formData.invoiceNo?.slice(-4) || '1234') : password,
+          password: null,
           data: { formData, items, type: 'invoice' }
         });
       } catch (err) {
@@ -642,8 +629,7 @@ function InvoiceContent() {
           </div>
 
           <div className="p-4 border-t bg-slate-900 flex flex-col gap-3 mt-auto shrink-0 z-10">
-            <PasswordLock value={password} onChange={setPassword} placeholderFallback={formData.invoiceNo?.slice(-4) || '1234'} />
-
+            
             <div className="flex gap-2">
                 <button 
                   onClick={handlePrint}

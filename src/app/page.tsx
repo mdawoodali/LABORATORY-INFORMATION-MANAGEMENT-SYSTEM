@@ -46,7 +46,7 @@ export default function HomePage() {
           reportNo: r.id,
           applicant: applicantValue,
           date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
-          password: r.password || '',
+          password: r.data?.type === 'invoice' ? '-' : (r.password || '-'),
           type: r.data?.type || 'report'
         };
       });
@@ -245,7 +245,8 @@ export default function HomePage() {
         return;
       }
 
-      const newPassword = newId.slice(-4);
+      const isInvoice = type === 'invoice' || String(report.id).startsWith('pqs-');
+      const newPassword = isInvoice ? null : newId.slice(-4);
 
       // Deep clone data and update the ID fields
       const duplicatedData = JSON.parse(JSON.stringify(original.data || {}));
@@ -277,7 +278,11 @@ export default function HomePage() {
         toast.error(`Failed to duplicate: ${insertErr.message}`, { id: toastId });
       } else {
         queryClient.invalidateQueries({ queryKey: ['recentReports'] });
-        toast.success(`Duplicated as ${newId}! (Password: ${newPassword})`, { id: toastId });
+        if (isInvoice) {
+          toast.success(`Duplicated as ${newId}!`, { id: toastId });
+        } else {
+          toast.success(`Duplicated as ${newId}! (Password: ${newPassword})`, { id: toastId });
+        }
       }
     } catch (err: unknown) {
       console.error(err);
