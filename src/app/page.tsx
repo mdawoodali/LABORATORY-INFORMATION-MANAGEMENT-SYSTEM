@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES } from '@/types';
-import { FileText, Clock, ChevronRight, Search, Plus, Trash2, Edit2, Settings, Layout, Download } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Search, Plus, Trash2, Edit2, Copy, Settings, Layout, Download } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
@@ -184,6 +184,106 @@ export default function HomePage() {
       await supabase.from('receipts').delete().eq('id', id);
       queryClient.invalidateQueries({ queryKey: ['recentReports'] });
       toast.success("Report deleted!");
+    }
+  };
+
+  const [isCopying, setIsCopying] = useState<string | null>(null);
+
+  const handleCopyReport = async (e: React.MouseEvent, report: { id: string; type: string; [key: string]: unknown }) => {
+    e.stopPropagation();
+    if (isCopying) return;
+
+    setIsCopying(report.id);
+    const toastId = toast.loading(`Duplicating ${report.id}...`);
+
+    try {
+      const { data: original, error: fetchErr } = await supabase
+        .from('receipts')
+        .select('*')
+        .eq('id', report.id)
+        .single();
+
+      if (fetchErr || !original) {
+        toast.error("Could not load original file to copy", { id: toastId });
+        setIsCopying(null);
+        return;
+      }
+
+      // Generate a brand new unique ID
+      let newId = '';
+      let isUnique = false;
+      const type = (original.data?.type || report.type || 'report').toLowerCase();
+
+      for (let attempts = 0; attempts < 10; attempts++) {
+        const random6 = Math.floor(100000 + Math.random() * 900000);
+        if (type === 'invoice' || String(report.id).startsWith('pqs-')) {
+          const d = new Date();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const yy = String(d.getFullYear()).slice(-2);
+          newId = `pqs-${mm}${yy}-${random6}`;
+        } else if (type === 'letterhead' || String(report.id).toLowerCase().includes('letth')) {
+          newId = `letth-${random6}`;
+        } else {
+          newId = String(random6);
+        }
+
+        const { data: existing } = await supabase
+          .from('receipts')
+          .select('id')
+          .eq('id', newId)
+          .maybeSingle();
+
+        if (!existing) {
+          isUnique = true;
+          break;
+        }
+      }
+
+      if (!isUnique || !newId) {
+        toast.error("Failed to generate a unique file number. Try again.", { id: toastId });
+        setIsCopying(null);
+        return;
+      }
+
+      const newPassword = newId.slice(-4);
+
+      // Deep clone data and update the ID fields
+      const duplicatedData = JSON.parse(JSON.stringify(original.data || {}));
+      if (duplicatedData.formData) {
+        if (duplicatedData.formData.reportNo !== undefined) {
+          duplicatedData.formData.reportNo = newId;
+        }
+        if (duplicatedData.formData.invoiceNo !== undefined) {
+          duplicatedData.formData.invoiceNo = newId;
+        }
+        if (Array.isArray(duplicatedData.formData.dynamicFields)) {
+          duplicatedData.formData.dynamicFields.forEach((f: any) => {
+            const lbl = (f?.label || '').toUpperCase();
+            if (lbl.includes('REPORT NO') || lbl.includes('REPORT #') || lbl.includes('INVOICE NO') || lbl.includes('INVOICE #')) {
+              f.value = newId;
+            }
+          });
+        }
+      }
+
+      const { error: insertErr } = await supabase.from('receipts').insert({
+        id: newId,
+        password: newPassword,
+        data: duplicatedData,
+        created_at: new Date().toISOString()
+      });
+
+      if (insertErr) {
+        toast.error(`Failed to duplicate: ${insertErr.message}`, { id: toastId });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['recentReports'] });
+        toast.success(`Duplicated as ${newId}! (Password: ${newPassword})`, { id: toastId });
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      toast.error("Failed to duplicate file", { id: toastId });
+    } finally {
+      setIsCopying(null);
     }
   };
 
@@ -440,6 +540,7 @@ export default function HomePage() {
                       <td className="px-6 py-4 text-gray-500 font-mono text-xs">{report.password || '-'}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-3">
+                          <button onClick={(e) => handleCopyReport(e, report)} disabled={isCopying === report.id} className="text-gray-400 hover:text-emerald-600 transition-colors disabled:opacity-50" title="Duplicate File"><Copy size={16} /></button>
                           <button onClick={(e) => handleRenameReport(e, report.id)} className="text-gray-400 hover:text-blue-600 transition-colors" title="Rename"><Edit2 size={16} /></button>
                           <button onClick={(e) => handleDeleteReport(e, report.id)} className="text-gray-400 hover:text-red-600 transition-colors" title="Delete"><Trash2 size={16} /></button>
                           <ChevronRight size={16} className="text-gray-400 inline" />
