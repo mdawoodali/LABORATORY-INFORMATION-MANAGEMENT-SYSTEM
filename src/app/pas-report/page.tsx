@@ -428,7 +428,6 @@ function EditorContent() {
       if (!isSilent) {
         setIsSuccess(true);
         setTimeout(() => setIsSuccess(false), 5000);
-        toast.success("PDF generated and secured successfully!");
         setIsGenerating(false);
       }
       } catch (err: unknown) {
@@ -626,21 +625,62 @@ function EditorContent() {
   }
 
   const handleSilentSave = async (filename: string) => {
-    await handlePrint();
-    allowNavigationRef.current = true;
-    setUnsavedModalOpen(false);
-    if (unsavedAction === 'BACK') {
-      router.push('/');
-    } else if (unsavedAction === 'CLOSE') {
-      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-        import('@tauri-apps/api/window').then((m) => {
-          const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
-          if (w && w.destroy) w.destroy();
-          else import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
-        }).catch(() => {
-          import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+    setIsGenerating(true);
+    const targetId = formData.reportNo || filename;
+    try {
+      const isDefaultPassword = reportId && password === reportId.slice(-4);
+      const reportPassword = (!password || isDefaultPassword) ? (targetId?.slice(-4) || '1234') : password;
+      
+      extractAndSaveOptions(formData, 'report');
+
+      const { supabase } = await import('@/lib/supabase');
+      await supabase.from('receipts').upsert({
+        id: targetId,
+        password: reportPassword,
+        data: { formData, tests, sampleImages, extraPages }
+      });
+
+      try {
+        const pages = document.querySelectorAll('.report-a4-page');
+        const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+        const { blob: pdfBlob } = await createDocumentPdf({
+          pages,
+          filename: targetId,
+          password: reportPassword,
+          type: 'report'
         });
+
+        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+          const { saveSilentBackup } = await import('@/utils/exportManager');
+          await saveSilentBackup(targetId, pdfBlob, true, 'report');
+        }
+      } catch (pdfErr) {
+        console.warn("Silent PDF backup error:", pdfErr);
       }
+
+      toast.success("Progress saved successfully!");
+      
+      allowNavigationRef.current = true;
+      setUnsavedModalOpen(false);
+      
+      if (unsavedAction === 'BACK' || !unsavedAction) {
+        router.push('/');
+      } else if (unsavedAction === 'CLOSE') {
+        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+          import('@tauri-apps/api/window').then((m) => {
+            const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+            if (w && w.destroy) w.destroy();
+            else import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          }).catch(() => {
+            import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to save progress. Please try again.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 

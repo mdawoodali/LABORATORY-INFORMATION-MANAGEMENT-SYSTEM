@@ -308,7 +308,6 @@ function InvoiceContent() {
       initialStateRef.current = JSON.stringify({ formData, items });
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 5000);
-      toast.success(backupType === 'invoice' ? "Invoice PDF generated successfully!" : "Report PDF generated successfully!");
       setIsGenerating(false);
     } catch (e: unknown) {
       console.error(e);
@@ -381,40 +380,40 @@ function InvoiceContent() {
 
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
+    const targetId = formData.invoiceNo || filename;
     
-    if (filename) {
-      try {
-        const { supabase } = await import('@/lib/supabase');
-        await supabase.from('receipts').upsert({
-          id: formData.invoiceNo || filename,
-          password: null,
-          data: { formData, items, type: 'invoice' }
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
     try {
-      const pageElements = document.querySelectorAll('.report-a4-page');
-      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
-      const { pdf, blob: pdfBlob } = await createDocumentPdf({
-        pages: pageElements,
-        filename,
-        type: 'invoice'
+      const { supabase } = await import('@/lib/supabase');
+      extractAndSaveOptions(formData, 'invoice');
+      await supabase.from('receipts').upsert({
+        id: targetId,
+        password: null,
+        data: { formData, items, type: 'invoice' }
       });
 
-      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-         const { saveSilentBackup } = await import('@/utils/exportManager');
-         await saveSilentBackup(filename, pdfBlob, true, 'invoice');
-      } else {
-         pdf.save(filename + ".pdf");
+      try {
+        const pageElements = document.querySelectorAll('.report-a4-page');
+        const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+        const { blob: pdfBlob } = await createDocumentPdf({
+          pages: pageElements,
+          filename: targetId,
+          type: 'invoice'
+        });
+
+        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+          const { saveSilentBackup } = await import('@/utils/exportManager');
+          await saveSilentBackup(targetId, pdfBlob, true, 'invoice');
+        }
+      } catch (pdfErr) {
+        console.warn("Silent PDF backup error:", pdfErr);
       }
+
+      toast.success("Progress saved successfully!");
       
       allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       
-      if (unsavedAction === 'BACK') {
+      if (unsavedAction === 'BACK' || !unsavedAction) {
         router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if ((window as any).__TAURI__) {
@@ -429,6 +428,7 @@ function InvoiceContent() {
       }
     } catch (e) {
       console.error(e);
+      toast.error("Failed to save progress. Please try again.");
     } finally {
       setIsGenerating(false);
     }

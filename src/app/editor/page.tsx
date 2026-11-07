@@ -107,26 +107,41 @@ function EditorContent() {
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
     try {
-      const pageElements = document.querySelectorAll('.report-a4-page');
-      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
-      const { pdf, blob: pdfBlob } = await createDocumentPdf({
-        pages: pageElements,
-        filename,
-        password,
-        type: 'report'
+      const targetId = formData.reportNo || filename;
+      const isDefaultPassword = reportId && password === reportId.slice(-4);
+      const reportPassword = (!password || isDefaultPassword) ? (targetId?.slice(-4) || '1234') : password;
+      
+      extractAndSaveOptions(formData, 'report');
+      await supabase.from('receipts').upsert({
+        id: targetId,
+        password: reportPassword,
+        data: { formData, tests, sampleImages, extraPages }
       });
 
-      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-         const { saveSilentBackup } = await import('@/utils/exportManager');
-         await saveSilentBackup(filename, pdfBlob, true, 'report');
-      } else {
-         pdf.save(filename + ".pdf");
+      try {
+        const pageElements = document.querySelectorAll('.report-a4-page');
+        const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+        const { blob: pdfBlob } = await createDocumentPdf({
+          pages: pageElements,
+          filename: targetId,
+          password: reportPassword,
+          type: 'report'
+        });
+
+        if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+          const { saveSilentBackup } = await import('@/utils/exportManager');
+          await saveSilentBackup(targetId, pdfBlob, true, 'report');
+        }
+      } catch (pdfErr) {
+        console.warn("Silent PDF backup error:", pdfErr);
       }
+
+      toast.success("Progress saved successfully!");
       
       allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       
-      if (unsavedAction === 'BACK') {
+      if (unsavedAction === 'BACK' || !unsavedAction) {
         router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if ((window as any).__TAURI__) {
@@ -141,6 +156,7 @@ function EditorContent() {
       }
     } catch (e) {
       console.error(e);
+      toast.error("Failed to save progress. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -375,7 +391,6 @@ function EditorContent() {
       await saveSilentBackup(formData.reportNo, blob, isSilent, 'report');
       
       if (!isSilent) {
-        toast.success("PDF generated and secured successfully!");
         setIsGenerating(false);
       }
     } catch (err: unknown) {

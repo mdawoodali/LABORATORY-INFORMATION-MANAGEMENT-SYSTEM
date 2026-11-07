@@ -1,6 +1,7 @@
 /* eslint-disable */
 "use client";
 import type { CSSProperties } from "react";
+import { toast } from "react-hot-toast";
 
 /**
  * PQS Letterhead
@@ -487,10 +488,11 @@ function LetterheadContent() {
          pdf.save(filename + ".pdf");
       }
       
+      toast.success("Progress saved successfully!");
       allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       
-      if (unsavedAction === 'BACK') {
+      if (unsavedAction === 'BACK' || !unsavedAction) {
         router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if ((window as any).__TAURI__) {
