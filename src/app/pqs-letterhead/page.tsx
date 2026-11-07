@@ -464,6 +464,7 @@ function LetterheadContent() {
         const { supabase } = await import('@/lib/supabase');
         await supabase.from('receipts').upsert({
           id: filename,
+          password: '',
           data: { type: 'letterhead', formData: { applicant: 'Letterhead' } },
           created_at: new Date().toISOString()
         });
@@ -716,6 +717,7 @@ function LetterheadContent() {
         const { supabase } = await import('@/lib/supabase');
         await supabase.from('receipts').upsert({
           id: filename,
+          password: '',
           data: { 
             type: 'letterhead', 
             formData: { applicant: 'Letterhead' }

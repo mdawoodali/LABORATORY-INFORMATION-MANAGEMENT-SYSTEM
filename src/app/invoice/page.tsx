@@ -180,7 +180,7 @@ function InvoiceContent() {
         extractAndSaveOptions(formData, 'invoice');
         if (formData.invoiceNo) supabase.from('receipts').upsert({
             id: formData.invoiceNo,
-            password: null,
+            password: '',
             data: { formData, items, type: 'invoice' }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -283,7 +283,7 @@ function InvoiceContent() {
         const { supabase } = await import('@/lib/supabase');
         if (formData.invoiceNo) supabase.from('receipts').upsert({
             id: formData.invoiceNo,
-            password: null,
+            password: '',
             data: { formData, items, type: 'invoice' }
           }).then(({error}) => { if (error) console.error("Supabase Error:", error); });
           
@@ -387,7 +387,7 @@ function InvoiceContent() {
       extractAndSaveOptions(formData, 'invoice');
       await supabase.from('receipts').upsert({
         id: targetId,
-        password: null,
+        password: '',
         data: { formData, items, type: 'invoice' }
       });
 

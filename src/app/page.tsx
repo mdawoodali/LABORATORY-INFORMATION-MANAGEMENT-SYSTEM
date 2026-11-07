@@ -246,7 +246,7 @@ export default function HomePage() {
       }
 
       const isInvoice = type === 'invoice' || String(report.id).startsWith('pqs-');
-      const newPassword = isInvoice ? null : newId.slice(-4);
+      const newPassword = isInvoice ? '' : newId.slice(-4);
 
       // Deep clone data and update the ID fields
       const duplicatedData = JSON.parse(JSON.stringify(original.data || {}));
