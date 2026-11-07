@@ -54,9 +54,9 @@ export default function TestTable({
           {tests.map((test, idx) => (
             <tr key={test.id || idx}>
               <td className="border border-black px-2 py-6 text-center whitespace-pre-wrap">{test.test || '-'}</td>
-              <td className="border border-black px-2 py-6 text-center">{test.method || '-'}</td>
-              <td className="border border-black px-2 py-6 text-center">{test.value || '-'}</td>
-              <td className="border border-black px-2 py-6 text-center">{test.unit || '-'}</td>
+              <td className="border border-black px-2 py-6 text-center whitespace-pre-wrap">{test.method || '-'}</td>
+              <td className="border border-black px-2 py-6 text-center whitespace-pre-wrap">{test.value || '-'}</td>
+              <td className="border border-black px-2 py-6 text-center whitespace-pre-wrap">{test.unit || '-'}</td>
               <td className="border border-black px-2 py-6 text-center">{test.result || '-'}</td>
             </tr>
           ))}

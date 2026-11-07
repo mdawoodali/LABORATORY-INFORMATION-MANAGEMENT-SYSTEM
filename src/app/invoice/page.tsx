@@ -560,11 +560,11 @@ function InvoiceContent() {
                     <div className="space-y-2">
                       <div>
                         <input type="text" value={formData.fieldLabels?.test || "Test Name"} onChange={e => updateLabel("test", e.target.value)} className="text-[10px] font-bold text-slate-400 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
-                        <DropdownInput fieldKey={formData.fieldLabels?.test || "Test Name"} value={item.test} onChange={val => updateItem(item.id, 'test', val)} className="w-full border rounded p-1 text-sm font-semibold" placeholder=" " />
+                        <DropdownInput fieldKey={formData.fieldLabels?.test || "Test Name"} value={item.test} onChange={val => updateItem(item.id, 'test', val)} className="w-full border rounded p-1 text-sm font-semibold" placeholder=" " multiline />
                       </div>
                       <div>
                         <input type="text" value={formData.fieldLabels?.method || "Test Method"} onChange={e => updateLabel("method", e.target.value)} className="text-[10px] font-bold text-slate-400 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none transition-colors w-full uppercase mb-1" />
-                        <DropdownInput fieldKey={formData.fieldLabels?.method || "Test Method"} value={item.method} onChange={val => updateItem(item.id, 'method', val)} className="w-full border rounded p-1 text-sm" placeholder=" " />
+                        <DropdownInput fieldKey={formData.fieldLabels?.method || "Test Method"} value={item.method} onChange={val => updateItem(item.id, 'method', val)} className="w-full border rounded p-1 text-sm" placeholder=" " multiline />
                       </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>

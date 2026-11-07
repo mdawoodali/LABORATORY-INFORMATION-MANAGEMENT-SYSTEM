@@ -236,15 +236,15 @@ export default function ReportForm({
                 <div className="grid grid-cols-2 gap-3 mb-2">
                   <div className="col-span-2">
                     <label className="text-[10px] uppercase font-bold text-slate-400">Test Name</label>
-                    <DropdownInput fieldKey="testName" placeholder="Test Name" value={test.test} onChange={val => updateTest(test.id, 'test', val)} className="w-full border-b border-slate-300 bg-transparent text-sm font-semibold py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                    <DropdownInput fieldKey="testName" placeholder="Test Name" value={test.test} onChange={val => updateTest(test.id, 'test', val)} className="w-full border-b border-slate-300 bg-transparent text-sm font-semibold py-1 focus:outline-none focus:border-blue-500 transition-colors" multiline />
                   </div>
                   <div>
                     <label className="text-[10px] uppercase font-bold text-slate-400">Test Method</label>
-                    <DropdownInput fieldKey="testMethod" placeholder="Test Method" value={test.method} onChange={val => updateTest(test.id, 'method', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                    <DropdownInput fieldKey="testMethod" placeholder="Test Method" value={test.method} onChange={val => updateTest(test.id, 'method', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" multiline />
                   </div>
                   <div>
                     <label className="text-[10px] uppercase font-bold text-slate-400">Value</label>
-                    <DropdownInput fieldKey="testValue" placeholder="Value" value={test.value} onChange={val => updateTest(test.id, 'value', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                    <DropdownInput fieldKey="testValue" placeholder="Value" value={test.value} onChange={val => updateTest(test.id, 'value', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" multiline />
                   </div>
                   <div>
                     <label className="text-[10px] uppercase font-bold text-slate-400">Unit</label>
