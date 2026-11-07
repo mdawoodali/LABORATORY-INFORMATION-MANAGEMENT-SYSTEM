@@ -294,39 +294,12 @@ function InvoiceContent() {
       const pages = document.querySelectorAll('.report-a4-page');
       if (pages.length === 0) throw new Error("No pages found");
 
-        const html2canvasModule = await import('html2canvas-pro');
-        const html2canvas = html2canvasModule.default;
-        const { jsPDF } = await import('jspdf');
-
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4'
-        });
-
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-
-        for (let i = 0; i < pages.length; i++) {
-          const pageEl = pages[i] as HTMLElement;
-          await new Promise(r => setTimeout(r, 100));
-          const canvas = await html2canvas(pageEl, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            width: pageEl.offsetWidth,
-            height: pageEl.offsetHeight
-          });
-          const imgData = canvas.toDataURL('image/jpeg', 0.90);
-        
-        if (i > 0) pdf.addPage();
-        
-        const imgProps = pdf.getImageProperties(imgData);
-        const calculatedHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, calculatedHeight);
-      }
-
-      const blob = pdf.output('blob');
+      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+      const { pdf, blob } = await createDocumentPdf({
+        pages,
+        filename: formData.invoiceNo,
+        type: 'invoice'
+      });
       
       const { saveSilentBackup } = await import('@/utils/exportManager');
       const backupType = 'invoice';
@@ -423,20 +396,13 @@ function InvoiceContent() {
     }
 
     try {
-      const { jsPDF } = await import('jspdf');
-      const html2canvas = (await import('html2canvas')).default;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
       const pageElements = document.querySelectorAll('.report-a4-page');
-      for (let i = 0; i < pageElements.length; i++) {
-        const page = pageElements[i] as HTMLElement;
-        const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
-        const imgData = canvas.toDataURL('image/png');
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-      }
-
-      const pdfBlob = pdf.output('blob');
+      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+      const { pdf, blob: pdfBlob } = await createDocumentPdf({
+        pages: pageElements,
+        filename,
+        type: 'invoice'
+      });
 
       if (typeof window !== 'undefined' && (window as any).__TAURI__) {
          const { saveSilentBackup } = await import('@/utils/exportManager');

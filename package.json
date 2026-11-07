@@ -1,6 +1,6 @@
 {
   "name": "laboratory-information-management-system",
-  "version": "6.3.9",
+  "version": "6.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

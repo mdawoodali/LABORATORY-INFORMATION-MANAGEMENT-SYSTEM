@@ -130,46 +130,13 @@ function VerifyPage() {
     setIsGeneratingPdf(true);
     try {
       const pages = document.querySelectorAll('.report-a4-page');
-      const html2canvasModule = await import('html2canvas-pro');
-      const html2canvas = html2canvasModule.default;
-      const content: string[] = [];
-
-      for (let i = 0; i < pages.length; i++) {
-        const pageEl = pages[i] as HTMLElement;
-        await new Promise(r => setTimeout(r, 100));
-        const canvas = await html2canvas(pageEl, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff'
-        });
-        content.push(canvas.toDataURL('image/jpeg', 0.90));
-      }
-
-      const { jsPDF } = await import('jspdf');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const jsPdfOptions: any = {
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      };
-
-      if (password) {
-        jsPdfOptions.encryption = {
-          userPassword: password,
-          ownerPassword: password,
-          userPermissions: ['print']
-        };
-      }
-
-      const pdf = new jsPDF(jsPdfOptions);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      for (let i = 0; i < content.length; i++) {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(content[i], 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      }
-
+      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+      const { pdf } = await createDocumentPdf({
+        pages,
+        filename: reportNo,
+        password: password || undefined,
+        type: 'report'
+      });
       pdf.save(`Report_${reportNo}.pdf`);
     } catch (err) {
       console.error('PDF generation failed:', err);

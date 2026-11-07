@@ -407,65 +407,19 @@ function EditorContent() {
         }
       });
 
-      // 2. Generate Canvas screenshots
-      const pages = document.querySelectorAll('.report-a4-page');
-      const content = [];
-
-      for (let i = 0; i < pages.length; i++) {
-        // Dynamically import html2canvas to prevent blocking initial load
-        const html2canvasModule = await import('html2canvas-pro');
-        const html2canvas = html2canvasModule.default;
-        const pageEl = pages[i] as HTMLElement;
-        
-        await new Promise(r => setTimeout(r, 100));
-        
-        const canvas = await html2canvas(pageEl, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff'
-        });
-        const imgData = canvas.toDataURL('image/jpeg', 0.90);
-        content.push({
-          image: imgData,
-          width: 595.28,
-          height: 841.89,
-          margin: [0, 0, 0, 0]
-        });
-      }
-
-      // Restore hidden elements
+      // Restore hidden elements before capture setup
       hiddenElements.forEach(({ el, prev }) => { el.style.display = prev; });
       ringElements.forEach(({ el, prev }) => { el.style.boxShadow = prev; });
       handleDots.forEach(({ el, prev }) => { el.style.display = prev; });
 
-      // 3. Build PDF using jsPDF
-      const { jsPDF } = await import('jspdf');
-      
-      const jsPdfOptions: any = {
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      };
-
-      if (effectivePassword) {
-        jsPdfOptions.encryption = {
-          userPassword: effectivePassword,
-          ownerPassword: effectivePassword,
-          userPermissions: ['print']
-        };
-      }
-
-      const pdf = new jsPDF(jsPdfOptions);
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      for (let i = 0; i < content.length; i++) {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(content[i].image, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      }
-
-      const blob = pdf.output('blob');
+      const pages = document.querySelectorAll('.report-a4-page');
+      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+      const { pdf, blob } = await createDocumentPdf({
+        pages,
+        filename: formData.reportNo,
+        password: effectivePassword,
+        type: 'report'
+      });
 
       // Save using Tauri natively, or fallback to browser download
       const { saveSilentBackup } = await import('@/utils/exportManager');

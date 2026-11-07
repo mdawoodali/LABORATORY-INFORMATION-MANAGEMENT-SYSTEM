@@ -472,20 +472,13 @@ function LetterheadContent() {
     }
 
     try {
-      const { jsPDF } = await import('jspdf');
-      const html2canvas = (await import('html2canvas')).default;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
       const pageElements = document.querySelectorAll('.pqs-a4-page');
-      for (let i = 0; i < pageElements.length; i++) {
-        const page = pageElements[i] as HTMLElement;
-        const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
-        const imgData = canvas.toDataURL('image/png');
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-      }
-
-      const pdfBlob = pdf.output('blob');
+      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+      const { pdf, blob: pdfBlob } = await createDocumentPdf({
+        pages: pageElements,
+        filename,
+        type: 'letterhead'
+      });
 
       if (typeof window !== 'undefined' && (window as any).__TAURI__) {
          const { saveSilentBackup } = await import('@/utils/exportManager');
@@ -732,10 +725,27 @@ function LetterheadContent() {
       }
     }
 
-    setTimeout(() => {
+    try {
+      const pageElements = document.querySelectorAll('.pqs-a4-page');
+      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+      const { pdf, blob: pdfBlob } = await createDocumentPdf({
+        pages: pageElements,
+        filename,
+        type: 'letterhead'
+      });
+
+      if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+        const { saveSilentBackup } = await import('@/utils/exportManager');
+        await saveSilentBackup(filename, pdfBlob, false, 'letterhead');
+      } else {
+        pdf.save((filename || 'Letterhead') + ".pdf");
+      }
+    } catch (e) {
+      console.error('Letterhead PDF export error:', e);
       window.print();
+    } finally {
       setIsGenerating(false);
-    }, 300);
+    }
   };
 
   const formatText = (command: string, value: string = '') => {

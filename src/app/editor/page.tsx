@@ -107,20 +107,14 @@ function EditorContent() {
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
     try {
-      const { jsPDF } = await import('jspdf');
-      const html2canvas = (await import('html2canvas')).default;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
       const pageElements = document.querySelectorAll('.report-a4-page');
-      for (let i = 0; i < pageElements.length; i++) {
-        const page = pageElements[i] as HTMLElement;
-        const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false });
-        const imgData = canvas.toDataURL('image/png');
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-      }
-
-      const pdfBlob = pdf.output('blob');
+      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+      const { pdf, blob: pdfBlob } = await createDocumentPdf({
+        pages: pageElements,
+        filename,
+        password,
+        type: 'report'
+      });
 
       if (typeof window !== 'undefined' && (window as any).__TAURI__) {
          const { saveSilentBackup } = await import('@/utils/exportManager');
@@ -367,61 +361,14 @@ function EditorContent() {
       // Wait a tick for isGenerating state to apply CSS class hiding handles
       await new Promise(r => setTimeout(r, 300));
 
-      // 2. Generate Canvas screenshots
       const pages = document.querySelectorAll('.report-a4-page');
-      const content = [];
-
-      for (let i = 0; i < pages.length; i++) {
-        // Dynamically import html2canvas to prevent blocking initial load
-        const html2canvasModule = await import('html2canvas-pro');
-        const html2canvas = html2canvasModule.default;
-        const pageEl = pages[i] as HTMLElement;
-        
-        // Wait an extra moment to ensure fonts/images are painted
-        await new Promise(r => setTimeout(r, 100));
-        
-        const canvas = await html2canvas(pageEl, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff'
-        });
-        const imgData = canvas.toDataURL('image/jpeg', 0.90);
-        content.push({
-          image: imgData,
-          width: 595.28,
-          height: 841.89,
-          margin: [0, 0, 0, 0]
-        });
-      }
-
-      // 3. Build PDF using jsPDF
-      const { jsPDF } = await import('jspdf');
-      
-      const jsPdfOptions: any = {
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      };
-
-      if (effectivePassword) {
-        jsPdfOptions.encryption = {
-          userPassword: effectivePassword,
-          ownerPassword: effectivePassword,
-          userPermissions: ['print']
-        };
-      }
-
-      const pdf = new jsPDF(jsPdfOptions);
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      for (let i = 0; i < content.length; i++) {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(content[i].image, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      }
-
-      const blob = pdf.output('blob');
+      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+      const { pdf, blob } = await createDocumentPdf({
+        pages,
+        filename: formData.reportNo,
+        password: effectivePassword,
+        type: 'report'
+      });
 
       // Save using Tauri natively, or fallback to browser download
       const { saveSilentBackup } = await import('@/utils/exportManager');
