@@ -374,15 +374,53 @@ function LetterheadContent() {
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
     const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
   const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
+  const initialStateRef = useRef<string>('');
+  const allowNavigationRef = useRef(false);
 
-  const isPageEmpty = () => {
-    const pgs = document.querySelectorAll('.pqs-a4-page');
-    let hasContent = false;
-    pgs.forEach(p => {
-        if (p.textContent?.trim() !== '' || p.querySelector('img')) hasContent = true;
+  const getLetterheadSnapshot = () => {
+    const pagesData = pages.map(p => {
+      const el = document.getElementById(p.id);
+      if (!el) return { id: p.id };
+      const fields = el.querySelectorAll('[contentEditable="true"], [contenteditable]');
+      return {
+        id: p.id,
+        subtitle: fields[0]?.innerHTML || '',
+        date: fields[1]?.innerHTML || '',
+        body: fields[2]?.innerHTML || '',
+        f1: fields[3]?.innerHTML || '',
+        f2: fields[4]?.innerHTML || '',
+        f3: fields[5]?.innerHTML || ''
+      };
     });
-    return !hasContent;
+    return JSON.stringify({ filename, pages: pagesData });
   };
+
+  const isDirty = () => {
+    if (allowNavigationRef.current) return false;
+    if (initialStateRef.current) {
+      const current = getLetterheadSnapshot();
+      if (current === initialStateRef.current) return false;
+      return true;
+    }
+    const pgs = document.querySelectorAll('.pqs-a4-page');
+    let hasBody = false;
+    pgs.forEach(p => {
+      const body = p.querySelector('[data-placeholder="Start typing your letter or document content here..."]');
+      if (body && body.textContent?.trim()) hasBody = true;
+    });
+    return hasBody;
+  };
+
+  const isPageEmpty = () => !isDirty();
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (!initialStateRef.current) {
+        initialStateRef.current = getLetterheadSnapshot();
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [pages, filename]);
 
   useEffect(() => {
     let unlisten: () => void;
@@ -391,7 +429,8 @@ function LetterheadContent() {
         const appWindow = module.getCurrentWindow ? module.getCurrentWindow() : (module as any).appWindow;
         if (appWindow && appWindow.onCloseRequested) {
             appWindow.onCloseRequested((event: any) => {
-              if (!isPageEmpty()) {
+              if (allowNavigationRef.current) return;
+              if (isDirty()) {
                 event.preventDefault();
                 setUnsavedAction('CLOSE');
                 setUnsavedModalOpen(true);
@@ -402,7 +441,8 @@ function LetterheadContent() {
     }
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!isPageEmpty()) {
+      if (allowNavigationRef.current) return;
+      if (isDirty()) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -413,7 +453,7 @@ function LetterheadContent() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       if (unlisten) unlisten();
     };
-  }, []);
+  }, [pages, filename]);
 
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
@@ -454,15 +494,20 @@ function LetterheadContent() {
          pdf.save(filename + ".pdf");
       }
       
+      allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       
       if (unsavedAction === 'BACK') {
-        window.location.href = '/';
+        router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if ((window as any).__TAURI__) {
-            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {
-                import('@tauri-apps/plugin-process').then(m => (m as any).exit(0)).catch(() => {});
-            });
+          import('@tauri-apps/api/window').then((m) => {
+            const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+            if (w && w.destroy) w.destroy();
+            else import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          }).catch(() => {
+            import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          });
         }
       }
     } catch (e) {
@@ -473,14 +518,19 @@ function LetterheadContent() {
   };
 
   const handleUnsavedDontSave = async () => {
+      allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       if (unsavedAction === 'BACK') {
-        window.location.href = '/';
+        router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {
-                import('@tauri-apps/plugin-process').then(m => (m as any).exit(0)).catch(() => {});
-            });
+          import('@tauri-apps/api/window').then((m) => {
+            const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+            if (w && w.destroy) w.destroy();
+            else import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          }).catch(() => {
+            import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          });
         }
       }
   };
@@ -720,11 +770,12 @@ function LetterheadContent() {
       <div className="w-full md:w-[400px] h-auto md:h-full bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl md:shadow-none no-print overflow-hidden shrink-0">
         <div className="flex-none p-4 md:p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
           <button onClick={() => {
-            if (!isPageEmpty()) {
+            if (isDirty()) {
               setUnsavedAction('BACK');
               setUnsavedModalOpen(true);
             } else {
-              window.location.href = '/';
+              allowNavigationRef.current = true;
+              router.push('/');
             }
           }} className="p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-xl transition-all" title="Back to Home">
             <ArrowLeft size={20} />

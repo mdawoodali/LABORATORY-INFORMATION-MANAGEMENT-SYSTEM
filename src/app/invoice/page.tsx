@@ -1,7 +1,7 @@
 /* eslint-disable */
 "use client";
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { extractAndSaveOptions } from '@/lib/sync';
@@ -50,6 +50,8 @@ function InvoiceContent() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(!!id);
+  const initialStateRef = useRef<string>('');
+  const allowNavigationRef = useRef(false);
   
   const generateInvoiceNo = () => {
     const d = new Date();
@@ -129,25 +131,33 @@ function InvoiceContent() {
     if (id) {
       supabase.from('receipts').select('*').eq('id', id).single().then(({ data }) => {
         if (data?.data) {
-          setFormData(prev => ({ 
-              ...prev, 
-              ...data.data.formData, 
+          const loadedData = data.data;
+          const loadedForm = { 
+              ...formData, 
+              ...loadedData.formData, 
               fieldLabels: { 
-                ...(prev.fieldLabels || {}), 
-                ...(data.data.formData.fieldLabels || {}) 
+                ...(formData.fieldLabels || {}), 
+                ...(loadedData.formData?.fieldLabels || {}) 
               } 
-            }));
-          setItems(data.data.items || []);
+          };
+          const loadedItems = loadedData.items || [];
+          setFormData(loadedForm);
+          setItems(loadedItems);
           if (data.password) setPassword(data.password);
+          initialStateRef.current = JSON.stringify({ formData: loadedForm, items: loadedItems });
         }
         setTimeout(() => setIsLoading(false), 0);
       });
     } else {
-      setFormData(prev => ({
-        ...prev,
-        invoiceNo: generateInvoiceNo(),
-        invoiceDate: getTodayDate()
-      }));
+      const newInvoiceNo = generateInvoiceNo();
+      const newInvoiceDate = getTodayDate();
+      const initialForm = {
+        ...formData,
+        invoiceNo: newInvoiceNo,
+        invoiceDate: newInvoiceDate
+      };
+      setFormData(initialForm);
+      initialStateRef.current = JSON.stringify({ formData: initialForm, items });
       setTimeout(() => setIsLoading(false), 0);
     }
   }, [id]);
@@ -335,6 +345,7 @@ function InvoiceContent() {
       const backupType = 'invoice';
       
       await saveSilentBackup(formData.invoiceNo, blob, false, backupType);
+      initialStateRef.current = JSON.stringify({ formData, items });
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 5000);
       toast.success(backupType === 'invoice' ? "Invoice PDF generated successfully!" : "Report PDF generated successfully!");
@@ -350,16 +361,30 @@ function InvoiceContent() {
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
   const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
 
-  const isPageEmpty = () => {
-    const hasItems = items.some((i: any) => 
-      (i.test !== '' && i.test !== 'Water Analysis') || 
-      (i.method !== '' && i.method !== 'ISO 1234') || 
-      i.price !== '' || 
-      i.samples !== ''
-    );
-    const hasClientInfo = formData.customerName !== '' || formData.companyAddress !== '' || formData.contactDetail !== '';
-    return !hasItems && !hasClientInfo;
+  const isDirty = () => {
+    if (allowNavigationRef.current) return false;
+    if (isLoading) return false;
+
+    if (initialStateRef.current) {
+      const currentData = JSON.stringify({ formData, items });
+      if (currentData === initialStateRef.current) return false;
+    }
+
+    if (!id) {
+      const hasItems = items.some((i: any) => 
+        (i.test !== '' && i.test !== 'Water Analysis') || 
+        (i.method !== '' && i.method !== 'ISO 1234') || 
+        i.price !== '' || 
+        i.samples !== ''
+      );
+      const hasClientInfo = Boolean(formData.customerName?.trim() || formData.companyAddress?.trim() || formData.contactDetail?.trim());
+      if (!hasItems && !hasClientInfo) return false;
+    }
+
+    return true;
   };
+
+  const isPageEmpty = () => !isDirty();
 
   useEffect(() => {
     let unlisten: () => void;
@@ -368,7 +393,8 @@ function InvoiceContent() {
         const appWindow = module.getCurrentWindow ? module.getCurrentWindow() : (module as any).appWindow;
         if (appWindow && appWindow.onCloseRequested) {
             appWindow.onCloseRequested((event: any) => {
-              if (!isPageEmpty()) {
+              if (allowNavigationRef.current) return;
+              if (isDirty()) {
                 event.preventDefault();
                 setUnsavedAction('CLOSE');
                 setUnsavedModalOpen(true);
@@ -379,7 +405,8 @@ function InvoiceContent() {
     }
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!isPageEmpty()) {
+      if (allowNavigationRef.current) return;
+      if (isDirty()) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -390,7 +417,7 @@ function InvoiceContent() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       if (unlisten) unlisten();
     };
-  }, [items, formData]);
+  }, [items, formData, isLoading]);
 
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
@@ -431,13 +458,20 @@ function InvoiceContent() {
          pdf.save(filename + ".pdf");
       }
       
+      allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       
       if (unsavedAction === 'BACK') {
-        window.location.href = '/';
+        router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if ((window as any).__TAURI__) {
-            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {});
+          import('@tauri-apps/api/window').then((m) => {
+            const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+            if (w && w.destroy) w.destroy();
+            else import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          }).catch(() => {
+            import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          });
         }
       }
     } catch (e) {
@@ -448,12 +482,19 @@ function InvoiceContent() {
   };
 
   const handleUnsavedDontSave = async () => {
+      allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       if (unsavedAction === 'BACK') {
-        window.location.href = '/';
+        router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {});
+          import('@tauri-apps/api/window').then((m) => {
+            const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+            if (w && w.destroy) w.destroy();
+            else import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          }).catch(() => {
+            import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          });
         }
       }
   };
@@ -493,11 +534,12 @@ function InvoiceContent() {
         <div className="p-4 border-b bg-slate-900 text-white flex gap-3 shrink-0 items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => {
-            if (!isPageEmpty()) {
+            if (isDirty()) {
               setUnsavedAction('BACK');
               setUnsavedModalOpen(true);
             } else {
-              window.location.href = '/';
+              allowNavigationRef.current = true;
+              router.push('/');
             }
           }} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all">
               <ArrowLeft size={16} />

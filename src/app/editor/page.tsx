@@ -9,7 +9,7 @@ const EndOfReportMarker = () => (
 );
 
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SettingsModal from '@/components/SettingsModal';
 import ReportForm from '@/components/form/ReportForm';
@@ -43,18 +43,33 @@ function EditorContent() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [password, setPassword] = useState('');
+  const initialStateRef = useRef<string>('');
+  const allowNavigationRef = useRef(false);
   
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
   const [unsavedAction, setUnsavedAction] = useState<UnsavedAction>(null);
 
-  const isPageEmpty = () => {
-    if (reportId || templateId) return false;
-    const isFormModified = (formData as any).customerName !== '' || (formData as any).sampleName !== '';
-    const hasTests = tests.some(t => (t as any).parameter !== '' || t.result !== '');
-    const hasImages = sampleImages.length > 0;
-    const hasExtraPages = extraPages.length > 0;
-    return !isFormModified && !hasTests && !hasImages && !hasExtraPages;
+  const isDirty = () => {
+    if (allowNavigationRef.current) return false;
+    if (!isLoaded) return false;
+
+    if (initialStateRef.current) {
+      const currentStr = JSON.stringify({ formData, tests, sampleImages, extraPages });
+      if (currentStr === initialStateRef.current) return false;
+    }
+
+    if (!reportId && !templateId) {
+      const isFormModified = Boolean((formData as any).customerName?.trim() || (formData as any).sampleName?.trim());
+      const hasTests = tests.some(t => Boolean((t as any).parameter?.trim() || t.result?.trim()));
+      const hasImages = sampleImages.length > 0;
+      const hasExtraPages = extraPages.length > 0;
+      if (!isFormModified && !hasTests && !hasImages && !hasExtraPages) return false;
+    }
+
+    return true;
   };
+
+  const isPageEmpty = () => !isDirty();
 
   useEffect(() => {
     let unlisten: () => void;
@@ -63,7 +78,8 @@ function EditorContent() {
         const appWindow = module.getCurrentWindow ? module.getCurrentWindow() : (module as any).appWindow;
         if (appWindow && appWindow.onCloseRequested) {
             appWindow.onCloseRequested((event: any) => {
-              if (!isPageEmpty()) {
+              if (allowNavigationRef.current) return;
+              if (isDirty()) {
                 event.preventDefault();
                 setUnsavedAction('CLOSE');
                 setUnsavedModalOpen(true);
@@ -74,7 +90,8 @@ function EditorContent() {
     }
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!isPageEmpty()) {
+      if (allowNavigationRef.current) return;
+      if (isDirty()) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -85,7 +102,7 @@ function EditorContent() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       if (unlisten) unlisten();
     };
-  }, [formData, tests, sampleImages, extraPages, reportId, templateId]);
+  }, [formData, tests, sampleImages, extraPages, reportId, templateId, isLoaded]);
 
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
@@ -112,15 +129,20 @@ function EditorContent() {
          pdf.save(filename + ".pdf");
       }
       
+      allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       
       if (unsavedAction === 'BACK') {
-        window.location.href = '/';
+        router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if ((window as any).__TAURI__) {
-            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {
-                import('@tauri-apps/plugin-process').then(m => (m as any).exit(0)).catch(() => {});
-            });
+          import('@tauri-apps/api/window').then((m) => {
+            const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+            if (w && w.destroy) w.destroy();
+            else import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          }).catch(() => {
+            import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          });
         }
       }
     } catch (e) {
@@ -131,14 +153,19 @@ function EditorContent() {
   };
 
   const handleUnsavedDontSave = async () => {
+      allowNavigationRef.current = true;
       setUnsavedModalOpen(false);
       if (unsavedAction === 'BACK') {
-        window.location.href = '/';
+        router.push('/');
       } else if (unsavedAction === 'CLOSE') {
         if (typeof window !== 'undefined' && (window as any).__TAURI__) {
-            import('@tauri-apps/plugin-process').then(m => m.exit(0)).catch(() => {
-                import('@tauri-apps/plugin-process').then(m => (m as any).exit(0)).catch(() => {});
-            });
+          import('@tauri-apps/api/window').then((m) => {
+            const w = m.getCurrentWindow ? m.getCurrentWindow() : (m as any).appWindow;
+            if (w && w.destroy) w.destroy();
+            else import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          }).catch(() => {
+            import('@tauri-apps/plugin-process').then(p => p.exit(0)).catch(() => {});
+          });
         }
       }
   };
@@ -166,14 +193,25 @@ function EditorContent() {
 
       if (data?.data) {
         const reportData = data.data as Record<string, unknown>;
-        setFormData(reportData.formData as any);  
-        setTests(reportData.tests as any[]);  
+        const loadedForm = (reportData.formData || {}) as any;
+        const loadedTests = (reportData.tests || []) as any[];
+        let loadedImages: any[] = [];
         if (reportData.sampleImages) {
-            setSampleImages(reportData.sampleImages as any[]);
-          } else if (reportData.sampleImage) {
-            setSampleImages([{ id: '1', src: reportData.sampleImage as string }]);
-          }
-        if (reportData.extraPages) setExtraPages(reportData.extraPages as any[]);  
+          loadedImages = reportData.sampleImages as any[];
+        } else if (reportData.sampleImage) {
+          loadedImages = [{ id: '1', src: reportData.sampleImage as string }];
+        }
+        const loadedExtra = (reportData.extraPages || []) as any[];
+        setFormData(loadedForm);  
+        setTests(loadedTests);  
+        setSampleImages(loadedImages);
+        setExtraPages(loadedExtra);
+        initialStateRef.current = JSON.stringify({
+          formData: loadedForm,
+          tests: loadedTests,
+          sampleImages: loadedImages,
+          extraPages: loadedExtra
+        });
       }
     } catch (e) {
       console.error('Failed to load report:', e);
@@ -224,20 +262,32 @@ function EditorContent() {
       if (templateData) {
         try {
           const template: Template = JSON.parse(templateData);
-           
-          setFormData({
+          const newFormData = {
             ...template.formData,
             reportNo: String(Math.floor(100000 + Math.random() * 900000)),
-          });
-           
+          };
+          setFormData(newFormData);
           setTests(template.tests);
           sessionStorage.removeItem('sr_template_data');
+          initialStateRef.current = JSON.stringify({
+            formData: newFormData,
+            tests: template.tests,
+            sampleImages: [],
+            extraPages: []
+          });
         } catch (e: unknown) {
           console.error('Failed to load template:', e);
         }
       }
     } else if (reportId) {
       loadReport(reportId);
+    } else {
+      initialStateRef.current = JSON.stringify({
+        formData,
+        tests: [...DEFAULT_TESTS],
+        sampleImages: [],
+        extraPages: []
+      });
     }
      
     setIsLoaded(true);
@@ -548,11 +598,12 @@ function EditorContent() {
         handlePrint={handlePrint}
         onSaveTemplate={handleSaveTemplate}
         onGoHome={() => {
-            if (!isPageEmpty()) {
+            if (isDirty()) {
               setUnsavedAction('BACK');
               setUnsavedModalOpen(true);
             } else {
-              window.location.href = '/';
+              allowNavigationRef.current = true;
+              router.push('/');
             }
           }}
         onOpenSettings={() => setShowSettings(true)}
