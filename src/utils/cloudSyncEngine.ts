@@ -174,21 +174,36 @@ function buildOffscreenDocumentDOM(receipt: any): HTMLElement {
     container.appendChild(page);
   } else {
     // Standard Laboratory Test Report
-    const page = document.createElement('div');
-    page.className = 'report-a4-page';
-    page.style.width = '794px';
-    page.style.height = '1123px';
-    page.style.padding = '32px 40px';
-    page.style.backgroundColor = '#ffffff';
-    page.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    page.style.position = 'relative';
-    page.style.boxSizing = 'border-box';
+    const testList = tests || [];
+    const ROWS_PER_PAGE = 8;
+    const testPagesCount = Math.max(1, Math.ceil(testList.length / ROWS_PER_PAGE));
+    const testChunks: any[][] = [];
+    for (let i = 0; i < testList.length; i += ROWS_PER_PAGE) {
+      testChunks.push(testList.slice(i, i + ROWS_PER_PAGE));
+    }
+    if (testChunks.length === 0) testChunks.push([]);
+
+    const rawImages = (receipt.data as any)?.sampleImages || [];
+    const singleImage = (receipt.data as any)?.sampleImage;
+    const hasImages = rawImages.length > 0 || !!singleImage;
+    const totalPages = 1 + testPagesCount + (hasImages ? 1 : 0);
 
     const dynFields = formData.dynamicFields || [];
     const applicantVal = dynFields.find((f: any) => f.label === 'APPLICANT')?.value || formData.applicant || '-';
     const sampleDesc = dynFields.find((f: any) => f.label?.includes('SAMPLE'))?.value || formData.sampleDescription || '-';
 
-    page.innerHTML = `
+    // Page 1: Client & Sample Information
+    const page1 = document.createElement('div');
+    page1.className = 'report-a4-page';
+    page1.style.width = '794px';
+    page1.style.height = '1123px';
+    page1.style.padding = '32px 40px';
+    page1.style.backgroundColor = '#ffffff';
+    page1.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    page1.style.position = 'relative';
+    page1.style.boxSizing = 'border-box';
+
+    page1.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; border-bottom:2px solid #1f2937; padding-bottom:12px;">
         <div style="display:flex; align-items:center; gap:12px;">
           <img src="/pqs-logo.png" style="width:80px; height:80px; object-fit:contain;" />
@@ -204,53 +219,144 @@ function buildOffscreenDocumentDOM(receipt: any): HTMLElement {
         </div>
       </div>
 
-      <div style="margin-bottom:16px;">
-        <div style="font-size:13px; font-weight:bold; color:#1f2937; border-bottom:1px solid #d1d5db; padding-bottom:4px; margin-bottom:8px;">Sample & Client Information:</div>
-        <table style="width:100%; font-size:12px; border-collapse:collapse;">
-          <tr><td style="font-weight:600; width:150px; padding:3px 0; color:#374151;">Applicant:</td><td style="font-weight:bold; color:#111827; border-bottom:1px solid #f3f4f6;">${applicantVal}</td></tr>
-          <tr><td style="font-weight:600; padding:3px 0; color:#374151;">Sample Description:</td><td style="color:#111827; border-bottom:1px solid #f3f4f6;">${sampleDesc}</td></tr>
-          ${dynFields.filter((f: any) => f.label !== 'APPLICANT' && !f.label?.includes('SAMPLE')).slice(0, 4).map((f: any) => `
-            <tr><td style="font-weight:600; padding:3px 0; color:#374151;">${f.label}:</td><td style="color:#111827; border-bottom:1px solid #f3f4f6;">${f.value || '-'}</td></tr>
+      <div style="margin-bottom:24px;">
+        <div style="font-size:14px; font-weight:bold; color:#1f2937; border-bottom:2px solid #1f2937; padding-bottom:6px; margin-bottom:12px;">Sample & Client Information:</div>
+        <table style="width:100%; font-size:13px; border-collapse:collapse;">
+          <tr><td style="font-weight:600; width:180px; padding:6px 0; color:#374151;">Applicant:</td><td style="font-weight:bold; color:#111827; border-bottom:1px solid #e5e7eb;">${applicantVal}</td></tr>
+          <tr><td style="font-weight:600; padding:6px 0; color:#374151;">Sample Description:</td><td style="color:#111827; border-bottom:1px solid #e5e7eb;">${sampleDesc}</td></tr>
+          ${dynFields.filter((f: any) => f.label !== 'APPLICANT' && !f.label?.includes('SAMPLE')).map((f: any) => `
+            <tr><td style="font-weight:600; padding:6px 0; color:#374151;">${f.label}:</td><td style="color:#111827; border-bottom:1px solid #e5e7eb;">${f.value || '-'}</td></tr>
           `).join('')}
         </table>
       </div>
 
-      <table style="width:100%; border-collapse:collapse; border:1px solid #1f2937; font-size:11px; margin-bottom:20px;">
-        <thead>
-          <tr style="background-color:#f1f5f9; color:#1f2937; font-weight:bold; border-bottom:1px solid #1f2937;">
-            <th style="border-right:1px solid #1f2937; padding:6px 8px; text-align:left;">TEST</th>
-            <th style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">METHOD</th>
-            <th style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">VALUE</th>
-            <th style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">UNIT</th>
-            <th style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">CRITERIA</th>
-            <th style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">UNIT</th>
-            <th style="padding:6px 8px; text-align:center;">RESULT</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tests.map((t: any) => `
-            <tr style="border-bottom:1px solid #e2e8f0;">
-              <td style="border-right:1px solid #1f2937; padding:6px 8px; font-weight:600;">${t.test || '-'}</td>
-              <td style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center; color:#4b5563;">${t.method || '-'}</td>
-              <td style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">${t.value || '-'}</td>
-              <td style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">${t.unit || '-'}</td>
-              <td style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">${t.criteria || t.peqs || '-'}</td>
-              <td style="border-right:1px solid #1f2937; padding:6px 8px; text-align:center;">${t.criteriaUnit || t.unit || '-'}</td>
-              <td style="padding:6px 8px; text-align:center; font-weight:bold;">${t.result || 'Pass'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-
       <div style="position:absolute; bottom:30px; left:0; width:100%; display:flex; justify-content:center;">
         <div style="width:85%; display:flex; justify-content:space-between; border-top:1px solid #9ca3af; padding-top:8px; font-size:10px; color:#6b7280;">
           <span style="font-style:italic;">This document is digitally verified. Unauthorized alterations invalidate this certificate.</span>
-          <span style="font-weight:bold;">Page 1/1</span>
+          <span style="font-weight:bold;">Page 1/${totalPages}</span>
         </div>
       </div>
     `;
+    container.appendChild(page1);
 
-    container.appendChild(page);
+    // Test Pages (Chunked into 8 tests per page)
+    testChunks.forEach((chunk, chunkIdx) => {
+      const testPage = document.createElement('div');
+      testPage.className = 'report-a4-page';
+      testPage.style.width = '794px';
+      testPage.style.height = '1123px';
+      testPage.style.padding = '32px 40px';
+      testPage.style.backgroundColor = '#ffffff';
+      testPage.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      testPage.style.position = 'relative';
+      testPage.style.boxSizing = 'border-box';
+
+      const pageNum = 2 + chunkIdx;
+      testPage.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; border-bottom:2px solid #1f2937; padding-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img src="/pqs-logo.png" style="width:80px; height:80px; object-fit:contain;" />
+            <div>
+              <div style="font-weight:900; font-size:18px; color:#1e3a8a; letter-spacing:0.5px;">PRECISION QUALITY SERVICES</div>
+              <div style="font-size:11px; color:#6b7280; margin-top:2px;">Laboratory Information Management System</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:14px; font-weight:bold; color:#1e3a8a;">TEST REPORT</div>
+            <div style="font-size:13px; font-weight:bold; margin-top:4px;">Report #: ${receipt.id}</div>
+            <div style="font-size:12px; color:#4b5563;">Date: ${formData.reportDate || '-'}</div>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; border:1px solid #1f2937; font-size:12px; margin-bottom:20px;">
+          <thead>
+            <tr style="background-color:#f1f5f9; color:#1f2937; font-weight:bold; border-bottom:1px solid #1f2937;">
+              <th style="border-right:1px solid #1f2937; padding:8px; text-align:left; width:22%;">TEST</th>
+              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:18%;">METHOD</th>
+              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:12%;">VALUE</th>
+              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:10%;">UNIT</th>
+              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:14%;">CRITERIA</th>
+              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:10%;">UNIT</th>
+              <th style="padding:8px; text-align:center; width:14%;">RESULT</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${chunk.map((t: any) => `
+              <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="border-right:1px solid #1f2937; padding:7px 8px; font-weight:600;">${t.test || '-'}</td>
+                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center; color:#4b5563; white-space:pre-wrap;">${t.method || '-'}</td>
+                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center;">${t.value || '-'}</td>
+                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center;">${t.unit || '-'}</td>
+                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center;">${t.criteria || t.peqs || '-'}</td>
+                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center;">${t.criteriaUnit || t.unit || '-'}</td>
+                <td style="padding:7px 8px; text-align:center; font-weight:bold;">${t.result || 'Pass'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        ${chunkIdx === testChunks.length - 1 && formData.remarks ? `
+          <div style="font-size:12px; margin-top:8px;">
+            <span style="font-weight:bold;">Remarks: </span>
+            <span style="text-decoration:underline;">${formData.remarks}</span>
+          </div>
+        ` : ''}
+
+        <div style="position:absolute; bottom:30px; left:0; width:100%; display:flex; justify-content:center;">
+          <div style="width:85%; display:flex; justify-content:space-between; border-top:1px solid #9ca3af; padding-top:8px; font-size:10px; color:#6b7280;">
+            <span style="font-style:italic;">This document is digitally verified. Unauthorized alterations invalidate this certificate.</span>
+            <span style="font-weight:bold;">Page ${pageNum}/${totalPages}</span>
+          </div>
+        </div>
+      `;
+      container.appendChild(testPage);
+    });
+
+    // Sample Images Page
+    if (hasImages) {
+      const imgPage = document.createElement('div');
+      imgPage.className = 'report-a4-page';
+      imgPage.style.width = '794px';
+      imgPage.style.height = '1123px';
+      imgPage.style.padding = '32px 40px';
+      imgPage.style.backgroundColor = '#ffffff';
+      imgPage.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      imgPage.style.position = 'relative';
+      imgPage.style.boxSizing = 'border-box';
+
+      const imgSrc = rawImages[0]?.src || singleImage;
+      imgPage.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; border-bottom:2px solid #1f2937; padding-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img src="/pqs-logo.png" style="width:80px; height:80px; object-fit:contain;" />
+            <div>
+              <div style="font-weight:900; font-size:18px; color:#1e3a8a; letter-spacing:0.5px;">PRECISION QUALITY SERVICES</div>
+              <div style="font-size:11px; color:#6b7280; margin-top:2px;">Laboratory Information Management System</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:14px; font-weight:bold; color:#1e3a8a;">TEST REPORT</div>
+            <div style="font-size:13px; font-weight:bold; margin-top:4px;">Report #: ${receipt.id}</div>
+            <div style="font-size:12px; color:#4b5563;">Date: ${formData.reportDate || '-'}</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; height:800px;">
+          ${imgSrc ? `
+            <img src="${imgSrc}" style="max-width:600px; max-height:600px; object-fit:contain; border:1px solid #d1d5db; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);" />
+            <div style="font-size:12px; font-weight:bold; color:#4b5563; margin-top:12px;">Product Picture</div>
+          ` : ''}
+        </div>
+
+        <div style="position:absolute; bottom:30px; left:0; width:100%; display:flex; justify-content:center;">
+          <div style="width:85%; display:flex; justify-content:space-between; border-top:1px solid #9ca3af; padding-top:8px; font-size:10px; color:#6b7280;">
+            <span style="font-style:italic;">This document is digitally verified. Unauthorized alterations invalidate this certificate.</span>
+            <span style="font-weight:bold;">Page ${totalPages}/${totalPages}</span>
+          </div>
+        </div>
+      `;
+      container.appendChild(imgPage);
+    }
   }
 
   return container;

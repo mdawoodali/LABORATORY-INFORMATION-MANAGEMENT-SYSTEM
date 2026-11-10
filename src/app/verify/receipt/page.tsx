@@ -214,7 +214,18 @@ function VerifyPage() {
         : [];
     
     const hasImages = images.length > 0;
-    const totalPages = 2 + (hasImages ? 1 : 0) + (extraPages?.length || 0);
+    const ROWS_PER_PAGE = 8;
+    const testList = tests || [];
+    const testPagesCount = Math.max(1, Math.ceil(testList.length / ROWS_PER_PAGE));
+    const testChunks: TestRow[][] = [];
+    for (let i = 0; i < testList.length; i += ROWS_PER_PAGE) {
+      testChunks.push(testList.slice(i, i + ROWS_PER_PAGE));
+    }
+    if (testChunks.length === 0) testChunks.push([]);
+
+    const sampleImagesCount = hasImages ? 1 : 0;
+    const extraPagesCount = extraPages?.length || 0;
+    const totalPages = 1 + testPagesCount + sampleImagesCount + extraPagesCount;
     const activeSeal = computedSeal || urlSeal;
 
     return (
@@ -270,7 +281,7 @@ function VerifyPage() {
         {/* Responsive Fit-to-Screen Document Viewport */}
         <MobileDocumentViewport pageCount={totalPages}>
           {/* PAGE 1 */}
-          <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
+          <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
             <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
             <div className="flex-1">
               <PageOneData data={formData} />
@@ -278,26 +289,37 @@ function VerifyPage() {
             <PASFooter pageNum={1} totalPages={totalPages} seal={activeSeal} />
           </div>
 
-          {/* PAGE 2 */}
-          <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
-            <div className="flex-1">
-              <TestTable tests={tests} data={formData} />
+          {/* TEST PAGES (Dynamically chunked) */}
+          {testChunks.map((chunk, index) => (
+            <div 
+              key={`test-page-${index}`} 
+              className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" 
+              style={{ width: '794px', height: '1123px' }}
+            >
+              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
+              <div className="flex-1">
+                <TestTable 
+                  tests={chunk} 
+                  data={formData} 
+                  isFirstPage={index === 0}
+                  isLastPage={index === testChunks.length - 1}
+                />
+              </div>
+              <PASFooter pageNum={2 + index} totalPages={totalPages} seal={activeSeal} />
             </div>
-            <PASFooter pageNum={2} totalPages={totalPages} seal={activeSeal} />
-          </div>
+          ))}
 
-          {/* PAGE 3 - Sample Images */}
+          {/* Sample Images Page */}
           {hasImages && (
-            <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+            <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
               <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
               <div className="flex-1 flex flex-col px-10">
                 <div className="flex-1 w-full relative">
-                  {images.map(img => (
+                  {images.map((img, imgIdx) => (
                     <CanvaImage 
-                      key={img.id}
+                      key={img.id || imgIdx}
                       src={img.src}
-                      caption={images.length > 1 ? `Product Picture #${images.indexOf(img) + 1}` : 'Product Picture'} 
+                      caption={images.length > 1 ? `Product Picture #${imgIdx + 1}` : 'Product Picture'} 
                       defaultWidth={400} 
                       defaultHeight={400} 
                       className="border border-gray-200 shadow-sm bg-white p-2 absolute" 
@@ -306,15 +328,15 @@ function VerifyPage() {
                   ))}
                 </div>
               </div>
-              <PASFooter pageNum={3} totalPages={totalPages} seal={activeSeal} />
+              <PASFooter pageNum={1 + testPagesCount + 1} totalPages={totalPages} seal={activeSeal} />
             </div>
           )}
 
           {/* Extra Pages */}
           {extraPages && extraPages.map((page, index) => {
-            const pageNum = (hasImages ? 4 : 3) + index;
+            const pageNum = 1 + testPagesCount + sampleImagesCount + 1 + index;
             return (
-              <div key={page.id || index} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
+              <div key={page.id || index} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
                 <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
                 <div className="flex-1 flex flex-col px-10 relative">
                   {page.image && (
