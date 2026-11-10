@@ -29,6 +29,7 @@ import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut, Printer } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { generateDocumentSeal } from '@/utils/cryptoSeal';
+import MobileDocumentViewport from '@/components/MobileDocumentViewport';
 
 const convertDate = (d: string) => {
   if (!d) return '';
@@ -37,10 +38,10 @@ const convertDate = (d: string) => {
   return `${p[2]}-${p[1]}-${p[0]}`;
 };
 
-const PASHeader = ({ reportNo, reportingDate, onReportingDateChange, seal }: { reportNo: string, reportingDate: string, onReportingDateChange?: (date: string) => void, seal?: string }) => {
-  const verifyUrl = seal
-    ? `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}&seal=${seal}`
-    : `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}`;
+const PASHeader = ({ reportNo, reportingDate, onReportingDateChange, seal, password }: { reportNo: string, reportingDate: string, onReportingDateChange?: (date: string) => void, seal?: string, password?: string }) => {
+  const pwdParam = password ? `&pwd=${encodeURIComponent(password)}` : '';
+  const sealParam = seal ? `&seal=${seal}` : '';
+  const verifyUrl = `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}${sealParam}${pwdParam}`;
 
   return (
     <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
@@ -848,8 +849,8 @@ function EditorContent() {
            </button>
         </div>
         
-        {/* Floating Toolbar */}
-        <div className="fixed top-4 right-4 md:top-6 md:right-6 z-50 flex flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print items-center">
+        {/* Floating Toolbar (Desktop) */}
+        <div className="hidden md:flex fixed top-4 right-4 md:top-6 md:right-6 z-50 flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print items-center">
           <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 transition-all text-slate-700" title="Undo">
             <Undo2 size={18} />
           </button>
@@ -866,14 +867,10 @@ function EditorContent() {
           </button>
         </div>
 
-        <div 
-        className="w-full max-w-[794px] origin-top md:transform-none print:scale-100 print:mb-0 flex flex-col gap-4 md:gap-8 items-center transition-transform"
-          style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}
-        >
-        
+        <MobileDocumentViewport pageCount={totalPages} onScaleChange={setZoom}>
         {/* PAGE 1 */}
         <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} />
+          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password} />
           <div className="flex-1">
             <PageOneData data={formData} />
           </div>
@@ -883,7 +880,7 @@ function EditorContent() {
         {/* TEST PAGES (Dynamically chunked) */}
         {testChunks.map((chunk, index) => (
           <div key={`test-page-${index}`} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} />
+            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password} />
             <div className="flex-1">
               <TestTable 
                 tests={chunk} 
@@ -899,7 +896,7 @@ function EditorContent() {
         {/* PAGE 3 - Sample Image */}
         {sampleImages.length > 0 && (
           <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} />
+            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password} />
             <div className="flex-1 flex flex-col px-10">
                 <div className="flex-1 w-full relative">
                         {sampleImages.map(img => (
@@ -924,7 +921,7 @@ function EditorContent() {
           const pageNum = 1 + testPagesCount + (sampleImages.length > 0 ? 1 : 0) + 1 + index;
           return (
             <div key={page.id} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} />
+              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password} />
               <div className="flex-1 flex flex-col px-10 relative">
                 {page.image && (
                   <div className="flex-1 flex justify-center items-start mb-4">
@@ -944,7 +941,7 @@ function EditorContent() {
             </div>
           );
         })}
-        </div>
+        </MobileDocumentViewport>
       </div>
     </div>
   );

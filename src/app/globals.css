@@ -20,10 +20,20 @@
   body {
     background-color: #f1f5f9;
     color: #1e293b;
+    overflow-x: hidden;
+    max-width: 100vw;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
 @layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
   .font-gothic {
     font-family: "Old English Text MT", "Engravers Old English BT", "Diploma", "Blackletter", serif;
   }

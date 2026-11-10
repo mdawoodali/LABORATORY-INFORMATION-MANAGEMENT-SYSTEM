@@ -21,11 +21,26 @@ const montserrat = Montserrat({
 
 import SecurityShield from "@/components/SecurityShield";
 import FolderInit from "@/components/FolderInit";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#002f6c',
+};
 
 export const metadata: Metadata = {
-  title: "Laboratory Information Management System",
-  description: "LIMS Desktop & Web Application",
+  title: "Precision Quality Services LIMS",
+  description: "Official Laboratory Information Management System - Desktop & Mobile Application",
   manifest: '/manifest.json',
+  applicationName: 'PQS LIMS',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'PQS LIMS',
+  },
   icons: {
     icon: '/pqs-logo.png',
     apple: '/pqs-logo.png',
@@ -41,8 +56,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col select-none">
+      <body className="min-h-full flex flex-col select-none overflow-x-hidden">
         <Providers>
+          <PWAInstallPrompt variant="banner" />
           <Updater />
           <GlobalSync />
           <FolderInit />

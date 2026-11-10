@@ -1,40 +1,37 @@
-# LIMS 10/10 Evolution Progress Log
-# Goal: Make everything 10/10 without breaking existing functionality
-# Started: 2026-11-10T20:21:00+05:00
-# Completed: 2026-11-10T20:48:00+05:00
+# LIMS Phone App & Desktop Auto-Sync Progress Log
+# Goal: Build proper phone app, install button, zero horizontal scroll, pinch-to-zoom, instant desktop auto-sync, QR auth
+# Started: 2026-11-10T20:55:00+05:00
+# Target Version: v6.7.0
 
-[2026-11-10 20:21:00] Initialized PRD with 6 comprehensive stories covering Sample Status Tracking, Keyboard-First UX, SHA-256 Tamper-Proof Seal, PDF Engine Polish, Architectural Hardening, and Build Quality Gate.
-[2026-11-10 20:21:10] Target Version: v6.6.0
+[2026-11-10 20:55:00] Initialized PRD with 6 user stories covering PWA Install Button, Mobile UX & Zero Horizontal Scroll, Pinch-to-Zoom Document Viewport, Desktop Auto-Cloud Sync Engine, QR Auth Verification, and Web Quality Audit.
 
-[2026-11-10 20:28:40] STORY-1: Sample & Report Lifecycle Status Tracking COMPLETED.
-- Added ReportStatus type ('Received' | 'In Testing' | 'Draft' | 'Reviewed' | 'Approved' | 'Dispatched') with REPORT_STATUS_CONFIG colors and badges.
-- Added Status column and 1-click status update menu to Recent Files table on Home page.
-- Added status filter bar (All, Received, In Testing, Draft, Reviewed, Approved, Dispatched) on Home page.
-- Added status picker to ReportForm header.
+[2026-11-10 21:05:00] STORY-1 (PWA Engine & Browser Install Button):
+- Configured public/manifest.json with standalone display mode, orientation "any", maskable PQS icons (/pqs-logo.png), theme color #002f6c, and productivity categories.
+- Built src/components/PWAInstallPrompt.tsx supporting Chrome/Android beforeinstallprompt event and iOS Safari "Add to Home Screen" instructions sheet.
+- Injected viewport metadata and appleWebApp config in src/app/layout.tsx.
+- Embedded interactive Install App button in top navigation bar in src/app/page.tsx.
 
-[2026-11-10 20:32:45] STORY-2: Keyboard-First UX & Hotkeys COMPLETED.
-- Implemented ArrowDown / ArrowUp navigation in DropdownInput with highlightedIndex.
-- Implemented Enter selection of highlighted dropdown option.
-- Implemented Tab and Escape closing dropdown cleanly without trapping focus, enabling rapid keyboard data entry.
-- Added Ctrl+S (silent save) and Ctrl+P (generate PDF) hotkeys in both Report Editors.
+[2026-11-10 21:10:00] STORY-2 (Mobile UX Polish & Zero Horizontal Scroll):
+- Added overflow-x: hidden, max-width: 100vw, -webkit-tap-highlight-color: transparent, and .scrollbar-none in src/app/globals.css.
+- Eradicated horizontal scroll on Home Page by introducing responsive mobile card view (< 768px) with status pills, 1-click status dropdown, applicant details, password display, and touch action buttons (Duplicate, Rename, Delete).
+- Desktop retains full structured 7-column table on md: and above.
 
-[2026-11-10 20:41:00] STORY-3: Cryptographic SHA-256 Tamper-Proof Document Integrity Seal COMPLETED.
-- Implemented deterministic SHA-256 calculation in src/utils/cryptoSeal.ts based on Report Number, Date, and Test Results.
-- Added cryptographic seal display in PASHeader and PASFooter.
-- Embedded seal verification parameter in report QR code URLs.
-- Enhanced public verification page (/verify/receipt) to calculate and verify document integrity and display a green tamper-proof verification seal badge.
+[2026-11-10 21:15:00] STORY-3 (Fit-to-Screen & Touch Pinch-to-Zoom Document Viewport):
+- Created src/components/MobileDocumentViewport.tsx featuring auto fit-scale calculation based on screen width (fitScale ≈ 0.45 on 390px phones), two-finger pinch-to-zoom, double-tap toggle, negative margin calculation to prevent dead vertical scroll, and floating mobile zoom bar (Fit, Zoom In, Zoom Out, 100%).
+- Integrated MobileDocumentViewport across all 4 document editors: pas-report, invoice, editor, and pqs-letterhead.
 
-[2026-11-10 20:43:30] STORY-4: PDF Engine Polish & Professional Document Metadata COMPLETED.
-- Added ISO PDF document properties (Title, Subject, Author, Keywords, Creator) in createDocumentPdf.
-- Ensured selectable text coordinate layer stays in sync across resolutions and zoom.
-- Preserved locked-file conflict resolution with (1) duplicate naming and toast notification with file path copying.
+[2026-11-10 21:22:00] STORY-4 (Instant Desktop Auto-Cloud Sync Engine):
+- Created src/utils/cloudSyncEngine.ts to automatically query Supabase receipts on launch and window focus in Tauri desktop app.
+- Compares cloud receipts against local disk backup and ledger (sr_synced_receipt_ledger).
+- Generates high-fidelity PDFs and saves directly to {LIMS BACKUP}/{folderCategory}/{year}/{month}/{date}/{id}/{id}.pdf and {id}.json.
+- Wired into src/components/FolderInit.tsx with focus listener for real-time background sync when returning to PC.
 
-[2026-11-10 20:44:50] STORY-5: Architectural Hardening, Offline Resilience & Memory Hygiene COMPLETED.
-- Added explicit canvas memory zeroing (width = 0, height = 0) to avoid memory retention during multi-page exports.
-- Wrapped Supabase network upserts in try/catch across both report and invoice editors to ensure silent save and local PDF generation succeed even during cloud disconnects.
-- Ensured clean window close and beforeunload listeners.
+[2026-11-10 21:24:00] STORY-5 (QR Code & Auth Verification on Mobile):
+- Enhanced src/app/verify/receipt/page.tsx with automatic verification when &pwd= or &auth= token is present in URL or document is passwordless.
+- Added responsive MobileDocumentViewport to verified report preview to eliminate horizontal scroll on phone screens.
+- Redesigned password unlock gate with large touch-friendly input, numeric inputMode support, and clear status badges.
 
-[2026-11-10 20:48:00] STORY-6: Production Build & Quality Gate COMPLETED.
-- Bumped version to 6.6.0 in package.json and src-tauri/tauri.conf.json.
-- Ran npm run build: 11/11 static pages generated with 0 TypeScript and 0 compilation errors.
-- 100% backward compatibility maintained for existing 5-column reports, invoice numbering, and password exemptions.
+[2026-11-10 21:29:00] STORY-6 (Web Quality Audit, Production Build & Quality Gate):
+- Bumped app version to v6.7.0 in package.json and src-tauri/tauri.conf.json.
+- Completed next build with zero TypeScript errors and all 11 static pages prerendered (11/11).
+- All 38 anti-vibecoding criteria verified. All 6 PRD stories marked passes: true.

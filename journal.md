@@ -30,3 +30,34 @@ The laboratory information management system was evaluated with high marks acros
    - Embedded standard ISO document metadata (`Title`, `Subject`, `Author`, `Creator: PQS LIMS Engine v6.6.0`).
    - Zeroed canvas dimensions (`width = 0; height = 0`) after extraction to free memory during large multi-page exports.
    - Wrapped cloud synchronization in resilient try/catch blocks to ensure local operations succeed even during network outages.
+
+
+## [2026-11-10] v6.7.0 Mobile PWA App & Desktop Cloud Auto-Sync Engine
+
+### Context & Motivations
+Lab technicians and field managers frequently need to generate reports and invoices directly on smartphones or tablets, while the main lab PC may be powered off or in sleep mode. This release turns the web application into an installable Progressive Web App (PWA) with zero horizontal scrolling, seamless pinch-to-zoom editing, instant desktop auto-sync when the PC app opens, and QR code auto-verification.
+
+### Key Architectural Decisions
+
+1. **Progressive Web App (PWA) Engine & Install Prompt:**
+   - *Manifest:* Standalone display mode, orientation `any`, theme color `#002f6c`, maskable high-res PQS icons.
+   - *Install Flow:* Custom `PWAInstallPrompt` hooks into `beforeinstallprompt` for one-tap install on Chrome/Edge/Android, with a dedicated Apple HIG instruction sheet for iOS Safari ("Add to Home Screen").
+
+2. **Mobile UX & Zero Horizontal Scroll:**
+   - *Root constraint:* `overflow-x: hidden; max-width: 100vw` globally prevents unwanted lateral shifting.
+   - *Home Screen Adaptivity:* On screens `< 768px`, Recent Files renders a responsive mobile card list with touch-friendly pills, 1-click status dropdown, applicant details, password display, and touch action buttons (Duplicate, Rename, Delete).
+
+3. **Responsive Fit-to-Screen & Pinch-to-Zoom Document Viewport:**
+   - *Challenge:* Fixed A4 dimensions (794px × 1123px) overflow mobile screens by ~400px.
+   - *Solution:* Built `MobileDocumentViewport` which dynamically calculates `fitScale = availableWidth / 794` (e.g. `0.45` on a 390px phone) with negative vertical margin offsets to prevent dead scroll space.
+   - *Interactions:* Native two-finger pinch-to-zoom (0.3× to 2.5×), double-tap toggle (Fit ↔ 100%), and a floating glassmorphic zoom pill bar.
+   - *Coverage:* Applied across all document surfaces: `pas-report`, `invoice`, `editor`, and `pqs-letterhead`.
+
+4. **Desktop Auto-Cloud Sync Engine (`cloudSyncEngine.ts`):**
+   - *Challenge:* Documents created or edited on mobile while the PC is off must automatically back up to the PC's chosen folder (`Desktop\LIMS BACKUP`) as soon as the PC app is launched.
+   - *Mechanism:* On launch and on `window.focus`, `syncCloudFilesToLocalDesktop()` queries Supabase `receipts` for recent documents, checks local disk existence (`@tauri-apps/plugin-fs`), renders any missing documents offscreen, generates high-DPI PDFs via `createDocumentPdf()`, and saves them to `{category}/{year}/{month}/{date}/{id}/{id}.pdf` along with raw `{id}.json`.
+   - *Ledger:* Stores sync timestamps in `localStorage.sr_synced_receipt_ledger` and triggers a desktop toast notification showing synced counts.
+
+5. **QR Code Verification with Auto-Authentication:**
+   - *Mechanism:* `PASHeader` encodes verification link with document seal and authentication parameter (`&pwd=XXXX`).
+   - *Verification Portal:* When scanned with a smartphone camera, `/verify/receipt` checks for credentials in the URL and automatically verifies authentic records, scaling the rendered document to mobile screens with zero horizontal overflow. Invoices and letterheads verify immediately without password barriers.

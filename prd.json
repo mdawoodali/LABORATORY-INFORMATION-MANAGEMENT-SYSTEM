@@ -1,78 +1,81 @@
 {
   "project": "Laboratory Information Management System (LIMS)",
-  "goal": "Elevate all aspects of the software to 10/10 perfection without breaking existing functionality",
-  "targetVersion": "6.6.0",
+  "goal": "Build a proper phone app with PWA install button, zero horizontal scroll, pinch-to-zoom editing, instant desktop auto-sync for files created on phone, and QR auth verification",
+  "targetVersion": "6.7.0",
   "stories": [
     {
       "id": "STORY-1",
-      "title": "Sample & Report Lifecycle Status Tracking",
-      "description": "Implement a full lab sample tracking lifecycle (Received, In Testing, Draft, Reviewed, Approved, Dispatched) with visual status badges, status filter on the Home dashboard, and status selector in the Report Editor.",
+      "title": "PWA Engine, Manifest & Web Browser Install Button",
+      "description": "Configure manifest.json and create PWAInstallPrompt with beforeinstallprompt handling, Chrome/Android install button, and iOS Safari Add to Home Screen instructions.",
       "acceptanceCriteria": [
-        "ReportFormData and receipts schema support status field with backward compatibility",
-        "Recent Files table displays polished, color-coded status badges",
-        "Home page supports filtering recent files by status",
-        "Technicians can update status in the Report Editor and directly from the Home page dropdown",
-        "Existing reports default gracefully to 'Approved' or 'Draft' without data loss"
+        "manifest.json configured with standalone display, correct orientation, and PQS branding",
+        "PWAInstallPrompt component detects beforeinstallprompt and renders interactive Install button",
+        "iOS Safari users receive clear Add to Home Screen instructions sheet",
+        "Prompts hide when app is already installed in standalone mode",
+        "layout.tsx metadata includes viewport, apple-touch-icon, and theme-color"
       ],
       "passes": true
     },
     {
       "id": "STORY-2",
-      "title": "Keyboard-First UX & Seamless Tab Navigation",
-      "description": "Optimize DropdownInput and form editors for keyboard navigation, allowing full tab navigation and arrow-key option selection without mouse dependence, plus global hotkeys.",
+      "title": "Mobile UX Polish & Zero Horizontal Scroll",
+      "description": "Eliminate all horizontal scroll across the application on phones, provide responsive card list view for Recent Files on mobile, and ensure form touch targets are 44px+.",
       "acceptanceCriteria": [
-        "DropdownInput supports ArrowDown / ArrowUp to highlight options when open",
-        "Pressing Enter selects highlighted option; pressing Tab moves to the next input cleanly",
-        "Ctrl+S hotkey triggers silent save with toast confirmation",
-        "Ctrl+P triggers PDF generation",
-        "Escape closes dropdown without losing focus or input state"
+        "globals.css enforces overflow-x hidden on root viewport",
+        "Home page renders responsive mobile card view for Recent Files on screens < 768px",
+        "Desktop displays full structured 7-column table on md: and above",
+        "Form input font size is at least 16px to prevent iOS auto-zoom",
+        "All buttons and tap targets meet WCAG 44x44px mobile touch standards"
       ],
       "passes": true
     },
     {
       "id": "STORY-3",
-      "title": "Cryptographic SHA-256 Tamper-Proof Document Integrity Seal",
-      "description": "Calculate an immutable SHA-256 cryptographic verification fingerprint from report data, embed it in the QR code and report footer, and display verification on the public verification portal.",
+      "title": "Fit-to-Screen & Touch Pinch-to-Zoom Document Viewport",
+      "description": "Create responsive fit-to-screen scaling and touch pinch-to-zoom for A4 document previews across pas-report, invoice, editor, and letterhead pages.",
       "acceptanceCriteria": [
-        "Deterministic SHA-256 hash computed for report payload (Report No + Date + Tests + Results)",
-        "Hash displayed in report footer/meta as 'Digital Document Integrity Seal: SHA256-...'",
-        "QR code encodes the verification URL with document hash parameter",
-        "Public verify page (/verify/receipt) validates document integrity and displays green tamper-proof badge",
-        "Invoices and letterheads remain unaffected"
+        "A4 preview pages auto-fit to screen width on mobile (fitScale ≈ 0.45 on 390px screens) with zero horizontal overflow",
+        "Two-finger pinch gesture smoothly zooms preview in and out",
+        "Floating mobile zoom bar provides Fit, Zoom In, Zoom Out, and 100% buttons",
+        "Double-tap resets zoom to screen-width fit",
+        "Applied to pas-report, invoice, editor, and letterhead pages"
       ],
       "passes": true
     },
     {
       "id": "STORY-4",
-      "title": "PDF Engine Polish & Professional Document Metadata",
-      "description": "Enhance pdfGenerator to embed standard ISO PDF document properties (Title, Subject, Author, Keywords) and calibrate selectable vector text coordinates for microscopic alignment.",
+      "title": "Instant Desktop Auto-Cloud Sync Engine",
+      "description": "Implement automated background sync in PC desktop app that immediately checks Supabase on launch for any files created or edited from mobile, and saves them to the decided Desktop backup folder.",
       "acceptanceCriteria": [
-        "jsPDF sets document properties (Title, Author, Subject, Creator, CreationDate)",
-        "Selectable text layer coordinate mapping aligns with canvas text across zoom levels",
-        "Locked-file duplicate naming and toast notification remain fully operational",
-        "Multi-page table chunking leaves zero orphan headers or split rows"
+        "cloudSyncEngine runs automatically on PC launch in Tauri desktop app",
+        "Compares cloud receipts in Supabase against local backup ledger and files",
+        "Automatically generates and saves PDFs in year/month/date/report folder structure on Desktop",
+        "Displays desktop toast notification showing count of synced mobile files",
+        "Listens to window focus to re-sync if new files were created while PC was running"
       ],
       "passes": true
     },
     {
       "id": "STORY-5",
-      "title": "Architectural Hardening, Offline Resilience & Memory Hygiene",
-      "description": "Ensure zero memory leaks from canvas/object URLs, robust Supabase offline retry mechanism with user-friendly feedback, and clean state synchronization.",
+      "title": "QR Code & Auth Verification on Mobile",
+      "description": "Ensure QR code verification portal loads smoothly on mobile, supports auto-authentication when auth token is present, and provides touch-friendly PIN unlock.",
       "acceptanceCriteria": [
-        "Canvas elements and Blob URLs explicitly released after PDF generation",
-        "Network disconnects in Supabase auto-save display clean status rather than unhandled rejections",
-        "Window close requested and beforeunload handlers reliably guard against accidental exit"
+        "PASHeader QR code encodes verification URL with seal and optional auth token",
+        "Verify page (/verify/receipt) automatically verifies and loads when auth token is present",
+        "Touch-friendly PIN entry form for manual report verification on phones",
+        "Verified report preview scales to mobile screen width with zero horizontal scroll",
+        "Invoices and letterheads verify immediately without password barriers"
       ],
       "passes": true
     },
     {
       "id": "STORY-6",
-      "title": "Production Build & Multi-Lens Quality Gate",
-      "description": "Execute comprehensive end-to-end build verification, bump version to 6.6.0 in package.json and tauri.conf.json, and push to main.",
+      "title": "Web Quality Audit, Production Build & Quality Gate",
+      "description": "Perform 38-point web quality audit, bump version to 6.7.0, verify production build, and push to main.",
       "acceptanceCriteria": [
         "npm run build completes with exit code 0 and all 11 static pages generated",
         "TypeScript passes with zero type errors",
-        "CodeRabbit multi-lens audit passes cleanly",
+        "All 38 anti-vibecoding defects addressed",
         "Git commit and push completed successfully"
       ],
       "passes": true

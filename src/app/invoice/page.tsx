@@ -11,6 +11,7 @@ import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
 import PQSWordmark from '@/components/report/PQSWordmark';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
 import DropdownInput from '@/components/form/DropdownInput';
+import MobileDocumentViewport from '@/components/MobileDocumentViewport';
 
 const convertDate = (d: string) => {
   if (!d) return '';
@@ -624,6 +625,7 @@ function InvoiceContent() {
              <span>{isGenerating ? 'Generating PDF...' : isSuccess ? 'Successful!' : 'Generate PDF'}</span>
            </button>
         </div>
+        <MobileDocumentViewport pageCount={chunks.length}>
         {chunks.map((chunk, pageIndex) => {
           const isLastPage = pageIndex === chunks.length - 1;
           
@@ -740,6 +742,7 @@ function InvoiceContent() {
             </div>
           );
         })}
+        </MobileDocumentViewport>
       </div>
     </div>
   );

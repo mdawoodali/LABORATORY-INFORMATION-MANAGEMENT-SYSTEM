@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import packageJson from '../../package.json';
 import { pushGlobalSettings } from '@/lib/sync';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 
 export default function HomePage() {
   const router = useRouter();
@@ -385,29 +386,32 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#f3f3f3] font-sans">
       
       {/* Top Bar */}
-      <div className="bg-white px-8 py-4 flex justify-between items-center shadow-sm border-b border-gray-200">
-        <div className="flex items-center gap-6">
+      <div className="bg-white px-4 sm:px-8 py-3 sm:py-4 flex justify-between items-center shadow-sm border-b border-gray-200">
+        <div className="flex items-center gap-3 sm:gap-6">
           {/* Typographic Logo */}
-          <div className="flex items-center gap-4 text-[#2b579a]">
-            <img src="/pqs-logo.png" alt="PQS Logo" className="w-16 h-16 object-contain shrink-0" />
-            <div className="flex flex-col justify-center gap-1 mt-1">
-              <img src="/pqs-wordmark.png" alt="PQS Wordmark" className="h-6 object-contain origin-left" style={{ objectPosition: 'left center' }} />
-              <span className="text-[10.5px] font-semibold text-gray-500 uppercase tracking-widest leading-none">
+          <div className="flex items-center gap-2.5 sm:gap-4 text-[#2b579a]">
+            <img src="/pqs-logo.png" alt="PQS Logo" className="w-10 h-10 sm:w-16 sm:h-16 object-contain shrink-0" />
+            <div className="flex flex-col justify-center gap-0.5 mt-0.5">
+              <img src="/pqs-wordmark.png" alt="PQS Wordmark" className="h-4 sm:h-6 object-contain origin-left" style={{ objectPosition: 'left center' }} />
+              <span className="text-[8.5px] sm:text-[10.5px] font-semibold text-gray-500 uppercase tracking-wider sm:tracking-widest leading-none">
                 Laboratory Information Management System
               </span>
             </div>
           </div>
         </div>
-        <button
-          onClick={() => window.location.href = '/settings/'}
-          className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-all text-sm text-gray-700"
-        >
-          <Settings size={16} />
-          Settings
-        </button>
+        <div className="flex items-center gap-2">
+          <PWAInstallPrompt variant="button" />
+          <button
+            onClick={() => window.location.href = '/settings/'}
+            className="flex items-center gap-1.5 sm:gap-2 bg-gray-100 hover:bg-gray-200 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm text-gray-700"
+          >
+            <Settings size={15} />
+            <span className="hidden sm:inline">Settings</span>
+          </button>
+        </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-8 py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
 
         {/* NEW REPORT Section */}
         <motion.div 
@@ -584,90 +588,196 @@ export default function HomePage() {
               )}
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-3 font-semibold">File #</th>
-                    <th className="px-6 py-3 font-semibold">File Type</th>
-                    <th className="px-6 py-3 font-semibold">Applicant</th>
-                    <th className="px-6 py-3 font-semibold">Status</th>
-                    <th className="px-6 py-3 font-semibold">Date</th>
-                    <th className="px-6 py-3 font-semibold">Password</th>
-                    <th className="px-6 py-3 font-semibold text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredReports.map((report, idx) => (
-                    <tr
-                      key={report.id}
-                      className={`border-b border-gray-100 hover:bg-blue-50/50 transition-colors cursor-pointer ${idx % 2 === 1 ? 'bg-gray-50/30' : ''}`}
+            <>
+              {/* Mobile Cards View (screens < 768px, eliminates horizontal scroll) */}
+              <div className="block md:hidden space-y-3">
+                {filteredReports.map((report) => {
+                  const conf = REPORT_STATUS_CONFIG[report.status] || REPORT_STATUS_CONFIG['Approved'];
+                  return (
+                    <div
+                      key={`mobile-${report.id}`}
                       onClick={() => handleOpenReport(report)}
+                      className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs active:bg-blue-50/50 transition-all flex flex-col gap-3 relative"
                     >
-                      <td className="px-6 py-4 font-mono font-bold text-[#2b579a]">{report.reportNo}</td>
-                      <td className="px-6 py-4 text-gray-500 capitalize">{report.type}</td>
-                      <td className="px-6 py-4 text-gray-700">{report.applicant}</td>
-                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                        <div className="relative inline-block">
-                          {(() => {
-                            const conf = REPORT_STATUS_CONFIG[report.status] || REPORT_STATUS_CONFIG['Approved'];
-                            return (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() => setActiveStatusDropdown(activeStatusDropdown === report.id ? null : report.id)}
-                                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${conf.bg} ${conf.text} ${conf.border} hover:shadow-xs transition-all`}
-                                  title="Click to update sample status"
-                                >
-                                  <span className={`w-1.5 h-1.5 rounded-full ${conf.dot}`} />
-                                  <span>{conf.label}</span>
-                                  <ChevronDown size={11} className="opacity-60" />
-                                </button>
-                                {activeStatusDropdown === report.id && (
-                                  <div className="absolute left-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 text-xs">
-                                    <div className="px-3 py-1 text-[10px] uppercase font-bold text-gray-400 border-b border-gray-100">Update Status</div>
-                                    {(['Received', 'In Testing', 'Draft', 'Reviewed', 'Approved', 'Dispatched'] as ReportStatus[]).map((st) => {
-                                      const sConf = REPORT_STATUS_CONFIG[st];
-                                      const isCurrent = report.status === st;
-                                      return (
-                                        <button
-                                          key={st}
-                                          type="button"
-                                          onClick={(e) => handleUpdateStatus(e, report.id, st, report.rawData)}
-                                          className={`w-full text-left px-3 py-1.5 hover:bg-gray-50 flex items-center justify-between transition-colors ${isCurrent ? 'font-bold text-[#2b579a] bg-blue-50/50' : 'text-gray-700'}`}
-                                        >
-                                          <div className="flex items-center gap-2">
-                                            <span className={`w-1.5 h-1.5 rounded-full ${sConf.dot}`} />
-                                            <span>{sConf.label}</span>
-                                          </div>
-                                          {isCurrent && <Check size={12} className="text-[#2b579a]" />}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })()}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-sm text-[#2b579a]">{report.reportNo}</span>
+                          <span className="text-[10px] font-semibold uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{report.type}</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 text-gray-500">{report.date}</td>
-                      <td className="px-6 py-4 text-gray-500 font-mono text-xs">{report.password || '-'}</td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-3">
-                          <button onClick={(e) => handleCopyReport(e, report)} disabled={isCopying === report.id} className="text-gray-400 hover:text-emerald-600 transition-colors disabled:opacity-50" title="Duplicate File"><Copy size={16} /></button>
-                          <button onClick={(e) => handleRenameReport(e, report.id)} className="text-gray-400 hover:text-blue-600 transition-colors" title="Rename"><Edit2 size={16} /></button>
-                          <button onClick={(e) => handleDeleteReport(e, report.id)} className="text-gray-400 hover:text-red-600 transition-colors" title="Delete"><Trash2 size={16} /></button>
-                          <ChevronRight size={16} className="text-gray-400 inline" />
+                        
+                        <div className="relative" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => setActiveStatusDropdown(activeStatusDropdown === `m-${report.id}` ? null : `m-${report.id}`)}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${conf.bg} ${conf.text} ${conf.border}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${conf.dot}`} />
+                            <span>{conf.label}</span>
+                            <ChevronDown size={11} className="opacity-60" />
+                          </button>
+                          {activeStatusDropdown === `m-${report.id}` && (
+                            <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 text-xs">
+                              <div className="px-3 py-1 text-[10px] uppercase font-bold text-gray-400 border-b border-gray-100">Update Status</div>
+                              {(['Received', 'In Testing', 'Draft', 'Reviewed', 'Approved', 'Dispatched'] as ReportStatus[]).map((st) => {
+                                const sConf = REPORT_STATUS_CONFIG[st];
+                                const isCurrent = report.status === st;
+                                return (
+                                  <button
+                                    key={st}
+                                    type="button"
+                                    onClick={(e) => {
+                                      handleUpdateStatus(e, report.id, st, report.rawData);
+                                      setActiveStatusDropdown(null);
+                                    }}
+                                    className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center justify-between transition-colors ${isCurrent ? 'font-bold text-[#2b579a] bg-blue-50/50' : 'text-gray-700'}`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span className={`w-1.5 h-1.5 rounded-full ${sConf.dot}`} />
+                                      <span>{sConf.label}</span>
+                                    </div>
+                                    {isCurrent && <Check size={12} className="text-[#2b579a]" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
-                      </td>
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-semibold text-gray-800 line-clamp-1">{report.applicant || 'No applicant name'}</h4>
+                        <div className="flex items-center gap-3 mt-1 text-[11px] text-gray-500">
+                          <span>📅 {report.date}</span>
+                          {report.password && report.password !== '-' && (
+                            <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-gray-600">🔑 {report.password}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t border-gray-100 pt-2.5 mt-0.5" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => handleCopyReport(e, report)}
+                            disabled={isCopying === report.id}
+                            className="p-1.5 rounded-md text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                            title="Duplicate File"
+                          >
+                            <Copy size={15} />
+                          </button>
+                          <button
+                            onClick={(e) => handleRenameReport(e, report.id)}
+                            className="p-1.5 rounded-md text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            title="Rename"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteReport(e, report.id)}
+                            className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => handleOpenReport(report)}
+                          className="text-xs font-bold text-[#2b579a] flex items-center gap-1 hover:underline"
+                        >
+                          <span>Open</span>
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop Structured Table View (screens >= 768px) */}
+              <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200 text-left text-xs text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 font-semibold">File #</th>
+                      <th className="px-6 py-3 font-semibold">File Type</th>
+                      <th className="px-6 py-3 font-semibold">Applicant</th>
+                      <th className="px-6 py-3 font-semibold">Status</th>
+                      <th className="px-6 py-3 font-semibold">Date</th>
+                      <th className="px-6 py-3 font-semibold">Password</th>
+                      <th className="px-6 py-3 font-semibold text-right">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredReports.map((report, idx) => (
+                      <tr
+                        key={report.id}
+                        className={`border-b border-gray-100 hover:bg-blue-50/50 transition-colors cursor-pointer ${idx % 2 === 1 ? 'bg-gray-50/30' : ''}`}
+                        onClick={() => handleOpenReport(report)}
+                      >
+                        <td className="px-6 py-4 font-mono font-bold text-[#2b579a]">{report.reportNo}</td>
+                        <td className="px-6 py-4 text-gray-500 capitalize">{report.type}</td>
+                        <td className="px-6 py-4 text-gray-700">{report.applicant}</td>
+                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                          <div className="relative inline-block">
+                            {(() => {
+                              const conf = REPORT_STATUS_CONFIG[report.status] || REPORT_STATUS_CONFIG['Approved'];
+                              return (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveStatusDropdown(activeStatusDropdown === report.id ? null : report.id)}
+                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${conf.bg} ${conf.text} ${conf.border} hover:shadow-xs transition-all`}
+                                    title="Click to update sample status"
+                                  >
+                                    <span className={`w-1.5 h-1.5 rounded-full ${conf.dot}`} />
+                                    <span>{conf.label}</span>
+                                    <ChevronDown size={11} className="opacity-60" />
+                                  </button>
+                                  {activeStatusDropdown === report.id && (
+                                    <div className="absolute left-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 text-xs">
+                                      <div className="px-3 py-1 text-[10px] uppercase font-bold text-gray-400 border-b border-gray-100">Update Status</div>
+                                      {(['Received', 'In Testing', 'Draft', 'Reviewed', 'Approved', 'Dispatched'] as ReportStatus[]).map((st) => {
+                                        const sConf = REPORT_STATUS_CONFIG[st];
+                                        const isCurrent = report.status === st;
+                                        return (
+                                          <button
+                                            key={st}
+                                            type="button"
+                                            onClick={(e) => handleUpdateStatus(e, report.id, st, report.rawData)}
+                                            className={`w-full text-left px-3 py-1.5 hover:bg-gray-50 flex items-center justify-between transition-colors ${isCurrent ? 'font-bold text-[#2b579a] bg-blue-50/50' : 'text-gray-700'}`}
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <span className={`w-1.5 h-1.5 rounded-full ${sConf.dot}`} />
+                                              <span>{sConf.label}</span>
+                                            </div>
+                                            {isCurrent && <Check size={12} className="text-[#2b579a]" />}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-500">{report.date}</td>
+                        <td className="px-6 py-4 text-gray-500 font-mono text-xs">{report.password || '-'}</td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-3">
+                            <button onClick={(e) => handleCopyReport(e, report)} disabled={isCopying === report.id} className="text-gray-400 hover:text-emerald-600 transition-colors disabled:opacity-50" title="Duplicate File"><Copy size={16} /></button>
+                            <button onClick={(e) => handleRenameReport(e, report.id)} className="text-gray-400 hover:text-blue-600 transition-colors" title="Rename"><Edit2 size={16} /></button>
+                            <button onClick={(e) => handleDeleteReport(e, report.id)} className="text-gray-400 hover:text-red-600 transition-colors" title="Delete"><Trash2 size={16} /></button>
+                            <ChevronRight size={16} className="text-gray-400 inline" />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
-                </motion.div>
+        </motion.div>
 
         {/* Footer */}
         <div className="mt-8 mb-4 text-center flex flex-col items-center justify-center gap-1 text-[10px] text-gray-400">

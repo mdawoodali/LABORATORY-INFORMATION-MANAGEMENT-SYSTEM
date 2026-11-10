@@ -7,12 +7,13 @@ export const saveSilentBackup = async (
   reportNo: string,
   pdfBlob: Blob,
   isSilent: boolean = true,
-  type: 'report' | 'invoice' | 'letterhead' = 'report'
+  type: 'report' | 'invoice' | 'letterhead' = 'report',
+  targetDate?: Date
 ): Promise<string | null> => {
   const isTauri = typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window);
 
   try {
-    const dateObj = new Date();
+    const dateObj = (targetDate && !isNaN(targetDate.getTime())) ? targetDate : new Date();
     const d = String(dateObj.getDate()).padStart(2, '0');
     const m = String(dateObj.getMonth() + 1).padStart(2, '0');
     const y = dateObj.getFullYear();

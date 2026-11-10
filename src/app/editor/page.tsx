@@ -1,5 +1,6 @@
-/* eslint-disable */
 "use client";
+/* eslint-disable */
+import MobileDocumentViewport from '@/components/MobileDocumentViewport';
 
 const EndOfReportMarker = () => (
   <div className="w-full flex items-center mt-6 px-10 mb-4">
@@ -613,7 +614,7 @@ function EditorContent() {
       <div className={`flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-4 md:gap-8 print:p-0 print:gap-0 print:overflow-visible items-center bg-gray-50 relative ${isGenerating ? 'is-generating-pdf' : ''}`}>
         
         {/* Floating Toolbar */}
-        <div className="fixed top-4 right-4 md:top-6 md:right-6 z-50 flex flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print items-center">
+        <div className="hidden md:flex fixed top-4 right-4 md:top-6 md:right-6 z-50 flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-xl shadow-lg border border-slate-200 no-print items-center">
           <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 transition-all text-slate-700" title="Undo">
             <Undo2 size={18} />
           </button>
@@ -630,10 +631,7 @@ function EditorContent() {
           </button>
         </div>
 
-        <div 
-          className="w-full max-w-[794px] origin-top md:transform-none print:scale-100 print:mb-0 flex flex-col gap-4 md:gap-8 items-center transition-transform"
-          style={{ transform: `scale(${zoom})`, marginBottom: zoom < 1 ? `-${300 * (1 - zoom)}px` : '0' }}
-        >
+        <MobileDocumentViewport pageCount={totalPages} onScaleChange={setZoom}>
         
         {/* PAGE 1 */}
         <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0">
@@ -745,7 +743,7 @@ function EditorContent() {
             </div>
           );
         })}
-        </div>
+        </MobileDocumentViewport>
       </div>
     </div>
   );
