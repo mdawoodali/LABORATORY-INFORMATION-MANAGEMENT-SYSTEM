@@ -24,8 +24,10 @@ export default function FolderInit() {
           try { await mkdir(`${backupPath}\\LETTERHEAD`, { recursive: true }); } catch (e) {}
         }
 
-        // Immediately check and sync files created from mobile
-        await syncCloudFilesToLocalDesktop();
+        // Check and sync files created from mobile after app initialization
+        setTimeout(() => {
+          syncCloudFilesToLocalDesktop().catch(() => {});
+        }, 1500);
       } catch (e) {
         console.error('Failed to init backup folder and cloud sync on launch', e);
       }

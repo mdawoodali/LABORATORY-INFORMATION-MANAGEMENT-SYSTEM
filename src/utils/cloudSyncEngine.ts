@@ -5,6 +5,7 @@ import { createDocumentPdf } from './pdfGenerator';
 import toast from 'react-hot-toast';
 
 let isSyncRunning = false;
+let lastSyncTimestamp = 0;
 
 /**
  * Checks if running inside Tauri desktop environment
@@ -265,11 +266,18 @@ export async function syncCloudFilesToLocalDesktop(): Promise<number> {
     return 0;
   }
 
+  // Throttle sync to once every 30 seconds to prevent background loop thrashing
+  const now = Date.now();
+  if (now - lastSyncTimestamp < 30000) {
+    return 0;
+  }
+
   if (isSyncRunning) {
     return 0;
   }
 
   isSyncRunning = true;
+  lastSyncTimestamp = now;
 
   try {
     const { desktopDir } = await import('@tauri-apps/api/path');
@@ -292,13 +300,13 @@ export async function syncCloudFilesToLocalDesktop(): Promise<number> {
 
     const baseValidPath = typeof primaryTarget === 'string' ? primaryTarget : `${basePath}\\LIMS BACKUP`;
 
-    // Query recent receipts from Supabase
+    // Query recent receipts from Supabase (top 15 recent files)
     const { data: receipts, error } = await supabase
       .from('receipts')
       .select('id, data, password, created_at')
       .neq('id', 'GLOBAL_SETTINGS')
       .order('created_at', { ascending: false })
-      .limit(60);
+      .limit(15);
 
     if (error || !receipts || receipts.length === 0) {
       return 0;

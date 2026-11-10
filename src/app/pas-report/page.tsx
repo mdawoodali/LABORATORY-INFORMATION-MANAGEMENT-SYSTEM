@@ -658,10 +658,6 @@ function EditorContent() {
     };
   }, [formData, tests, sampleImages, extraPages, isLoaded]);
 
-  if (!isLoaded) {
-    return <div className="flex h-screen items-center justify-center bg-slate-200 text-gray-500">Initializing editor...</div>;
-  }
-
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
     const targetId = formData.reportNo || filename;
@@ -761,6 +757,10 @@ function EditorContent() {
     window.addEventListener('keydown', handleGlobalHotkeys);
     return () => window.removeEventListener('keydown', handleGlobalHotkeys);
   }, [formData, password]);
+
+  if (!isLoaded) {
+    return <div className="flex h-screen items-center justify-center bg-slate-200 text-gray-500">Initializing editor...</div>;
+  }
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
