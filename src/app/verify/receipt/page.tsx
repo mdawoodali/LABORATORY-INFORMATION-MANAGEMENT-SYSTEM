@@ -200,7 +200,7 @@ function VerifyPage() {
         {/* PAGE 2 */}
         <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
           <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
-          <div className="flex-1 px-10">
+          <div className="flex-1">
             <TestTable tests={tests} data={formData} />
           </div>
           <PASFooter pageNum={2} totalPages={totalPages} />

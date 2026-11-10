@@ -11,6 +11,8 @@ export interface TestRow {
   method: string;
   value: string;
   unit: string;
+  criteria?: string;
+  criteriaUnit?: string;
   result: string;
 }
 
@@ -47,7 +49,19 @@ export interface ReportFormData {
   tableHeader3: string;
   tableHeader4: string;
   tableHeader5: string;
+  tableHeader6?: string;
+  tableHeader7?: string;
+  tableLayout?: '7-col' | '5-col';
   footerText: string;
+}
+
+export function is7ColumnReport(data?: Partial<ReportFormData>, tests?: TestRow[]): boolean {
+  if (!data) return false;
+  if (data.tableLayout === '7-col') return true;
+  if (data.tableLayout === '5-col') return false;
+  if (data.tableHeader6 !== undefined || data.tableHeader7 !== undefined) return true;
+  if (tests && tests.some(t => t.criteria !== undefined || t.criteriaUnit !== undefined)) return true;
+  return false;
 }
 
 export interface Template {
@@ -103,16 +117,19 @@ export const DEFAULT_FORM_DATA: ReportFormData = {
   sampleReportingDate: '',
   careLabelSymbols: '',
   sampleDetails: '',
-  tableHeader1: '',
-  tableHeader2: '',
-  tableHeader3: '',
-  tableHeader4: '',
-  tableHeader5: '',
+  tableHeader1: 'Test',
+  tableHeader2: 'Test Method',
+  tableHeader3: 'Value',
+  tableHeader4: 'Unit',
+  tableHeader5: 'Criteria',
+  tableHeader6: 'Unit',
+  tableHeader7: 'Result',
+  tableLayout: '7-col',
   footerText: ''
 };
 
 export const DEFAULT_TESTS: TestRow[] = [
-  { id: '1', test: '', method: '', value: '', unit: '', result: '' },
+  { id: '1', test: '', method: '', value: '', unit: '', criteria: '', criteriaUnit: '', result: '' },
 ];
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -152,8 +169,8 @@ export const DEFAULT_TEMPLATES: Template[] = [
     name: 'Garment Wash & Shrinkage Report',
     createdAt: new Date().toISOString(),
     tests: [
-      { id: 't1', test: 'Dimensional Stability to Washing', method: 'AATCC 135', value: '-2.5%', unit: '%', result: 'Pass' },
-      { id: 't2', test: 'Appearance After Wash', method: 'Visual', value: 'No significant change', unit: 'Rating', result: 'Pass' }
+      { id: 't1', test: 'Dimensional Stability to Washing', method: 'AATCC 135', value: '-2.5%', unit: '%', criteria: '±3.0%', criteriaUnit: '%', result: 'Pass' },
+      { id: 't2', test: 'Appearance After Wash', method: 'Visual', value: 'No significant change', unit: 'Rating', criteria: 'Min 4', criteriaUnit: 'Grade', result: 'Pass' }
     ],
     formData: {
       ...DEFAULT_FORM_DATA,
@@ -170,9 +187,9 @@ export const DEFAULT_TEMPLATES: Template[] = [
     name: 'Color Fastness Certificate',
     createdAt: new Date().toISOString(),
     tests: [
-      { id: 't1', test: 'Color Fastness to Dry Rubbing', method: 'ISO 105-X12', value: '4-5', unit: 'Grade', result: 'Pass' },
-      { id: 't2', test: 'Color Fastness to Wet Rubbing', method: 'ISO 105-X12', value: '3-4', unit: 'Grade', result: 'Pass' },
-      { id: 't3', test: 'Color Fastness to Washing', method: 'ISO 105-C06', value: '4', unit: 'Grade', result: 'Pass' }
+      { id: 't1', test: 'Color Fastness to Dry Rubbing', method: 'ISO 105-X12', value: '4-5', unit: 'Grade', criteria: 'Min 4', criteriaUnit: 'Grade', result: 'Pass' },
+      { id: 't2', test: 'Color Fastness to Wet Rubbing', method: 'ISO 105-X12', value: '3-4', unit: 'Grade', criteria: 'Min 3', criteriaUnit: 'Grade', result: 'Pass' },
+      { id: 't3', test: 'Color Fastness to Washing', method: 'ISO 105-C06', value: '4', unit: 'Grade', criteria: 'Min 4', criteriaUnit: 'Grade', result: 'Pass' }
     ],
     formData: {
       ...DEFAULT_FORM_DATA,

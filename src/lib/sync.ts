@@ -151,6 +151,8 @@ export function extractAndSaveOptions(formData: any, type: 'report' | 'invoice')
     processField('tableHeader3', formData.tableHeader3);
     processField('tableHeader4', formData.tableHeader4);
     processField('tableHeader5', formData.tableHeader5);
+    if (formData.tableHeader6) processField('tableHeader6', formData.tableHeader6);
+    if (formData.tableHeader7) processField('tableHeader7', formData.tableHeader7);
     processField('footerText', formData.footerText);
   }
 

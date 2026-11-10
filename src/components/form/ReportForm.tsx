@@ -1,6 +1,6 @@
 import React from 'react';
 import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save, Settings, ChevronDown } from 'lucide-react';
-import { ReportFormData, TestRow, migrateToDynamicFields, ExtraPage } from '@/types';
+import { ReportFormData, TestRow, migrateToDynamicFields, ExtraPage, is7ColumnReport } from '@/types';
 import DropdownInput from './DropdownInput';
 import PasswordLock from './PasswordLock';
 
@@ -60,6 +60,7 @@ export default function ReportForm({
   const [isPage1FieldsOpen, setIsPage1FieldsOpen] = React.useState(false);
   const [isPage2TestsOpen, setIsPage2TestsOpen] = React.useState(false);
   const [isPage3AppendixOpen, setIsPage3AppendixOpen] = React.useState(false);
+  const is7Column = is7ColumnReport(formData, tests);
   return (
     <div className="w-full md:w-[450px] bg-white border-r shadow-lg flex flex-col z-10 no-print h-full md:h-screen">
       <div className="p-4 border-b bg-slate-900 text-white flex flex-col gap-3 shrink-0">
@@ -201,26 +202,85 @@ export default function ReportForm({
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Remarks</label>
                   <textarea value={formData.remarks || ''} onChange={e => updateField('remarks', e.target.value)} className="w-full border border-slate-300 rounded p-2 text-sm resize-y focus:ring-2 focus:ring-blue-500 outline-none transition-all" rows={2} placeholder="Optional remarks to show below table" />
               </div>
-            <div className="col-span-1">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 1 Header</label>
-              <DropdownInput fieldKey="tableHeader1" placeholder="Test" value={formData.tableHeader1} onChange={val => updateField('tableHeader1', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+
+            {/* Layout switch indicator */}
+            <div className="col-span-2 flex items-center justify-between bg-slate-100 px-3 py-1.5 rounded text-xs border border-slate-200">
+              <span className="font-semibold text-slate-600">
+                Columns: <span className="font-bold text-blue-700">{is7Column ? '7 Columns (Criteria + Unit)' : '5 Columns (Classic)'}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (is7Column) {
+                    updateField('tableLayout', '5-col');
+                  } else {
+                    updateField('tableLayout', '7-col');
+                    if (!formData.tableHeader5 || formData.tableHeader5 === 'Result') updateField('tableHeader5', 'Criteria');
+                    if (!formData.tableHeader6) updateField('tableHeader6', 'Unit');
+                    if (!formData.tableHeader7) updateField('tableHeader7', 'Result');
+                  }
+                }}
+                className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 underline transition-colors"
+              >
+                {is7Column ? 'Switch to 5-col' : 'Switch to 7-col'}
+              </button>
             </div>
-            <div className="col-span-1">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 2 Header</label>
-              <DropdownInput fieldKey="tableHeader2" placeholder="Test Method" value={formData.tableHeader2} onChange={val => updateField('tableHeader2', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-            </div>
-            <div className="col-span-1">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 3 Header</label>
-              <DropdownInput fieldKey="tableHeader3" placeholder="Value" value={formData.tableHeader3} onChange={val => updateField('tableHeader3', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-            </div>
-            <div className="col-span-1">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 4 Header</label>
-              <DropdownInput fieldKey="tableHeader4" placeholder="Unit" value={formData.tableHeader4} onChange={val => updateField('tableHeader4', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-            </div>
-            <div className="col-span-1">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Col 5 Header</label>
-              <DropdownInput fieldKey="tableHeader5" placeholder="Result" value={formData.tableHeader5} onChange={val => updateField('tableHeader5', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-            </div>
+
+            {is7Column ? (
+              <>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 1 Header</label>
+                  <DropdownInput fieldKey="tableHeader1" placeholder="Test" value={formData.tableHeader1} onChange={val => updateField('tableHeader1', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 2 Header</label>
+                  <DropdownInput fieldKey="tableHeader2" placeholder="Test Method" value={formData.tableHeader2} onChange={val => updateField('tableHeader2', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 3 Header</label>
+                  <DropdownInput fieldKey="tableHeader3" placeholder="Value" value={formData.tableHeader3} onChange={val => updateField('tableHeader3', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 4 Header</label>
+                  <DropdownInput fieldKey="tableHeader4" placeholder="Unit" value={formData.tableHeader4} onChange={val => updateField('tableHeader4', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 5 Header</label>
+                  <DropdownInput fieldKey="tableHeader5" placeholder="Criteria" value={formData.tableHeader5} onChange={val => updateField('tableHeader5', val)} defaultOptions={['Criteria', 'PEQS', 'Standard', 'Limit']} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 6 Header</label>
+                  <DropdownInput fieldKey="tableHeader6" placeholder="Unit" value={formData.tableHeader6 || ''} onChange={val => updateField('tableHeader6', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 7 Header</label>
+                  <DropdownInput fieldKey="tableHeader7" placeholder="Result" value={formData.tableHeader7 || ''} onChange={val => updateField('tableHeader7', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 1 Header</label>
+                  <DropdownInput fieldKey="tableHeader1" placeholder="Test" value={formData.tableHeader1} onChange={val => updateField('tableHeader1', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 2 Header</label>
+                  <DropdownInput fieldKey="tableHeader2" placeholder="Test Method" value={formData.tableHeader2} onChange={val => updateField('tableHeader2', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 3 Header</label>
+                  <DropdownInput fieldKey="tableHeader3" placeholder="Value" value={formData.tableHeader3} onChange={val => updateField('tableHeader3', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 4 Header</label>
+                  <DropdownInput fieldKey="tableHeader4" placeholder="Unit" value={formData.tableHeader4} onChange={val => updateField('tableHeader4', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Col 5 Header</label>
+                  <DropdownInput fieldKey="tableHeader5" placeholder="Result" value={formData.tableHeader5} onChange={val => updateField('tableHeader5', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                </div>
+              </>
+            )}
             <div className="col-span-2 mb-2">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Table Footer Text</label>
                 <DropdownInput fieldKey="footerText" placeholder="Average readings are reported." value={formData.footerText} onChange={val => updateField('footerText', val)} className="w-full border border-slate-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
@@ -248,12 +308,34 @@ export default function ReportForm({
                   </div>
                   <div>
                     <label className="text-[10px] uppercase font-bold text-slate-400">Unit</label>
-                    <DropdownInput fieldKey="testUnit" placeholder="Unit" value={test.unit} onChange={val => updateTest(test.id, 'unit', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                    <DropdownInput fieldKey="testUnit" placeholder="Unit" value={test.unit} onChange={val => {
+                      updateTest(test.id, 'unit', val);
+                      if (is7Column && !test.criteriaUnit) {
+                        updateTest(test.id, 'criteriaUnit', val);
+                      }
+                    }} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
                   </div>
-                  <div>
-                    <label className="text-[10px] uppercase font-bold text-slate-400">Result</label>
-                    <DropdownInput fieldKey="testResult" placeholder="Result" value={test.result} onChange={val => updateTest(test.id, 'result', val)} defaultOptions={['Pass', 'Fail']} className="w-full bg-white border border-slate-300 rounded text-sm p-1.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold" />
-                  </div>
+                  {is7Column ? (
+                    <>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Criteria</label>
+                        <DropdownInput fieldKey="testCriteria" placeholder="e.g. 6 - 9, <40" value={test.criteria || ''} onChange={val => updateTest(test.id, 'criteria', val)} defaultOptions={['6 - 9', '<40', '<80', 'Min. 80', 'Max. 50']} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" multiline />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Criteria Unit</label>
+                        <DropdownInput fieldKey="testCriteriaUnit" placeholder="Unit" value={test.criteriaUnit || ''} onChange={val => updateTest(test.id, 'criteriaUnit', val)} className="w-full border-b border-slate-300 bg-transparent text-xs py-1 focus:outline-none focus:border-blue-500 transition-colors" />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-[10px] uppercase font-bold text-slate-400">Result</label>
+                        <DropdownInput fieldKey="testResult" placeholder="Result" value={test.result} onChange={val => updateTest(test.id, 'result', val)} defaultOptions={['Pass', 'Fail']} className="w-full bg-white border border-slate-300 rounded text-sm p-1.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold" />
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-slate-400">Result</label>
+                      <DropdownInput fieldKey="testResult" placeholder="Result" value={test.result} onChange={val => updateTest(test.id, 'result', val)} defaultOptions={['Pass', 'Fail']} className="w-full bg-white border border-slate-300 rounded text-sm p-1.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold" />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

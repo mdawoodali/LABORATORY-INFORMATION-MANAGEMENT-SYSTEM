@@ -21,7 +21,7 @@ import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
 import CanvaImage from '@/components/report/CanvaImage';
-import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage } from '@/types';
+import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage, is7ColumnReport } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { extractAndSaveOptions } from '@/lib/sync';
 import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
@@ -351,6 +351,8 @@ function EditorContent() {
       forceSaveOption('tableHeader3', formData.tableHeader3);
       forceSaveOption('tableHeader4', formData.tableHeader4);
       forceSaveOption('tableHeader5', formData.tableHeader5);
+      if (formData.tableHeader6) forceSaveOption('tableHeader6', formData.tableHeader6);
+      if (formData.tableHeader7) forceSaveOption('tableHeader7', formData.tableHeader7);
       forceSaveOption('footerText', formData.footerText);
 
       tests.forEach(test => {
@@ -358,6 +360,8 @@ function EditorContent() {
         forceSaveOption('testMethod', test.method);
         forceSaveOption('testValue', test.value);
         forceSaveOption('testUnit', test.unit);
+        if (test.criteria) forceSaveOption('testCriteria', test.criteria);
+        if (test.criteriaUnit) forceSaveOption('testCriteriaUnit', test.criteriaUnit);
         forceSaveOption('testResult', test.result);
       });
     }
@@ -521,7 +525,19 @@ function EditorContent() {
   };
 
   const addTest = () => {
-    setTests([...tests, { id: Date.now().toString(), test: '', method: '', value: '', unit: '', result: '' }]);
+    const is7Col = is7ColumnReport(formData, tests);
+    setTests([
+      ...tests,
+      {
+        id: Date.now().toString(),
+        test: '',
+        method: '',
+        value: '',
+        unit: '',
+        ...(is7Col ? { criteria: '', criteriaUnit: '' } : {}),
+        result: ''
+      }
+    ]);
   };
 
   const updateTest = (id: string, field: keyof TestRow, value: string) => {

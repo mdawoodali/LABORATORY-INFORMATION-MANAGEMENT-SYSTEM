@@ -19,7 +19,7 @@ import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import Signature from '@/components/report/Signature';
 import CanvaImage from '@/components/report/CanvaImage';
-import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage } from '@/types';
+import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage, is7ColumnReport } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { extractAndSaveOptions } from '@/lib/sync';
 import { toast } from 'react-hot-toast';
@@ -481,7 +481,19 @@ function EditorContent() {
   };
 
   const addTest = () => {
-    setTests([...tests, { id: Date.now().toString(), test: '', method: '', value: '', unit: '', result: '' }]);
+    const is7Col = is7ColumnReport(formData, tests);
+    setTests([
+      ...tests,
+      {
+        id: Date.now().toString(),
+        test: '',
+        method: '',
+        value: '',
+        unit: '',
+        ...(is7Col ? { criteria: '', criteriaUnit: '' } : {}),
+        result: ''
+      }
+    ]);
   };
 
   const updateTest = (id: string, field: keyof TestRow, value: string) => {
