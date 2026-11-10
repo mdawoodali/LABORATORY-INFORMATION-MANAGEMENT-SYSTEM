@@ -143,9 +143,9 @@ export default function ReportForm({
               Page 1 Fields
             </button>
             <button onClick={() => {
-              const label = prompt("Enter field name:");
-              if (label) addDynamicField?.(label, '', false);
-            }} className="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-1">
+              setIsPage1FieldsOpen(true);
+              addDynamicField?.('NEW FIELD', '', false);
+            }} className="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-1 font-medium transition-colors">
               <Plus size={12} /> Add Field
             </button>
           </div>
