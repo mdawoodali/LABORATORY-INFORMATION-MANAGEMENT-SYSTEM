@@ -112,11 +112,16 @@ function EditorContent() {
       const reportPassword = (!password || isDefaultPassword) ? (targetId?.slice(-4) || '1234') : password;
       
       extractAndSaveOptions(formData, 'report');
-      await supabase.from('receipts').upsert({
-        id: targetId,
-        password: reportPassword,
-        data: { formData, tests, sampleImages, extraPages }
-      });
+      try {
+        const { error: sbErr } = await supabase.from('receipts').upsert({
+          id: targetId,
+          password: reportPassword,
+          data: { formData, tests, sampleImages, extraPages }
+        });
+        if (sbErr) console.warn("Supabase upsert warning:", sbErr);
+      } catch (cloudErr) {
+        console.warn("Cloud connection unavailable, saving locally:", cloudErr);
+      }
 
       try {
         const pageElements = document.querySelectorAll('.report-a4-page');
@@ -179,6 +184,23 @@ function EditorContent() {
         }
       }
   };
+
+  useEffect(() => {
+    const handleGlobalHotkeys = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        handleSilentSave(formData.reportNo || 'Untitled');
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        handlePrint(password);
+        return;
+      }
+    };
+    window.addEventListener('keydown', handleGlobalHotkeys);
+    return () => window.removeEventListener('keydown', handleGlobalHotkeys);
+  }, [formData, password]);
   
   // Undo/Redo state
   const [history, setHistory] = useState<string[]>([]);

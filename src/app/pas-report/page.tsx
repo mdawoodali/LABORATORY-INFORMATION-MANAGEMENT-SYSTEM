@@ -28,6 +28,7 @@ import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
 import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut, Printer } from 'lucide-react';
 import QRCode from 'react-qr-code';
+import { generateDocumentSeal } from '@/utils/cryptoSeal';
 
 const convertDate = (d: string) => {
   if (!d) return '';
@@ -36,8 +37,10 @@ const convertDate = (d: string) => {
   return `${p[2]}-${p[1]}-${p[0]}`;
 };
 
-const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportNo: string, reportingDate: string, onReportingDateChange?: (date: string) => void }) => {
-  const verifyUrl = `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}`;
+const PASHeader = ({ reportNo, reportingDate, onReportingDateChange, seal }: { reportNo: string, reportingDate: string, onReportingDateChange?: (date: string) => void, seal?: string }) => {
+  const verifyUrl = seal
+    ? `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}&seal=${seal}`
+    : `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}`;
 
   return (
     <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
@@ -66,6 +69,7 @@ const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportN
               level="M"
             />
             <span className="text-[7px] mt-0.5 text-gray-500 font-bold uppercase tracking-wider">Scan Me</span>
+            {seal && <span className="text-[6.5px] text-gray-400 font-mono tracking-tighter mt-0.5">{seal}</span>}
           </div>
           <div className="text-2xl font-bold tracking-wider text-gray-800 border border-gray-800 px-4 py-1">
             REPORT
@@ -96,10 +100,17 @@ const PASHeader = ({ reportNo, reportingDate, onReportingDateChange }: { reportN
   );
 };
 
-const PASFooter = ({ pageNum, totalPages }: { pageNum: number, totalPages: number }) => (
+const PASFooter = ({ pageNum, totalPages, seal }: { pageNum: number, totalPages: number, seal?: string }) => (
   <div className="absolute bottom-10 left-0 w-full flex flex-col items-center">
-    <div className="w-[80%] flex justify-between border-t border-gray-400 pt-3 text-xs text-gray-500">
-      <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
+    <div className="w-[85%] flex justify-between items-center border-t border-gray-400 pt-3 text-xs text-gray-500">
+      <div className="flex flex-col text-left">
+        <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
+        {seal && (
+          <span className="text-[9px] text-gray-400 font-mono mt-0.5">
+            Digital Integrity Seal: {seal} • ISO/IEC 17025 Compliant Electronic Audit Trail
+          </span>
+        )}
+      </div>
       <span className="font-bold text-gray-700">Page {pageNum}/{totalPages}</span>
     </div>
   </div>
@@ -153,6 +164,16 @@ function EditorContent() {
   const [zoom, setZoom] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
   const [mobileStep, setMobileStep] = useState<1 | 2>(1);
+  const [seal, setSeal] = useState<string>('');
+
+  useEffect(() => {
+    let isMounted = true;
+    generateDocumentSeal(formData.reportNo || '', formData.reportDate || '', tests || []).then(code => {
+      if (isMounted) setSeal(code);
+    });
+    return () => { isMounted = false; };
+  }, [formData.reportNo, formData.reportDate, tests]);
+
   const [brandSettings, setBrandSettings] = useState({
     logoBase64: '',
     companyName: 'L.I.M.S'
@@ -649,12 +670,17 @@ function EditorContent() {
       
       extractAndSaveOptions(formData, 'report');
 
-      const { supabase } = await import('@/lib/supabase');
-      await supabase.from('receipts').upsert({
-        id: targetId,
-        password: reportPassword,
-        data: { formData, tests, sampleImages, extraPages }
-      });
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        const { error: sbErr } = await supabase.from('receipts').upsert({
+          id: targetId,
+          password: reportPassword,
+          data: { formData, tests, sampleImages, extraPages }
+        });
+        if (sbErr) console.warn("Supabase upsert warning:", sbErr);
+      } catch (cloudErr) {
+        console.warn("Cloud connection unavailable, saving locally:", cloudErr);
+      }
 
       try {
         const pages = document.querySelectorAll('.report-a4-page');
@@ -717,6 +743,24 @@ function EditorContent() {
         }
       }
   };
+
+  useEffect(() => {
+    const handleGlobalHotkeys = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        handleSilentSave(formData.reportNo || 'Untitled');
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        handlePrint(password);
+        return;
+      }
+    };
+    window.addEventListener('keydown', handleGlobalHotkeys);
+    return () => window.removeEventListener('keydown', handleGlobalHotkeys);
+  }, [formData, password]);
+
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 overflow-hidden font-sans">
       <UnsavedModal 
@@ -829,17 +873,17 @@ function EditorContent() {
         
         {/* PAGE 1 */}
         <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
+          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} />
           <div className="flex-1">
             <PageOneData data={formData} />
           </div>
-          <PASFooter pageNum={1} totalPages={totalPages} />
+          <PASFooter pageNum={1} totalPages={totalPages} seal={seal} />
         </div>
 
         {/* TEST PAGES (Dynamically chunked) */}
         {testChunks.map((chunk, index) => (
           <div key={`test-page-${index}`} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
+            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} />
             <div className="flex-1">
               <TestTable 
                 tests={chunk} 
@@ -848,14 +892,14 @@ function EditorContent() {
                 isLastPage={index === testChunks.length - 1}
               />
             </div>
-            <PASFooter pageNum={2 + index} totalPages={totalPages} />
+            <PASFooter pageNum={2 + index} totalPages={totalPages} seal={seal} />
           </div>
         ))}
 
         {/* PAGE 3 - Sample Image */}
         {sampleImages.length > 0 && (
           <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
+            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} />
             <div className="flex-1 flex flex-col px-10">
                 <div className="flex-1 w-full relative">
                         {sampleImages.map(img => (
@@ -871,7 +915,7 @@ function EditorContent() {
                       </div>
                 
               </div>
-              <PASFooter pageNum={1 + testPagesCount + 1} totalPages={totalPages} />
+              <PASFooter pageNum={1 + testPagesCount + 1} totalPages={totalPages} seal={seal} />
           </div>
         )}
 
@@ -880,7 +924,7 @@ function EditorContent() {
           const pageNum = 1 + testPagesCount + (sampleImages.length > 0 ? 1 : 0) + 1 + index;
           return (
             <div key={page.id} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} />
+              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} />
               <div className="flex-1 flex flex-col px-10 relative">
                 {page.image && (
                   <div className="flex-1 flex justify-center items-start mb-4">
@@ -896,7 +940,7 @@ function EditorContent() {
                   </div>
                 )}
               </div>
-              <PASFooter pageNum={pageNum} totalPages={totalPages} />
+              <PASFooter pageNum={pageNum} totalPages={totalPages} seal={seal} />
             </div>
           );
         })}

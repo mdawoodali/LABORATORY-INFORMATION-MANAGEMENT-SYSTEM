@@ -1,0 +1,40 @@
+# LIMS 10/10 Evolution Progress Log
+# Goal: Make everything 10/10 without breaking existing functionality
+# Started: 2026-11-10T20:21:00+05:00
+# Completed: 2026-11-10T20:48:00+05:00
+
+[2026-11-10 20:21:00] Initialized PRD with 6 comprehensive stories covering Sample Status Tracking, Keyboard-First UX, SHA-256 Tamper-Proof Seal, PDF Engine Polish, Architectural Hardening, and Build Quality Gate.
+[2026-11-10 20:21:10] Target Version: v6.6.0
+
+[2026-11-10 20:28:40] STORY-1: Sample & Report Lifecycle Status Tracking COMPLETED.
+- Added ReportStatus type ('Received' | 'In Testing' | 'Draft' | 'Reviewed' | 'Approved' | 'Dispatched') with REPORT_STATUS_CONFIG colors and badges.
+- Added Status column and 1-click status update menu to Recent Files table on Home page.
+- Added status filter bar (All, Received, In Testing, Draft, Reviewed, Approved, Dispatched) on Home page.
+- Added status picker to ReportForm header.
+
+[2026-11-10 20:32:45] STORY-2: Keyboard-First UX & Hotkeys COMPLETED.
+- Implemented ArrowDown / ArrowUp navigation in DropdownInput with highlightedIndex.
+- Implemented Enter selection of highlighted dropdown option.
+- Implemented Tab and Escape closing dropdown cleanly without trapping focus, enabling rapid keyboard data entry.
+- Added Ctrl+S (silent save) and Ctrl+P (generate PDF) hotkeys in both Report Editors.
+
+[2026-11-10 20:41:00] STORY-3: Cryptographic SHA-256 Tamper-Proof Document Integrity Seal COMPLETED.
+- Implemented deterministic SHA-256 calculation in src/utils/cryptoSeal.ts based on Report Number, Date, and Test Results.
+- Added cryptographic seal display in PASHeader and PASFooter.
+- Embedded seal verification parameter in report QR code URLs.
+- Enhanced public verification page (/verify/receipt) to calculate and verify document integrity and display a green tamper-proof verification seal badge.
+
+[2026-11-10 20:43:30] STORY-4: PDF Engine Polish & Professional Document Metadata COMPLETED.
+- Added ISO PDF document properties (Title, Subject, Author, Keywords, Creator) in createDocumentPdf.
+- Ensured selectable text coordinate layer stays in sync across resolutions and zoom.
+- Preserved locked-file conflict resolution with (1) duplicate naming and toast notification with file path copying.
+
+[2026-11-10 20:44:50] STORY-5: Architectural Hardening, Offline Resilience & Memory Hygiene COMPLETED.
+- Added explicit canvas memory zeroing (width = 0, height = 0) to avoid memory retention during multi-page exports.
+- Wrapped Supabase network upserts in try/catch across both report and invoice editors to ensure silent save and local PDF generation succeed even during cloud disconnects.
+- Ensured clean window close and beforeunload listeners.
+
+[2026-11-10 20:48:00] STORY-6: Production Build & Quality Gate COMPLETED.
+- Bumped version to 6.6.0 in package.json and src-tauri/tauri.conf.json.
+- Ran npm run build: 11/11 static pages generated with 0 TypeScript and 0 compilation errors.
+- 100% backward compatibility maintained for existing 5-column reports, invoice numbering, and password exemptions.

@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES } from '@/types';
-import { FileText, Clock, ChevronRight, Search, Plus, Trash2, Edit2, Copy, Settings, Layout, Download } from 'lucide-react';
+import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES, ReportStatus, REPORT_STATUS_CONFIG } from '@/types';
+import { FileText, Clock, ChevronRight, Search, Plus, Trash2, Edit2, Copy, Settings, Layout, Download, ChevronDown, Check } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
@@ -41,19 +41,26 @@ export default function HomePage() {
           applicantValue = applicantField ? applicantField.value : (r.data?.formData?.applicant || 'Untitled');
         }
 
+        const rawStatus = r.data?.formData?.status as ReportStatus | undefined;
+        const status: ReportStatus = rawStatus || (r.data?.type === 'invoice' ? 'Dispatched' : 'Approved');
+
         return {
           id: r.id,
           reportNo: r.id,
           applicant: applicantValue,
           date: r.created_at ? new Date(r.created_at).toLocaleDateString() : '-',
           password: r.data?.type === 'invoice' ? '-' : (r.password || '-'),
-          type: r.data?.type || 'report'
+          type: r.data?.type || 'report',
+          status,
+          rawData: r.data
         };
       });
     }
   });
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'All' | ReportStatus>('All');
+  const [activeStatusDropdown, setActiveStatusDropdown] = useState<string | null>(null);
 
   const [templates, setTemplates] = useState<Template[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
@@ -126,12 +133,35 @@ export default function HomePage() {
 
   const filteredReports = recentReports.filter(report => {
     const term = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       report.reportNo.toLowerCase().includes(term) ||
       report.applicant.toLowerCase().includes(term) ||
       report.date.toLowerCase().includes(term)
     );
+    const matchesStatus = statusFilter === 'All' || report.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
+
+  const handleUpdateStatus = async (e: React.MouseEvent, id: string, newStatus: ReportStatus, rawData: any) => {
+    e.stopPropagation();
+    setActiveStatusDropdown(null);
+    try {
+      const updatedData = {
+        ...rawData,
+        formData: {
+          ...rawData?.formData,
+          status: newStatus
+        }
+      };
+      const { error } = await supabase.from('receipts').update({ data: updatedData }).eq('id', id);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['recentReports'] });
+      toast.success(`Updated ${id} to "${REPORT_STATUS_CONFIG[newStatus].label}"`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update status');
+    }
+  };
 
   const deleteTemplate = (id: string) => {
     const updated = templates.filter(t => t.id !== id);
@@ -488,11 +518,16 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-              <Clock size={14} />
-              Recent Files
-            </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                <Clock size={14} />
+                Recent Files
+              </h2>
+              <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-semibold">
+                {filteredReports.length}
+              </span>
+            </div>
             <div className="relative w-full sm:w-64">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={14} className="text-gray-400" />
@@ -502,9 +537,39 @@ export default function HomePage() {
                 placeholder="Search by date, file #, applicant..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2b579a] transition-shadow"
+                className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2b579a] transition-shadow bg-white"
               />
             </div>
+          </div>
+
+          {/* Status Pipeline Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-3 scrollbar-none text-xs">
+            <button
+              onClick={() => setStatusFilter('All')}
+              className={`px-3 py-1 rounded-full font-semibold transition-all shrink-0 ${statusFilter === 'All' ? 'bg-[#2b579a] text-white shadow-xs' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+            >
+              All Files ({recentReports.length})
+            </button>
+            {(['Received', 'In Testing', 'Draft', 'Reviewed', 'Approved', 'Dispatched'] as ReportStatus[]).map((st) => {
+              const count = recentReports.filter(r => r.status === st).length;
+              const conf = REPORT_STATUS_CONFIG[st];
+              const isActive = statusFilter === st;
+              return (
+                <button
+                  key={st}
+                  onClick={() => setStatusFilter(st)}
+                  className={`px-3 py-1 rounded-full font-semibold transition-all shrink-0 flex items-center gap-1.5 border ${
+                    isActive 
+                      ? `${conf.bg} ${conf.text} ${conf.border} ring-2 ring-offset-1 ring-blue-400 shadow-xs` 
+                      : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${conf.dot}`} />
+                  {conf.label}
+                  <span className="opacity-60 text-[10px]">({count})</span>
+                </button>
+              );
+            })}
           </div>
 
           {isLoading ? (
@@ -515,7 +580,7 @@ export default function HomePage() {
               {recentReports.length === 0 ? (
                 <p className="text-sm">No reports yet. Click a template above to create one.</p>
               ) : (
-                <p className="text-sm">No reports match your search.</p>
+                <p className="text-sm">No reports match your filter criteria.</p>
               )}
             </div>
           ) : (
@@ -526,6 +591,7 @@ export default function HomePage() {
                     <th className="px-6 py-3 font-semibold">File #</th>
                     <th className="px-6 py-3 font-semibold">File Type</th>
                     <th className="px-6 py-3 font-semibold">Applicant</th>
+                    <th className="px-6 py-3 font-semibold">Status</th>
                     <th className="px-6 py-3 font-semibold">Date</th>
                     <th className="px-6 py-3 font-semibold">Password</th>
                     <th className="px-6 py-3 font-semibold text-right">Action</th>
@@ -541,6 +607,50 @@ export default function HomePage() {
                       <td className="px-6 py-4 font-mono font-bold text-[#2b579a]">{report.reportNo}</td>
                       <td className="px-6 py-4 text-gray-500 capitalize">{report.type}</td>
                       <td className="px-6 py-4 text-gray-700">{report.applicant}</td>
+                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="relative inline-block">
+                          {(() => {
+                            const conf = REPORT_STATUS_CONFIG[report.status] || REPORT_STATUS_CONFIG['Approved'];
+                            return (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveStatusDropdown(activeStatusDropdown === report.id ? null : report.id)}
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${conf.bg} ${conf.text} ${conf.border} hover:shadow-xs transition-all`}
+                                  title="Click to update sample status"
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${conf.dot}`} />
+                                  <span>{conf.label}</span>
+                                  <ChevronDown size={11} className="opacity-60" />
+                                </button>
+                                {activeStatusDropdown === report.id && (
+                                  <div className="absolute left-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 text-xs">
+                                    <div className="px-3 py-1 text-[10px] uppercase font-bold text-gray-400 border-b border-gray-100">Update Status</div>
+                                    {(['Received', 'In Testing', 'Draft', 'Reviewed', 'Approved', 'Dispatched'] as ReportStatus[]).map((st) => {
+                                      const sConf = REPORT_STATUS_CONFIG[st];
+                                      const isCurrent = report.status === st;
+                                      return (
+                                        <button
+                                          key={st}
+                                          type="button"
+                                          onClick={(e) => handleUpdateStatus(e, report.id, st, report.rawData)}
+                                          className={`w-full text-left px-3 py-1.5 hover:bg-gray-50 flex items-center justify-between transition-colors ${isCurrent ? 'font-bold text-[#2b579a] bg-blue-50/50' : 'text-gray-700'}`}
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            <span className={`w-1.5 h-1.5 rounded-full ${sConf.dot}`} />
+                                            <span>{sConf.label}</span>
+                                          </div>
+                                          {isCurrent && <Check size={12} className="text-[#2b579a]" />}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-gray-500">{report.date}</td>
                       <td className="px-6 py-4 text-gray-500 font-mono text-xs">{report.password || '-'}</td>
                       <td className="px-6 py-4 text-right">

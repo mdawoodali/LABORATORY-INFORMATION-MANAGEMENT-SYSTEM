@@ -1,6 +1,6 @@
 import React from 'react';
 import { Printer, Plus, Trash2, Image as ImageIcon, X, ArrowLeft, Save, Settings, ChevronDown } from 'lucide-react';
-import { ReportFormData, TestRow, migrateToDynamicFields, ExtraPage, is7ColumnReport } from '@/types';
+import { ReportFormData, TestRow, migrateToDynamicFields, ExtraPage, is7ColumnReport, REPORT_STATUS_CONFIG, ReportStatus } from '@/types';
 import DropdownInput from './DropdownInput';
 import PasswordLock from './PasswordLock';
 
@@ -108,9 +108,26 @@ export default function ReportForm({
         <section>
           <h3 className="font-bold text-xs text-slate-400 mb-2 uppercase tracking-widest">General Info</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-            <div className="col-span-2">
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Report # <span className="text-slate-400 font-normal">(Auto-generated)</span></label>
-              <input type="text" value={formData.reportNo} readOnly disabled className="w-full border border-slate-200 rounded p-2 text-sm font-mono bg-gray-100 text-gray-500 cursor-not-allowed" />
+            <div className="col-span-2 flex items-center justify-between gap-3">
+              <div className="flex-1">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Report # <span className="text-slate-400 font-normal">(Auto)</span></label>
+                <input type="text" value={formData.reportNo} readOnly disabled className="w-full border border-slate-200 rounded p-2 text-sm font-mono bg-gray-100 text-gray-500 cursor-not-allowed" />
+              </div>
+              <div className="w-36">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                <select
+                  value={formData.status || 'Approved'}
+                  onChange={(e) => updateField('status', e.target.value as any)}
+                  className={`w-full border rounded p-2 text-xs font-bold transition-all outline-none ${REPORT_STATUS_CONFIG[formData.status || 'Approved'].bg} ${REPORT_STATUS_CONFIG[formData.status || 'Approved'].text} ${REPORT_STATUS_CONFIG[formData.status || 'Approved'].border}`}
+                >
+                  <option value="Received">Sample Received</option>
+                  <option value="In Testing">In Testing</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Reviewed">Reviewed</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Dispatched">Dispatched</option>
+                </select>
+              </div>
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-slate-600 mb-1">Report Date</label>

@@ -24,6 +24,7 @@ export default function DropdownInput({
 }: DropdownInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<string[]>(defaultOptions || []);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [isMultiline, setIsMultiline] = useState(false);
   const [isAddingInline, setIsAddingInline] = useState(false);
   const [inlineText, setInlineText] = useState('');
@@ -83,6 +84,31 @@ export default function DropdownInput({
   }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (isOpen) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedIndex(prev => (prev < options.length - 1 ? prev + 1 : 0));
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedIndex(prev => (prev > 0 ? prev - 1 : options.length - 1));
+        return;
+      }
+      if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey && highlightedIndex >= 0 && options[highlightedIndex]) {
+        e.preventDefault();
+        handleSelect(options[highlightedIndex]);
+        setHighlightedIndex(-1);
+        return;
+      }
+      if (e.key === 'Tab' || e.key === 'Escape') {
+        setIsOpen(false);
+        setIsAddingInline(false);
+        setHighlightedIndex(-1);
+        return;
+      }
+    }
+
     // When user presses Ctrl+Enter or Cmd+Enter (or Shift+Enter in multiline mode)
     if ((e.ctrlKey || e.metaKey || (effectiveMultiline && e.shiftKey)) && e.key === 'Enter') {
       e.preventDefault();
@@ -112,6 +138,7 @@ export default function DropdownInput({
       setIsOpen(false);
       setIsAddingInline(false);
       setInlineText('');
+      setHighlightedIndex(-1);
     }
   };
 
@@ -272,8 +299,11 @@ export default function DropdownInput({
             options.map((opt, idx) => (
               <div
                 key={idx}
-                className="group/item flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-b-0 cursor-pointer"
+                className={`group/item flex items-center justify-between px-3 py-2 text-sm transition-colors border-b border-slate-50 last:border-b-0 cursor-pointer ${
+                  idx === highlightedIndex ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-slate-700 hover:bg-slate-50'
+                }`}
                 onClick={() => handleSelect(opt)}
+                onMouseEnter={() => setHighlightedIndex(idx)}
               >
                 <span className="whitespace-pre-wrap flex-1">{opt}</span>
                 <button

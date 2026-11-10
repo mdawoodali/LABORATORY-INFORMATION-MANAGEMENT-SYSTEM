@@ -168,6 +168,22 @@ export async function createDocumentPdf(options: GeneratePdfOptions): Promise<{ 
   const pdfWidth = pdf.internal.pageSize.getWidth();
   const pdfHeight = pdf.internal.pageSize.getHeight();
 
+  // Set standard ISO document metadata
+  const docTitle = options.filename || 'Document';
+  const docSubject = options.type === 'invoice' 
+    ? 'Official Laboratory Service Invoice' 
+    : options.type === 'letterhead' 
+      ? 'Official Precision Quality Services Letter' 
+      : 'Official Laboratory Test Certificate';
+
+  pdf.setProperties({
+    title: docTitle,
+    subject: docSubject,
+    author: 'Precision Quality Services (PQS)',
+    keywords: 'PQS, Laboratory, Testing, LIMS, Report, Certificate, ISO 17025',
+    creator: 'Precision Quality Services LIMS Engine v6.6.0'
+  });
+
   for (let i = 0; i < pages.length; i++) {
     const pageEl = pages[i] as HTMLElement;
     if (i > 0) pdf.addPage();
@@ -189,6 +205,10 @@ export async function createDocumentPdf(options: GeneratePdfOptions): Promise<{ 
 
     // Embed selectable, searchable vector text layer
     injectSelectableTextLayer(pdf, pageEl, pdfWidth, pdfHeight);
+
+    // Memory hygiene: zero canvas dimensions to allow immediate garbage collection
+    canvas.width = 0;
+    canvas.height = 0;
   }
 
   const blob = pdf.output('blob');

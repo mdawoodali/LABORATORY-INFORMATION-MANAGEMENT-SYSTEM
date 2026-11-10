@@ -1,0 +1,81 @@
+{
+  "project": "Laboratory Information Management System (LIMS)",
+  "goal": "Elevate all aspects of the software to 10/10 perfection without breaking existing functionality",
+  "targetVersion": "6.6.0",
+  "stories": [
+    {
+      "id": "STORY-1",
+      "title": "Sample & Report Lifecycle Status Tracking",
+      "description": "Implement a full lab sample tracking lifecycle (Received, In Testing, Draft, Reviewed, Approved, Dispatched) with visual status badges, status filter on the Home dashboard, and status selector in the Report Editor.",
+      "acceptanceCriteria": [
+        "ReportFormData and receipts schema support status field with backward compatibility",
+        "Recent Files table displays polished, color-coded status badges",
+        "Home page supports filtering recent files by status",
+        "Technicians can update status in the Report Editor and directly from the Home page dropdown",
+        "Existing reports default gracefully to 'Approved' or 'Draft' without data loss"
+      ],
+      "passes": true
+    },
+    {
+      "id": "STORY-2",
+      "title": "Keyboard-First UX & Seamless Tab Navigation",
+      "description": "Optimize DropdownInput and form editors for keyboard navigation, allowing full tab navigation and arrow-key option selection without mouse dependence, plus global hotkeys.",
+      "acceptanceCriteria": [
+        "DropdownInput supports ArrowDown / ArrowUp to highlight options when open",
+        "Pressing Enter selects highlighted option; pressing Tab moves to the next input cleanly",
+        "Ctrl+S hotkey triggers silent save with toast confirmation",
+        "Ctrl+P triggers PDF generation",
+        "Escape closes dropdown without losing focus or input state"
+      ],
+      "passes": true
+    },
+    {
+      "id": "STORY-3",
+      "title": "Cryptographic SHA-256 Tamper-Proof Document Integrity Seal",
+      "description": "Calculate an immutable SHA-256 cryptographic verification fingerprint from report data, embed it in the QR code and report footer, and display verification on the public verification portal.",
+      "acceptanceCriteria": [
+        "Deterministic SHA-256 hash computed for report payload (Report No + Date + Tests + Results)",
+        "Hash displayed in report footer/meta as 'Digital Document Integrity Seal: SHA256-...'",
+        "QR code encodes the verification URL with document hash parameter",
+        "Public verify page (/verify/receipt) validates document integrity and displays green tamper-proof badge",
+        "Invoices and letterheads remain unaffected"
+      ],
+      "passes": true
+    },
+    {
+      "id": "STORY-4",
+      "title": "PDF Engine Polish & Professional Document Metadata",
+      "description": "Enhance pdfGenerator to embed standard ISO PDF document properties (Title, Subject, Author, Keywords) and calibrate selectable vector text coordinates for microscopic alignment.",
+      "acceptanceCriteria": [
+        "jsPDF sets document properties (Title, Author, Subject, Creator, CreationDate)",
+        "Selectable text layer coordinate mapping aligns with canvas text across zoom levels",
+        "Locked-file duplicate naming and toast notification remain fully operational",
+        "Multi-page table chunking leaves zero orphan headers or split rows"
+      ],
+      "passes": true
+    },
+    {
+      "id": "STORY-5",
+      "title": "Architectural Hardening, Offline Resilience & Memory Hygiene",
+      "description": "Ensure zero memory leaks from canvas/object URLs, robust Supabase offline retry mechanism with user-friendly feedback, and clean state synchronization.",
+      "acceptanceCriteria": [
+        "Canvas elements and Blob URLs explicitly released after PDF generation",
+        "Network disconnects in Supabase auto-save display clean status rather than unhandled rejections",
+        "Window close requested and beforeunload handlers reliably guard against accidental exit"
+      ],
+      "passes": true
+    },
+    {
+      "id": "STORY-6",
+      "title": "Production Build & Multi-Lens Quality Gate",
+      "description": "Execute comprehensive end-to-end build verification, bump version to 6.6.0 in package.json and tauri.conf.json, and push to main.",
+      "acceptanceCriteria": [
+        "npm run build completes with exit code 0 and all 11 static pages generated",
+        "TypeScript passes with zero type errors",
+        "CodeRabbit multi-lens audit passes cleanly",
+        "Git commit and push completed successfully"
+      ],
+      "passes": true
+    }
+  ]
+}

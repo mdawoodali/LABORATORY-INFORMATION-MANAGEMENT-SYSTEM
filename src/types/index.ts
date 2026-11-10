@@ -22,8 +22,20 @@ export interface ExtraPage {
   text: string;
 }
 
+export type ReportStatus = 'Received' | 'In Testing' | 'Draft' | 'Reviewed' | 'Approved' | 'Dispatched';
+
+export const REPORT_STATUS_CONFIG: Record<ReportStatus, { label: string; bg: string; text: string; border: string; dot: string }> = {
+  'Received': { label: 'Sample Received', bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-300', dot: 'bg-amber-500' },
+  'In Testing': { label: 'In Testing', bg: 'bg-blue-50', text: 'text-blue-800', border: 'border-blue-300', dot: 'bg-blue-500' },
+  'Draft': { label: 'Draft', bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-300', dot: 'bg-slate-400' },
+  'Reviewed': { label: 'Reviewed', bg: 'bg-purple-50', text: 'text-purple-800', border: 'border-purple-300', dot: 'bg-purple-500' },
+  'Approved': { label: 'Approved', bg: 'bg-emerald-50', text: 'text-emerald-800', border: 'border-emerald-300', dot: 'bg-emerald-500' },
+  'Dispatched': { label: 'Dispatched', bg: 'bg-teal-50', text: 'text-teal-800', border: 'border-teal-300', dot: 'bg-teal-500' },
+};
+
 export interface ReportFormData {
   dynamicFields?: DynamicField[];
+  status?: ReportStatus;
   reportNo: string;
   applicant: string;
   address: string;
@@ -125,6 +137,7 @@ export const DEFAULT_FORM_DATA: ReportFormData = {
   tableHeader6: 'Unit',
   tableHeader7: 'Result',
   tableLayout: '7-col',
+  status: 'Approved',
   footerText: ''
 };
 

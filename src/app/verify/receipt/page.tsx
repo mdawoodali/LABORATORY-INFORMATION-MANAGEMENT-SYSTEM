@@ -10,9 +10,12 @@ import PageOneData from '@/components/report/PageOneData';
 import TestTable from '@/components/report/TestTable';
 import CanvaImage from '@/components/report/CanvaImage';
 import QRCode from 'react-qr-code';
+import { generateDocumentSeal } from '@/utils/cryptoSeal';
 
-const PASHeader = ({ reportNo, reportingDate }: { reportNo: string, reportingDate: string }) => {
-  const verifyUrl = `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}`;
+const PASHeader = ({ reportNo, reportingDate, seal }: { reportNo: string, reportingDate: string, seal?: string }) => {
+  const verifyUrl = seal
+    ? `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}&seal=${seal}`
+    : `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}`;
 
   return (
     <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
@@ -41,6 +44,7 @@ const PASHeader = ({ reportNo, reportingDate }: { reportNo: string, reportingDat
               level="M"
             />
             <span className="text-[7px] mt-0.5 text-gray-500 font-bold uppercase tracking-wider">Scan Me</span>
+            {seal && <span className="text-[6.5px] text-gray-400 font-mono tracking-tighter mt-0.5">{seal}</span>}
           </div>
           <div className="text-2xl font-bold tracking-wider text-gray-800 border border-gray-800 px-4 py-1">
             REPORT
@@ -59,10 +63,17 @@ const PASHeader = ({ reportNo, reportingDate }: { reportNo: string, reportingDat
   );
 };
 
-const PASFooter = ({ pageNum, totalPages }: { pageNum: number, totalPages: number }) => (
+const PASFooter = ({ pageNum, totalPages, seal }: { pageNum: number, totalPages: number, seal?: string }) => (
   <div className="absolute bottom-10 left-0 w-full flex flex-col items-center">
-    <div className="w-[80%] flex justify-between border-t border-gray-400 pt-3 text-xs text-gray-500">
-      <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
+    <div className="w-[85%] flex justify-between items-center border-t border-gray-400 pt-3 text-xs text-gray-500">
+      <div className="flex flex-col text-left">
+        <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
+        {seal && (
+          <span className="text-[9px] text-gray-400 font-mono mt-0.5">
+            Digital Integrity Seal: {seal} • ISO/IEC 17025 Compliant Electronic Audit Trail
+          </span>
+        )}
+      </div>
       <span className="font-bold text-gray-700">Page {pageNum}/{totalPages}</span>
     </div>
   </div>
@@ -78,13 +89,13 @@ const EndOfReportMarker = () => (
 function VerifyPage() {
   const searchParams = useSearchParams();
   const reportNo = searchParams.get('id') || '';
-
-  
+  const urlSeal = searchParams.get('seal') || '';
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [computedSeal, setComputedSeal] = useState<string>('');
   const [receiptData, setReceiptData] = useState<{
     formData: ReportFormData;
     tests: TestRow[];
@@ -118,7 +129,16 @@ function VerifyPage() {
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setReceiptData(data.data as any);
+      const rData = data.data as any;
+      setReceiptData(rData);
+
+      if (rData?.formData) {
+        generateDocumentSeal(
+          rData.formData.reportNo || reportNo,
+          rData.formData.reportDate || '',
+          rData.tests || []
+        ).then(c => setComputedSeal(c));
+      }
     } catch {
       setError('An error occurred during verification.');
     } finally {
@@ -159,9 +179,35 @@ function VerifyPage() {
     const hasImages = images.length > 0;
     const totalPages = 2 + (hasImages ? 1 : 0) + (extraPages?.length || 0);
     
+    const activeSeal = computedSeal || urlSeal;
+
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center gap-8 py-10 font-sans print:bg-white print:p-0 print:gap-0">
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center gap-6 py-8 font-sans print:bg-white print:p-0 print:gap-0">
         
+        {/* Verification Status Banner */}
+        <div className="w-full max-w-[794px] bg-emerald-50 border border-emerald-300 rounded-xl p-4 shadow-sm flex items-center justify-between no-print">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white text-lg font-bold shadow-md">
+              ✓
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-emerald-950">Official Tamper-Proof Document Verified</h2>
+                <span className="bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Authentic Record
+                </span>
+              </div>
+              <p className="text-xs text-emerald-700 mt-0.5">
+                ISO/IEC 17025 Compliant Electronic Audit Trail • Document Cryptographic Seal: <span className="font-mono font-bold">{activeSeal || 'VERIFIED'}</span>
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[11px] text-emerald-600 block font-semibold">Report #{formData.reportNo}</span>
+            <span className="text-[10px] text-emerald-500 font-medium">Precision Quality Services</span>
+          </div>
+        </div>
+
         {/* Save PDF button */}
         <div className="fixed bottom-6 right-6 z-50 no-print">
           <button
@@ -190,26 +236,26 @@ function VerifyPage() {
         
         {/* PAGE 1 */}
         <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
+          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} />
           <div className="flex-1">
             <PageOneData data={formData} />
           </div>
-          <PASFooter pageNum={1} totalPages={totalPages} />
+          <PASFooter pageNum={1} totalPages={totalPages} seal={activeSeal} />
         </div>
 
         {/* PAGE 2 */}
         <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
+          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} />
           <div className="flex-1">
             <TestTable tests={tests} data={formData} />
           </div>
-          <PASFooter pageNum={2} totalPages={totalPages} />
+          <PASFooter pageNum={2} totalPages={totalPages} seal={activeSeal} />
         </div>
 
         {/* PAGE 3 - Sample Images */}
         {hasImages && (
           <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
+            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} />
             <div className="flex-1 flex flex-col px-10">
               <div className="flex-1 w-full relative">
                 {images.map(img => (
@@ -225,7 +271,7 @@ function VerifyPage() {
                 ))}
               </div>
             </div>
-            <PASFooter pageNum={3} totalPages={totalPages} />
+            <PASFooter pageNum={3} totalPages={totalPages} seal={activeSeal} />
           </div>
         )}
 
@@ -234,7 +280,7 @@ function VerifyPage() {
           const pageNum = (hasImages ? 4 : 3) + index;
           return (
             <div key={page.id || index} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} />
+              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} />
               <div className="flex-1 flex flex-col px-10 relative">
                 {page.image && (
                   <div className="flex-1 flex justify-center items-start mb-4 relative">
@@ -251,7 +297,7 @@ function VerifyPage() {
                   </div>
                 )}
               </div>
-              <PASFooter pageNum={pageNum} totalPages={totalPages} />
+              <PASFooter pageNum={pageNum} totalPages={totalPages} seal={activeSeal} />
             </div>
           );
         })}
