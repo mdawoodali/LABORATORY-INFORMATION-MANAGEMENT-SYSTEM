@@ -1,0 +1,24 @@
+# Precision Quality Services LIMS Robots Policy
+# https://limsreportgenerator.vercel.app
+
+User-agent: *
+Allow: /
+Allow: /verify/
+Allow: /verify/receipt/
+Disallow: /settings/
+Disallow: /editor/
+
+# AI Crawlers
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+
+Sitemap: https://limsreportgenerator.vercel.app/sitemap.xml

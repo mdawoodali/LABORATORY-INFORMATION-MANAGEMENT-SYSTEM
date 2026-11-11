@@ -48,6 +48,7 @@ export default function SettingsPage() {
     
      
     setSettings(parsedSettings);
+    document.title = "Settings | Precision Quality Services LIMS";
 
     if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window && !srBackupPath) {
       import('@tauri-apps/api/path').then(({ desktopDir }) => {

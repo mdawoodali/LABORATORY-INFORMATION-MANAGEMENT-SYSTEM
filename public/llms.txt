@@ -1,0 +1,18 @@
+# Precision Quality Services - Laboratory Information Management System (LIMS)
+> https://limsreportgenerator.vercel.app
+
+## Overview
+Precision Quality Services (PQS) LIMS is an enterprise laboratory management platform engineered for environmental, wastewater, metallurgical, and chemical testing laboratories. It adheres to ISO/IEC 17025 standards for electronic record integrity, tamper-proof audit trails, and cryptographic verification.
+
+## Core Capabilities
+- **Standard-Compliant Laboratory Reports:** 7-column analytical test reports (`TEST`, `TEST METHOD`, `VALUE`, `UNIT`, `CRITERIA`, `UNIT`, `RESULT`) with dynamic regulatory criteria matching (PEQS, WHO, ASTM, APHA).
+- **Invoicing & Commercial Quotations:** Laboratory testing service invoices with automated total calculations, NTN numbers, and line-item summaries.
+- **Official Letterheads:** Pre-formatted ISO 9001/17025 accredited laboratory documentation with verified certification marks.
+- **Cryptographic Document Seals:** Client-side SHA-256 hash generation for every issued report (`PQS-XXXXXXXXXXXX`) encoded into QR verification codes.
+- **Public Document Verification:** Real-time online document verification portal (`/verify/receipt?id=...&seal=...`) allowing third-party purchasers and regulators to inspect authenticity.
+
+## Architecture & Technology
+- Framework: Next.js 16 (Turbopack, Static Export)
+- Desktop Runtime: Tauri v2 + Rust
+- Offline Resilience: Supabase Cloud Sync with local browser persistence
+- Typography: Inter, Montserrat, Good Times Bold

@@ -79,6 +79,12 @@ function VerifyPage() {
     }
   };
 
+  useEffect(() => {
+    document.title = reportNo 
+      ? `Verify Document #${reportNo} | PQS LIMS` 
+      : "Document Verification | PQS LIMS";
+  }, [reportNo]);
+
   // Auto-verify on mount if auth token/password is present or document is password-free
   useEffect(() => {
     verifyWithPassword(urlPwd);

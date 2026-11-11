@@ -457,6 +457,10 @@ function LetterheadContent() {
     };
   }, [pages, filename]);
 
+  useEffect(() => {
+    document.title = filename ? `Letterhead #${filename} | PQS LIMS` : "Letterhead Generator | PQS LIMS";
+  }, [filename]);
+
   const handleSilentSave = async (filename: string) => {
     setIsGenerating(true);
     

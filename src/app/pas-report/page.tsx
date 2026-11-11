@@ -147,12 +147,12 @@ function EditorContent() {
     }
   }, []);
 
-  // Sync title when brand settings change
+  // Sync document title with report number and laboratory brand
   useEffect(() => {
-    if (brandSettings.companyName) {
-      document.title = brandSettings.companyName;
-    }
-  }, [brandSettings.companyName]);
+    document.title = formData.reportNo 
+      ? `Report #${formData.reportNo} | PQS LIMS` 
+      : (brandSettings.companyName || "Report Editor | PQS LIMS");
+  }, [formData.reportNo, brandSettings.companyName]);
 
   const ROWS_PER_PAGE = 8;
   const testPagesCount = Math.max(1, Math.ceil(tests.length / ROWS_PER_PAGE));

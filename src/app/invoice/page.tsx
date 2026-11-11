@@ -160,6 +160,12 @@ function InvoiceContent() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (formData.invoiceNo) {
+      document.title = `Invoice #${formData.invoiceNo} | PQS LIMS`;
+    }
+  }, [formData.invoiceNo]);
+
   const lastBackedUpDataRef = React.useRef<string>('');
 
   useEffect(() => {

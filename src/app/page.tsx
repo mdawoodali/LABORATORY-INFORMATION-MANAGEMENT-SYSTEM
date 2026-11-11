@@ -28,7 +28,7 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    // Relying on packageJson.version directly
+    document.title = "Dashboard | Precision Quality Services LIMS";
   }, []);
   const { data: recentReports = [], isLoading: reportsLoading } = useQuery({
     queryKey: ['recentReports'],
@@ -382,25 +382,26 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#f3f3f3] font-sans">
       
-      {/* Top Bar */}
-      <div className="bg-white px-4 sm:px-8 py-3 sm:py-4 flex justify-between items-center shadow-sm border-b border-gray-200">
+      {/* Top Header Bar */}
+      <header className="bg-white px-4 sm:px-8 py-3 sm:py-4 flex justify-between items-center shadow-sm border-b border-gray-200">
+        <h1 className="sr-only">Precision Quality Services LIMS Dashboard</h1>
         <div className="flex items-center gap-3 sm:gap-6">
           {/* Typographic Logo */}
           <div className="flex items-center gap-2.5 sm:gap-4 text-[#2b579a]">
-            <img src="/pqs-logo.png" alt="PQS Logo" className="w-10 h-10 sm:w-16 sm:h-16 object-contain shrink-0" />
+            <img src="/pqs-logo.png" alt="PQS Logo" width={64} height={64} className="w-10 h-10 sm:w-16 sm:h-16 object-contain shrink-0" />
             <div className="flex flex-col justify-center gap-0.5 mt-0.5">
-              <img src="/pqs-wordmark.png" alt="PQS Wordmark" className="h-4 sm:h-6 object-contain origin-left" style={{ objectPosition: 'left center' }} />
+              <img src="/pqs-wordmark.png" alt="PQS Wordmark" width={180} height={24} className="h-4 sm:h-6 object-contain origin-left" style={{ objectPosition: 'left center' }} />
               <span className="text-[8.5px] sm:text-[10.5px] font-semibold text-gray-500 uppercase tracking-wider sm:tracking-widest leading-none">
                 Laboratory Information Management System
               </span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <nav className="flex items-center gap-2" aria-label="Administrative controls">
           <PWAInstallPrompt variant="button" />
           <button
             onClick={() => window.location.href = '/settings/'}
-            className="flex items-center gap-1.5 sm:gap-2 bg-gray-100 hover:bg-gray-200 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm text-gray-700"
+            className="flex items-center gap-1.5 sm:gap-2 bg-gray-100 hover:bg-gray-200 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm text-gray-700 cursor-pointer"
             title="System Settings"
           >
             <Settings size={15} />
@@ -408,16 +409,16 @@ export default function HomePage() {
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 sm:gap-2 bg-red-50 hover:bg-red-100 text-red-700 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm font-medium border border-red-200"
+            className="flex items-center gap-1.5 sm:gap-2 bg-red-50 hover:bg-red-100 text-red-700 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm font-medium border border-red-200 cursor-pointer"
             title="Log Out Administrator"
           >
             <LogOut size={15} />
             <span className="hidden sm:inline">Log Out</span>
           </button>
-        </div>
-      </div>
+        </nav>
+      </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+      <main id="main-content" className="max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
 
         {/* NEW REPORT Section */}
         <motion.div 
@@ -785,14 +786,18 @@ export default function HomePage() {
           )}
         </motion.div>
 
-        {/* Footer */}
-        <div className="mt-8 mb-4 text-center flex flex-col items-center justify-center gap-1 text-[10px] text-gray-400">
-          <span>v{appVersion}</span>
-          <span>
-            Powered by <a href="https://www.linkedin.com/in/areeb-iqbal-63b444247/" target="_blank" rel="noopener noreferrer" className="hover:text-[#2b579a] hover:underline font-medium transition-colors">Areeb Iqbal</a>
-          </span>
-        </div>
-      </div>
+        {/* Semantic Footer */}
+        <footer className="mt-10 mb-4 text-center flex flex-col items-center justify-center gap-1.5 text-[10.5px] text-gray-400">
+          <span>© {new Date().getFullYear()} Precision Quality Services • ISO/IEC 17025 Accredited Testing Laboratory</span>
+          <div className="flex items-center gap-2 text-[10px]">
+            <span>v{appVersion}</span>
+            <span>•</span>
+            <span>
+              Engineered by <a href="https://www.linkedin.com/in/areeb-iqbal-63b444247/" target="_blank" rel="noopener noreferrer" className="hover:text-[#2b579a] hover:underline font-medium transition-colors">Areeb Iqbal</a>
+            </span>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }
