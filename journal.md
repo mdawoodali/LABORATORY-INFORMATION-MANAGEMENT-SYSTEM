@@ -131,3 +131,34 @@ The user requested transitioning the Admin Login screen and related authenticati
 
 3. **Consistent Public Verification PIN Modal (`src/app/verify/receipt/page.tsx`):**
    - Updated the document encryption PIN unlock form to match the light mode theme seamlessly (`bg-slate-50`, `bg-white`, `border-gray-200`, `#2b579a` unlock button).
+
+
+## [2026-11-11] v6.7.4 Comprehensive 38-Point Addy Osmani Web Quality & Anti-Vibecoding Audit
+
+### Context & Motivations
+Executed the full 38-point Addy Osmani web quality audit and pre-launch anti-vibecoding checklist to ensure enterprise-grade reliability, SEO discoverability, accessibility compliance, and professional polish.
+
+### Key Audit Remedies & Enhancements
+
+1. **Custom 404 & Error Boundaries (`not-found.tsx`, `error.tsx`):**
+   - Created custom branded Apple HIG 404 page with navigation to dashboard and direct verification search.
+   - Built custom error boundary with retry affordance and safe state recovery.
+
+2. **OpenGraph, Twitter Cards, & SEO Meta (`layout.tsx`):**
+   - Configured `metadataBase`, dynamic `title.template` (`%s | Precision Quality Services LIMS`), distinct meta descriptions, canonical URL tag, and high-resolution OpenGraph preview images ($1200\times 630$px).
+
+3. **Structured JSON-LD Schema (`layout.tsx`):**
+   - Injected `Organization` and `WebSite` schema for semantic crawler comprehension.
+
+4. **Crawler & AI Directives (`robots.txt`, `sitemap.xml`, `llms.txt`):**
+   - Added clean `robots.txt` granting access to legitimate bots and AI agents while shielding admin tools.
+   - Generated `sitemap.xml` with canonical URLs and `<lastmod>` timestamps.
+   - Authored `/llms.txt` providing structured documentation for LLM agents.
+
+5. **Accessibility & Core Web Vitals:**
+   - Added hidden skip-to-content accessible link (`#main-content`).
+   - Added explicit `:focus-visible` styling with 2px high-contrast outline.
+   - Added semantic `<header>`, `<nav>`, `<main>`, and `<footer>` landmarks, plus primary `<h1>` headings.
+   - Added explicit `width` and `height` dimensions on logos to eradicate Cumulative Layout Shift (CLS).
+   - Dynamic `new Date().getFullYear()` copyright in the footer.
+   - Disabled production browser source maps in `next.config.ts`.
