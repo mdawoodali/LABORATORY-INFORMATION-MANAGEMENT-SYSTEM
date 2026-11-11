@@ -47,48 +47,48 @@ export default function AdminLoginForm() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-[#071328] to-slate-900 flex flex-col justify-center items-center p-4 sm:p-6 font-sans select-text">
+    <div className="flex-1 min-h-[calc(100vh-60px)] w-full bg-gradient-to-br from-slate-50 via-gray-100 to-slate-200/60 flex flex-col justify-center items-center py-4 px-4 font-sans select-text text-gray-900 relative">
       
-      {/* Background Decorative Rings */}
+      {/* Background Subtle Gradient Accents */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[25%] -left-[10%] w-[600px] h-[600px] rounded-full bg-blue-600/10 blur-3xl" />
-        <div className="absolute -bottom-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-3xl" />
+        <div className="absolute -top-[25%] -left-[10%] w-[600px] h-[600px] rounded-full bg-blue-100/50 blur-3xl" />
+        <div className="absolute -bottom-[20%] -right-[10%] w-[600px] h-[600px] rounded-full bg-indigo-100/40 blur-3xl" />
       </div>
 
-      <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10">
+      <div className="w-full max-w-md bg-white border border-gray-200/90 rounded-3xl p-6 sm:p-7 shadow-xl shadow-slate-200/60 relative z-10">
         
         {/* Header Branding */}
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-center p-3 shadow-inner mb-4">
+        <div className="flex flex-col items-center text-center mb-5">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-gray-200 flex items-center justify-center p-2.5 shadow-sm mb-3">
             <PQSLogoImage className="w-full h-full object-contain" />
           </div>
           
-          <PQSWordmark className="h-6 object-contain mb-2 brightness-110" />
+          <PQSWordmark className="h-5 sm:h-6 object-contain mb-1.5" />
           
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-950/70 border border-blue-800/50 rounded-full text-[11px] font-semibold text-blue-300 uppercase tracking-widest mt-1">
-            <ShieldCheck size={13} className="text-blue-400" />
+          <div className="flex items-center gap-1.5 px-3 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[10.5px] font-semibold text-blue-900 uppercase tracking-widest mt-1">
+            <ShieldCheck size={12} className="text-[#2b579a]" />
             <span>Restricted Lab Access</span>
           </div>
           
-          <p className="text-xs text-slate-400 mt-3 leading-relaxed max-w-xs">
+          <p className="text-xs text-gray-500 mt-2 leading-relaxed max-w-xs">
             Sign in with authorized credentials to manage laboratory reports, invoices, and audit records.
           </p>
         </div>
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="mb-6 p-3.5 bg-red-950/80 border border-red-800/80 rounded-2xl flex items-start gap-3 text-red-200 text-xs animate-shake">
-            <AlertCircle size={18} className="text-red-400 shrink-0 mt-0.5" />
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-red-700 text-xs animate-shake">
+            <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
             <div className="flex-1 font-medium">{errorMessage}</div>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Email Field */}
           <div>
-            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
-              <Mail size={13} className="text-blue-400" />
+            <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1.5 block flex items-center gap-1.5">
+              <Mail size={12} className="text-[#2b579a]" />
               <span>Admin Email</span>
             </label>
             <div className="relative">
@@ -99,15 +99,15 @@ export default function AdminLoginForm() {
                 placeholder="precisionqualityserviceslabs@gmail.com"
                 required
                 autoComplete="email"
-                className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full bg-slate-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2b579a]/20 focus:border-[#2b579a] transition-all"
               />
             </div>
           </div>
 
           {/* Password Field */}
           <div>
-            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 block flex items-center gap-1.5">
-              <Lock size={13} className="text-blue-400" />
+            <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1.5 block flex items-center gap-1.5">
+              <Lock size={12} className="text-[#2b579a]" />
               <span>Admin Password</span>
             </label>
             <div className="relative">
@@ -118,38 +118,38 @@ export default function AdminLoginForm() {
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
-                className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-3 pr-11 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
+                className="w-full bg-slate-50 border border-gray-300 rounded-xl px-3.5 py-2.5 pr-11 text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2b579a]/20 focus:border-[#2b579a] transition-all font-mono"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
           </div>
 
           {/* Remember Checkbox */}
-          <div className="flex items-center justify-between text-xs pt-1">
-            <label className="flex items-center gap-2 cursor-pointer text-slate-300 select-none">
+          <div className="flex items-center justify-between text-xs pt-0.5">
+            <label className="flex items-center gap-2 cursor-pointer text-gray-700 select-none font-medium text-[11.5px]">
               <input 
                 type="checkbox"
                 checked={rememberDevice}
                 onChange={(e) => setRememberDevice(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500"
+                className="w-3.5 h-3.5 rounded border-gray-300 text-[#2b579a] focus:ring-[#2b579a]"
               />
               <span>Remember this browser</span>
             </label>
-            <span className="text-[11px] text-slate-500">Persistent Session</span>
+            <span className="text-[11px] text-gray-400">Persistent Session</span>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.99] disabled:opacity-50 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 text-sm mt-2 cursor-pointer"
+            className="w-full bg-[#2b579a] hover:bg-[#1e4178] active:scale-[0.99] disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-900/10 transition-all flex items-center justify-center gap-2 text-sm mt-1 cursor-pointer"
           >
             {isLoading ? (
               <>
@@ -159,15 +159,15 @@ export default function AdminLoginForm() {
             ) : (
               <>
                 <span>Sign In to LIMS</span>
-                <ArrowRight size={16} />
+                <ArrowRight size={15} />
               </>
             )}
           </button>
         </form>
 
         {/* Footer info */}
-        <div className="mt-8 pt-4 border-t border-slate-800 text-center">
-          <p className="text-[10.5px] text-slate-500 tracking-wide font-medium">
+        <div className="mt-5 pt-3 border-t border-gray-100 text-center">
+          <p className="text-[10px] text-gray-400 tracking-wide font-medium">
             Precision Quality Services • ISO/IEC 17025 Compliant System
           </p>
         </div>

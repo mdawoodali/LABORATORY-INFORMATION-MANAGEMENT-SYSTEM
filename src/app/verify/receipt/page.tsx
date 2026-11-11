@@ -216,32 +216,32 @@ function VerifyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center font-sans text-white p-4">
-      <div className="w-full max-w-sm bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-800">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center font-sans text-gray-900 p-4">
+      <div className="w-full max-w-sm bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-gray-200">
         <div className="flex justify-center mb-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center p-2 shadow-inner">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-gray-200 flex items-center justify-center p-2 shadow-sm">
             <PQSLogoImage className="w-full h-full object-contain" />
           </div>
         </div>
 
         <div className="text-center mb-6">
-          <h1 className="text-xl font-black text-white tracking-wide">Document Verification</h1>
-          <p className="text-slate-400 text-xs mt-1">
-            Report <span className="font-mono text-blue-400 font-bold">#{reportNo || 'Unknown'}</span> is protected with security encryption.
+          <h1 className="text-xl font-black text-gray-900 tracking-wide">Document Verification</h1>
+          <p className="text-gray-500 text-xs mt-1">
+            Report <span className="font-mono text-[#2b579a] font-bold">#{reportNo || 'Unknown'}</span> is protected with security encryption.
           </p>
         </div>
 
         <form onSubmit={handleVerify} className="flex flex-col gap-4">
           <div>
-            <label className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-1.5 flex items-center gap-1.5">
-              <Lock size={12} className="text-blue-400" />
+            <label className="text-[11px] uppercase tracking-wider font-bold text-gray-700 mb-1.5 flex items-center gap-1.5">
+              <Lock size={12} className="text-[#2b579a]" />
               <span>Security PIN / Password</span>
             </label>
             <input
               type="password"
               inputMode="text"
               autoFocus
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-base focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-mono"
+              className="w-full bg-slate-50 border border-gray-300 rounded-xl px-4 py-3.5 text-gray-900 text-base focus:bg-white focus:outline-none focus:border-[#2b579a] focus:ring-2 focus:ring-[#2b579a]/20 transition-all font-mono"
               placeholder="Enter document PIN"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -250,7 +250,7 @@ function VerifyPage() {
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-300 text-xs rounded-xl p-3 font-medium">
+            <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3 font-medium">
               {error}
             </div>
           )}
@@ -258,7 +258,7 @@ function VerifyPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm mt-1"
+            className="w-full bg-[#2b579a] hover:bg-[#1e4178] active:bg-[#16335f] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm mt-1 cursor-pointer"
           >
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -271,8 +271,8 @@ function VerifyPage() {
           </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-slate-800 text-center">
-          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+          <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
             Precision Quality Services • ISO 17025
           </span>
         </div>
@@ -283,7 +283,7 @@ function VerifyPage() {
 
 export default function VerifyPageWrapper() {
   return (
-    <React.Suspense fallback={<div className="min-h-screen bg-slate-950 flex justify-center items-center text-white">Loading verification portal...</div>}>
+    <React.Suspense fallback={<div className="min-h-screen bg-slate-50 flex justify-center items-center text-gray-600 font-sans">Loading verification portal...</div>}>
       <VerifyPage />
     </React.Suspense>
   );
