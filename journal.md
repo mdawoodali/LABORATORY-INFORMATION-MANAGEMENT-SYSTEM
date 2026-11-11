@@ -61,3 +61,28 @@ Lab technicians and field managers frequently need to generate reports and invoi
 5. **QR Code Verification with Auto-Authentication:**
    - *Mechanism:* `PASHeader` encodes verification link with document seal and authentication parameter (`&pwd=XXXX`).
    - *Verification Portal:* When scanned with a smartphone camera, `/verify/receipt` checks for credentials in the URL and automatically verifies authentic records, scaling the rendered document to mobile screens with zero horizontal overflow. Invoices and letterheads verify immediately without password barriers.
+
+
+## [2026-11-11] v6.7.1 Complete PDF Generation & Design System Unification
+
+### Context & Motivations
+The user loved the exact layout, cleanliness, and visual fidelity of the PDF downloaded from the QR code verification portal (`/verify/receipt`), but noticed discrepancies when generating PDFs from the desktop app (e.g. legacy editor routing, handles burning into the output, and different header/footer styles in auto-sync). The goal was to unify all report generation onto a single component architecture (`ReportDocumentView`) to guarantee 100% pixel-level parity across phone, web, desktop software, and background auto-sync.
+
+### Key Architectural Decisions
+
+1. **Shared Document Architecture (`ReportDocumentView.tsx`):**
+   - Extracted common report page structure, headers (`PASHeader`), footers (`PASFooter`), page one data (`PageOneData`), 7-column and 5-column test tables (`TestTable`), and sample pictures (`CanvaImage`) into a single canonical component.
+   - Both `/verify/receipt`, `/pas-report`, and `cloudSyncEngine` now render the exact same component with zero duplicate markup.
+
+2. **Decoupled PDF Capture & UI Element Restoration:**
+   - In `pas-report/page.tsx`, element hiding (resize handles, dots, selection outlines) was previously restored prior to capture. Moved restoration into a `finally` block executing strictly *after* `createDocumentPdf()` finishes canvas extraction and text injection.
+   - Added `isReadOnly={isGenerating}` prop to `CanvaImage` so interactive handles are structurally disabled during print/save.
+   - Added `data-html2canvas-ignore="true"` and `no-print` to the date picker `<input type="date">` to eliminate duplicate text in vector layers.
+
+3. **Homepage Routing & Legacy Editor Deprecation:**
+   - Updated `handleNewReport` and `handleOpenTemplate` in `src/app/page.tsx` to route all report creation directly to `/pas-report/`.
+   - Added an automatic client redirect in `src/app/editor/page.tsx` to forward any legacy requests directly to `/pas-report/`.
+
+4. **Offscreen React 19 Engine in Cloud Auto-Sync (`cloudSyncEngine.tsx`):**
+   - Transformed background synchronization to render documents via `createRoot(<ReportDocumentView ... isReadOnly={true} />)` into an offscreen element.
+   - Ensures reports created on phone and synced to the desktop PC have the exact same cryptographic QR seal, typography, and table layout as files downloaded directly from the web portal.
