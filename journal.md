@@ -106,8 +106,28 @@ To prevent unauthorized public web access to the laboratory report management sy
    - Eliminates flash of unauthenticated content (FOUC) by presenting a sleek laboratory-branded loader during initial storage hydration.
 
 3. **Laboratory-Grade Design & UX (`AdminLoginForm.tsx`):**
-   - High-craft, Apple HIG-styled dark glassmorphism card with PQS logo, PQS wordmark, and security badge.
+   - High-craft, Apple HIG-styled interface with PQS logo, PQS wordmark, and security badge.
    - Includes password toggle visibility, case-insensitive email normalization, persistent device checkbox, and accessible error handling.
 
 4. **In-App Account & Sign-Out Controls:**
    - Integrated quick-logout actions in the Home dashboard header bar and Settings page, allowing administrators to terminate sessions on shared computers when necessary.
+
+
+## [2026-11-11] v6.7.3 Apple HIG Light Mode Transformation for Admin Auth & Verification
+
+### Context & Motivations
+The user requested transitioning the Admin Login screen and related authentication UI to a clean, laboratory-grade light mode matching the primary dashboard and document canvas aesthetics.
+
+### Key Architectural Decisions
+
+1. **Light Mode Admin Login Screen (`AdminLoginForm.tsx`):**
+   - Replaced dark navy/slate background with a crisp `bg-gradient-to-br from-slate-50 via-gray-100 to-slate-200/60` and pure white elevated card (`bg-white border-gray-200/90 shadow-xl`).
+   - Restored authentic PQS logo and brand wordmark rendering without inverted brightness filters.
+   - Refined input styling (`bg-slate-50 border-gray-300 focus:bg-white text-gray-900 focus:border-[#2b579a]`) and high-contrast labels (`text-gray-700 font-bold`).
+   - Compacted vertical padding and margins so the entire card fits cleanly on all screen sizes with zero unnecessary vertical scrolling.
+
+2. **Unified Auth Initialization Splash (`AdminAuthGuard.tsx`):**
+   - Converted the loading splash state from dark slate to clean light mode (`bg-slate-50 text-gray-700`, white logo card, `#2b579a` spinner) to eliminate dark flashes during initial page load.
+
+3. **Consistent Public Verification PIN Modal (`src/app/verify/receipt/page.tsx`):**
+   - Updated the document encryption PIN unlock form to match the light mode theme seamlessly (`bg-slate-50`, `bg-white`, `border-gray-200`, `#2b579a` unlock button).
