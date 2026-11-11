@@ -86,3 +86,28 @@ The user loved the exact layout, cleanliness, and visual fidelity of the PDF dow
 4. **Offscreen React 19 Engine in Cloud Auto-Sync (`cloudSyncEngine.tsx`):**
    - Transformed background synchronization to render documents via `createRoot(<ReportDocumentView ... isReadOnly={true} />)` into an offscreen element.
    - Ensures reports created on phone and synced to the desktop PC have the exact same cryptographic QR seal, typography, and table layout as files downloaded directly from the web portal.
+
+
+## [2026-11-11] v6.7.2 Enterprise Administrator Authentication & Persistent Device Auth
+
+### Context & Motivations
+To prevent unauthorized public web access to the laboratory report management system (`https://limsreportgenerator.vercel.app`), an administrative authentication barrier was requested. Only authorized laboratory personnel using the official admin email and password can access, create, edit, or delete reports, invoices, letterheads, and settings. Once logged in on a device or browser, the session is remembered indefinitely so technicians are not repeatedly prompted. Public document QR verification (`/verify/receipt`) remains completely accessible to clients and third-party auditors.
+
+### Key Architectural Decisions
+
+1. **Persistent Device Session (`AdminAuthContext.tsx`):**
+   - Credentials configured for administrator access: `precisionqualityserviceslabs@gmail.com` / `pqs@1234`.
+   - On successful sign in, stores a cryptographically unique tokenized session in `localStorage` (`pqs_admin_session_v1`).
+   - Automatically re-authorizes on subsequent app boots, browser reloads, phone PWA launches, and desktop window instances without requiring repeated credential entry.
+
+2. **Route-Level Protection via Layout Guard (`AdminAuthGuard.tsx`):**
+   - Sits at the root layout boundary to intercept all unauthenticated requests to `/`, `/pas-report/`, `/invoice/`, `/pqs-letterhead/`, and `/settings/`.
+   - Automatically whitelists public verification paths (`/verify/*`) so customers scanning physical QR codes can view authenticated records with zero barriers.
+   - Eliminates flash of unauthenticated content (FOUC) by presenting a sleek laboratory-branded loader during initial storage hydration.
+
+3. **Laboratory-Grade Design & UX (`AdminLoginForm.tsx`):**
+   - High-craft, Apple HIG-styled dark glassmorphism card with PQS logo, PQS wordmark, and security badge.
+   - Includes password toggle visibility, case-insensitive email normalization, persistent device checkbox, and accessible error handling.
+
+4. **In-App Account & Sign-Out Controls:**
+   - Integrated quick-logout actions in the Home dashboard header bar and Settings page, allowing administrators to terminate sessions on shared computers when necessary.

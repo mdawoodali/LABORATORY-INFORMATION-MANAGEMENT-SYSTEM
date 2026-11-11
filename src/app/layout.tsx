@@ -49,6 +49,8 @@ export const metadata: Metadata = {
 
 import Providers from "@/components/Providers";
 import GlobalSync from "@/components/GlobalSync";
+import { AdminAuthProvider } from "@/context/AdminAuthContext";
+import AdminAuthGuard from "@/components/auth/AdminAuthGuard";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -58,13 +60,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col select-none overflow-x-hidden">
         <Providers>
-          <PWAInstallPrompt variant="banner" />
-          <Updater />
-          <GlobalSync />
-          <FolderInit />
-          <Toaster position="bottom-right" />
-          <SecurityShield />
-          {children}
+          <AdminAuthProvider>
+            <PWAInstallPrompt variant="banner" />
+            <Updater />
+            <GlobalSync />
+            <FolderInit />
+            <Toaster position="bottom-right" />
+            <SecurityShield />
+            <AdminAuthGuard>
+              {children}
+            </AdminAuthGuard>
+          </AdminAuthProvider>
         </Providers>
       </body>
     </html>

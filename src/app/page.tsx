@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, DEFAULT_TEMPLATES, ReportStatus, REPORT_STATUS_CONFIG } from '@/types';
-import { FileText, Clock, ChevronRight, Search, Plus, Trash2, Edit2, Copy, Settings, Layout, Download, ChevronDown, Check } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Search, Plus, Trash2, Edit2, Copy, Settings, Layout, Download, ChevronDown, Check, LogOut, ShieldCheck } from 'lucide-react';
 import TemplateUploadToast from '@/components/TemplateUploadToast';
 import { toast } from 'react-hot-toast';
 import PQSWordmark from '@/components/report/PQSWordmark';
@@ -13,10 +13,19 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import packageJson from '../../package.json';
 import { pushGlobalSettings } from '@/lib/sync';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 export default function HomePage() {
   const router = useRouter();
   const appVersion = packageJson.version;
+  const { logout } = useAdminAuth();
+
+  const handleLogout = () => {
+    if (confirm("Are you sure you want to log out of PQS LIMS? You will need to enter your administrator credentials to sign back in.")) {
+      logout();
+      toast.success("Logged out successfully");
+    }
+  };
 
   useEffect(() => {
     // Relying on packageJson.version directly
@@ -392,9 +401,18 @@ export default function HomePage() {
           <button
             onClick={() => window.location.href = '/settings/'}
             className="flex items-center gap-1.5 sm:gap-2 bg-gray-100 hover:bg-gray-200 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm text-gray-700"
+            title="System Settings"
           >
             <Settings size={15} />
             <span className="hidden sm:inline">Settings</span>
+          </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 sm:gap-2 bg-red-50 hover:bg-red-100 text-red-700 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm font-medium border border-red-200"
+            title="Log Out Administrator"
+          >
+            <LogOut size={15} />
+            <span className="hidden sm:inline">Log Out</span>
           </button>
         </div>
       </div>

@@ -5,14 +5,24 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { AppSettings, DEFAULT_SETTINGS } from '@/types';
-import { ArrowLeft, Download, Upload, Shield, Database, Save, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Download, Upload, Shield, Database, Save, CheckCircle, Eye, EyeOff, ShieldCheck, LogOut } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { ensureBackupFolder } from '@/utils/backupValidator';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { adminEmail, logout } = useAdminAuth();
+
+  const handleLogout = () => {
+    if (confirm("Are you sure you want to sign out of the administrator account? You will be prompted for credentials to sign back in.")) {
+      logout();
+      toast.success("Administrator signed out.");
+      router.push('/');
+    }
+  };
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -317,6 +327,34 @@ export default function SettingsPage() {
                 {importStatus}
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Administrator Authentication */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={18} className="text-[#2b579a]" />
+              <h2 className="font-bold text-gray-700">Administrator Access</h2>
+            </div>
+            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+              Active Session
+            </span>
+          </div>
+          <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">Signed In As</p>
+              <p className="text-sm font-bold text-gray-800 mt-0.5 font-mono">{adminEmail}</p>
+              <p className="text-xs text-gray-400 mt-1">This browser is authorized. You will not be asked for credentials again unless you sign out.</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold px-4 py-2.5 rounded-lg text-xs transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
+            >
+              <LogOut size={14} />
+              <span>Sign Out Administrator</span>
+            </button>
           </div>
         </div>
 
