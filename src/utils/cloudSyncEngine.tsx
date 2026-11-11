@@ -1,7 +1,11 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { supabase } from '@/lib/supabase';
 import { ensureBackupFolder } from './backupValidator';
 import { saveSilentBackup } from './exportManager';
 import { createDocumentPdf } from './pdfGenerator';
+import ReportDocumentView from '@/components/report/ReportDocumentView';
+import { generateDocumentSeal } from './cryptoSeal';
 import toast from 'react-hot-toast';
 
 let isSyncRunning = false;
@@ -54,9 +58,10 @@ function parseReceiptDate(dateStr?: string, createdAt?: string): Date {
 }
 
 /**
- * Generates an offscreen DOM element representing the document for PDF generation
+ * Generates an offscreen DOM element representing the document for PDF generation.
+ * Uses the exact ReportDocumentView component for 100% pixel parity with verify portal and editor.
  */
-function buildOffscreenDocumentDOM(receipt: any): HTMLElement {
+async function buildOffscreenDocumentDOM(receipt: any): Promise<{ container: HTMLElement; cleanup: () => void }> {
   const container = document.createElement('div');
   container.style.position = 'fixed';
   container.style.left = '-9999px';
@@ -64,7 +69,7 @@ function buildOffscreenDocumentDOM(receipt: any): HTMLElement {
   container.style.width = '794px';
   container.style.zIndex = '-9999';
   container.style.background = '#ffffff';
-  container.style.pointerEvents = 'none';
+  document.body.appendChild(container);
 
   const type = receipt.data?.type || 'report';
   const formData = receipt.data?.formData || {};
@@ -172,194 +177,49 @@ function buildOffscreenDocumentDOM(receipt: any): HTMLElement {
     `;
 
     container.appendChild(page);
+    return {
+      container,
+      cleanup: () => {
+        if (container.parentNode) container.parentNode.removeChild(container);
+      }
+    };
   } else {
-    // Standard Laboratory Test Report
-    const testList = tests || [];
-    const ROWS_PER_PAGE = 8;
-    const testPagesCount = Math.max(1, Math.ceil(testList.length / ROWS_PER_PAGE));
-    const testChunks: any[][] = [];
-    for (let i = 0; i < testList.length; i += ROWS_PER_PAGE) {
-      testChunks.push(testList.slice(i, i + ROWS_PER_PAGE));
-    }
-    if (testChunks.length === 0) testChunks.push([]);
+    // Standard Laboratory Test Report - Rendered with exact ReportDocumentView
+    const sampleImages = (receipt.data as any)?.sampleImages || [];
+    const sampleImage = (receipt.data as any)?.sampleImage;
+    const extraPages = (receipt.data as any)?.extraPages || [];
 
-    const rawImages = (receipt.data as any)?.sampleImages || [];
-    const singleImage = (receipt.data as any)?.sampleImage;
-    const hasImages = rawImages.length > 0 || !!singleImage;
-    const totalPages = 1 + testPagesCount + (hasImages ? 1 : 0);
+    const computedSeal = await generateDocumentSeal(
+      receipt.id || formData.reportNo,
+      formData.reportDate || '',
+      tests
+    );
 
-    const dynFields = formData.dynamicFields || [];
-    const applicantVal = dynFields.find((f: any) => f.label === 'APPLICANT')?.value || formData.applicant || '-';
-    const sampleDesc = dynFields.find((f: any) => f.label?.includes('SAMPLE'))?.value || formData.sampleDescription || '-';
+    const root = createRoot(container);
+    root.render(
+      <ReportDocumentView
+        formData={{ ...formData, reportNo: receipt.id || formData.reportNo }}
+        tests={tests}
+        sampleImage={sampleImage}
+        sampleImages={sampleImages}
+        extraPages={extraPages}
+        seal={computedSeal}
+        password={receipt.password || undefined}
+        isReadOnly={true}
+      />
+    );
 
-    // Page 1: Client & Sample Information
-    const page1 = document.createElement('div');
-    page1.className = 'report-a4-page';
-    page1.style.width = '794px';
-    page1.style.height = '1123px';
-    page1.style.padding = '32px 40px';
-    page1.style.backgroundColor = '#ffffff';
-    page1.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    page1.style.position = 'relative';
-    page1.style.boxSizing = 'border-box';
+    // Wait for React to render and SVG/images to mount
+    await new Promise(r => setTimeout(r, 350));
 
-    page1.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; border-bottom:2px solid #1f2937; padding-bottom:12px;">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <img src="/pqs-logo.png" style="width:80px; height:80px; object-fit:contain;" />
-          <div>
-            <div style="font-weight:900; font-size:18px; color:#1e3a8a; letter-spacing:0.5px;">PRECISION QUALITY SERVICES</div>
-            <div style="font-size:11px; color:#6b7280; margin-top:2px;">Laboratory Information Management System</div>
-          </div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:14px; font-weight:bold; color:#1e3a8a;">TEST REPORT</div>
-          <div style="font-size:13px; font-weight:bold; margin-top:4px;">Report #: ${receipt.id}</div>
-          <div style="font-size:12px; color:#4b5563;">Date: ${formData.reportDate || '-'}</div>
-        </div>
-      </div>
-
-      <div style="margin-bottom:24px;">
-        <div style="font-size:14px; font-weight:bold; color:#1f2937; border-bottom:2px solid #1f2937; padding-bottom:6px; margin-bottom:12px;">Sample & Client Information:</div>
-        <table style="width:100%; font-size:13px; border-collapse:collapse;">
-          <tr><td style="font-weight:600; width:180px; padding:6px 0; color:#374151;">Applicant:</td><td style="font-weight:bold; color:#111827; border-bottom:1px solid #e5e7eb;">${applicantVal}</td></tr>
-          <tr><td style="font-weight:600; padding:6px 0; color:#374151;">Sample Description:</td><td style="color:#111827; border-bottom:1px solid #e5e7eb;">${sampleDesc}</td></tr>
-          ${dynFields.filter((f: any) => f.label !== 'APPLICANT' && !f.label?.includes('SAMPLE')).map((f: any) => `
-            <tr><td style="font-weight:600; padding:6px 0; color:#374151;">${f.label}:</td><td style="color:#111827; border-bottom:1px solid #e5e7eb;">${f.value || '-'}</td></tr>
-          `).join('')}
-        </table>
-      </div>
-
-      <div style="position:absolute; bottom:30px; left:0; width:100%; display:flex; justify-content:center;">
-        <div style="width:85%; display:flex; justify-content:space-between; border-top:1px solid #9ca3af; padding-top:8px; font-size:10px; color:#6b7280;">
-          <span style="font-style:italic;">This document is digitally verified. Unauthorized alterations invalidate this certificate.</span>
-          <span style="font-weight:bold;">Page 1/${totalPages}</span>
-        </div>
-      </div>
-    `;
-    container.appendChild(page1);
-
-    // Test Pages (Chunked into 8 tests per page)
-    testChunks.forEach((chunk, chunkIdx) => {
-      const testPage = document.createElement('div');
-      testPage.className = 'report-a4-page';
-      testPage.style.width = '794px';
-      testPage.style.height = '1123px';
-      testPage.style.padding = '32px 40px';
-      testPage.style.backgroundColor = '#ffffff';
-      testPage.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      testPage.style.position = 'relative';
-      testPage.style.boxSizing = 'border-box';
-
-      const pageNum = 2 + chunkIdx;
-      testPage.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; border-bottom:2px solid #1f2937; padding-bottom:12px;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <img src="/pqs-logo.png" style="width:80px; height:80px; object-fit:contain;" />
-            <div>
-              <div style="font-weight:900; font-size:18px; color:#1e3a8a; letter-spacing:0.5px;">PRECISION QUALITY SERVICES</div>
-              <div style="font-size:11px; color:#6b7280; margin-top:2px;">Laboratory Information Management System</div>
-            </div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:14px; font-weight:bold; color:#1e3a8a;">TEST REPORT</div>
-            <div style="font-size:13px; font-weight:bold; margin-top:4px;">Report #: ${receipt.id}</div>
-            <div style="font-size:12px; color:#4b5563;">Date: ${formData.reportDate || '-'}</div>
-          </div>
-        </div>
-
-        <table style="width:100%; border-collapse:collapse; border:1px solid #1f2937; font-size:12px; margin-bottom:20px;">
-          <thead>
-            <tr style="background-color:#f1f5f9; color:#1f2937; font-weight:bold; border-bottom:1px solid #1f2937;">
-              <th style="border-right:1px solid #1f2937; padding:8px; text-align:left; width:22%;">TEST</th>
-              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:18%;">METHOD</th>
-              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:12%;">VALUE</th>
-              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:10%;">UNIT</th>
-              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:14%;">CRITERIA</th>
-              <th style="border-right:1px solid #1f2937; padding:8px; text-align:center; width:10%;">UNIT</th>
-              <th style="padding:8px; text-align:center; width:14%;">RESULT</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${chunk.map((t: any) => `
-              <tr style="border-bottom:1px solid #e2e8f0;">
-                <td style="border-right:1px solid #1f2937; padding:7px 8px; font-weight:600;">${t.test || '-'}</td>
-                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center; color:#4b5563; white-space:pre-wrap;">${t.method || '-'}</td>
-                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center;">${t.value || '-'}</td>
-                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center;">${t.unit || '-'}</td>
-                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center;">${t.criteria || t.peqs || '-'}</td>
-                <td style="border-right:1px solid #1f2937; padding:7px 8px; text-align:center;">${t.criteriaUnit || t.unit || '-'}</td>
-                <td style="padding:7px 8px; text-align:center; font-weight:bold;">${t.result || 'Pass'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-
-        ${chunkIdx === testChunks.length - 1 && formData.remarks ? `
-          <div style="font-size:12px; margin-top:8px;">
-            <span style="font-weight:bold;">Remarks: </span>
-            <span style="text-decoration:underline;">${formData.remarks}</span>
-          </div>
-        ` : ''}
-
-        <div style="position:absolute; bottom:30px; left:0; width:100%; display:flex; justify-content:center;">
-          <div style="width:85%; display:flex; justify-content:space-between; border-top:1px solid #9ca3af; padding-top:8px; font-size:10px; color:#6b7280;">
-            <span style="font-style:italic;">This document is digitally verified. Unauthorized alterations invalidate this certificate.</span>
-            <span style="font-weight:bold;">Page ${pageNum}/${totalPages}</span>
-          </div>
-        </div>
-      `;
-      container.appendChild(testPage);
-    });
-
-    // Sample Images Page
-    if (hasImages) {
-      const imgPage = document.createElement('div');
-      imgPage.className = 'report-a4-page';
-      imgPage.style.width = '794px';
-      imgPage.style.height = '1123px';
-      imgPage.style.padding = '32px 40px';
-      imgPage.style.backgroundColor = '#ffffff';
-      imgPage.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      imgPage.style.position = 'relative';
-      imgPage.style.boxSizing = 'border-box';
-
-      const imgSrc = rawImages[0]?.src || singleImage;
-      imgPage.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; border-bottom:2px solid #1f2937; padding-bottom:12px;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <img src="/pqs-logo.png" style="width:80px; height:80px; object-fit:contain;" />
-            <div>
-              <div style="font-weight:900; font-size:18px; color:#1e3a8a; letter-spacing:0.5px;">PRECISION QUALITY SERVICES</div>
-              <div style="font-size:11px; color:#6b7280; margin-top:2px;">Laboratory Information Management System</div>
-            </div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:14px; font-weight:bold; color:#1e3a8a;">TEST REPORT</div>
-            <div style="font-size:13px; font-weight:bold; margin-top:4px;">Report #: ${receipt.id}</div>
-            <div style="font-size:12px; color:#4b5563;">Date: ${formData.reportDate || '-'}</div>
-          </div>
-        </div>
-
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; height:800px;">
-          ${imgSrc ? `
-            <img src="${imgSrc}" style="max-width:600px; max-height:600px; object-fit:contain; border:1px solid #d1d5db; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);" />
-            <div style="font-size:12px; font-weight:bold; color:#4b5563; margin-top:12px;">Product Picture</div>
-          ` : ''}
-        </div>
-
-        <div style="position:absolute; bottom:30px; left:0; width:100%; display:flex; justify-content:center;">
-          <div style="width:85%; display:flex; justify-content:space-between; border-top:1px solid #9ca3af; padding-top:8px; font-size:10px; color:#6b7280;">
-            <span style="font-style:italic;">This document is digitally verified. Unauthorized alterations invalidate this certificate.</span>
-            <span style="font-weight:bold;">Page ${totalPages}/${totalPages}</span>
-          </div>
-        </div>
-      `;
-      container.appendChild(imgPage);
-    }
+    return {
+      container,
+      cleanup: () => {
+        try { root.unmount(); } catch {}
+        if (container.parentNode) container.parentNode.removeChild(container);
+      }
+    };
   }
-
-  return container;
 }
 
 /**
@@ -471,9 +331,8 @@ export async function syncCloudFilesToLocalDesktop(): Promise<number> {
           console.warn(`[Cloud Sync] Could not write JSON backup for ${receipt.id}:`, jsonErr);
         }
 
-        // Render PDF offscreen and save
-        const offscreenContainer = buildOffscreenDocumentDOM(receipt);
-        document.body.appendChild(offscreenContainer);
+        // Render PDF offscreen using exact unified component
+        const { container: offscreenContainer, cleanup } = await buildOffscreenDocumentDOM(receipt);
 
         try {
           const pageElements = offscreenContainer.querySelectorAll('.report-a4-page');
@@ -490,9 +349,7 @@ export async function syncCloudFilesToLocalDesktop(): Promise<number> {
             console.log(`[Cloud Sync] Successfully generated and backed up ${receipt.id} to ${targetPdfPath}`);
           }
         } finally {
-          if (offscreenContainer.parentNode) {
-            offscreenContainer.parentNode.removeChild(offscreenContainer);
-          }
+          cleanup();
         }
 
         // Update ledger

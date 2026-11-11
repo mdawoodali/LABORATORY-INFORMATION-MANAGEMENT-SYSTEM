@@ -4,92 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSearchParams } from 'next/navigation';
 import { ReportFormData, TestRow, ExtraPage } from '@/types';
-import PQSWordmark from '@/components/report/PQSWordmark';
+import ReportDocumentView from '@/components/report/ReportDocumentView';
 import PQSLogoImage from '@/components/report/PQSLogoImage';
-import PageOneData from '@/components/report/PageOneData';
-import TestTable from '@/components/report/TestTable';
-import CanvaImage from '@/components/report/CanvaImage';
-import QRCode from 'react-qr-code';
 import { generateDocumentSeal } from '@/utils/cryptoSeal';
 import MobileDocumentViewport from '@/components/MobileDocumentViewport';
 import { ShieldCheck, Lock, ArrowRight, Download } from 'lucide-react';
-
-const PASHeader = ({ 
-  reportNo, 
-  reportingDate, 
-  seal, 
-  password 
-}: { 
-  reportNo: string; 
-  reportingDate: string; 
-  seal?: string; 
-  password?: string;
-}) => {
-  const pwdParam = password ? `&pwd=${encodeURIComponent(password)}` : '';
-  const sealParam = seal ? `&seal=${seal}` : '';
-  const verifyUrl = `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}${sealParam}${pwdParam}`;
-
-  return (
-    <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
-      <div className="flex items-center gap-3 shrink-0">
-        <PQSLogoImage className="w-[90px] h-[90px] object-contain" />
-        <div className="flex flex-col">
-          <PQSWordmark className="mb-2" />
-          <div className="text-xs text-gray-500 mt-1">
-            R-332/9, Dastagir, F.B Area, Karachi, 75950.
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            Contact: 03322673373
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            Email: precisionqualityserviceslabs@gmail.com
-          </div>
-        </div>
-      </div>
-      
-      <div className="text-right flex flex-col items-end">
-        <div className="flex items-start mb-4">
-          <div className="flex flex-col items-center mr-4 mt-1">
-            <QRCode 
-              value={verifyUrl} 
-              size={40}
-              level="M"
-            />
-            <span className="text-[7px] mt-0.5 text-gray-500 font-bold uppercase tracking-wider">Scan Me</span>
-            {seal && <span className="text-[6.5px] text-gray-400 font-mono tracking-tighter mt-0.5">{seal}</span>}
-          </div>
-          <div className="text-2xl font-bold tracking-wider text-gray-800 border border-gray-800 px-4 py-1">
-            REPORT
-          </div>
-        </div>
-        <div className="flex gap-2 text-sm">
-          <span className="font-bold w-20 text-right whitespace-nowrap">Report #:</span>
-          <span className="w-28 text-left border-b border-gray-400">{reportNo}</span>
-        </div>
-        <div className="flex gap-2 text-sm mt-1">
-          <span className="font-bold w-20 text-right whitespace-nowrap">Report Date:</span>
-          <span className="w-28 text-left border-b border-gray-400">{reportingDate}</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const PASFooter = ({ pageNum, totalPages, seal }: { pageNum: number, totalPages: number, seal?: string }) => (
-  <div className="absolute bottom-10 left-0 w-full flex flex-col items-center">
-    <div className="w-[85%] flex justify-between items-center border-t border-gray-400 pt-3 text-xs text-gray-500">
-      <div className="flex flex-col text-left">
-        <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
-        {seal && (
-          <span className="text-[9px] text-gray-400 font-mono mt-0.5">
-            Digital Integrity Seal: {seal} • ISO/IEC 17025 Compliant Electronic Audit Trail
-          </span>
-        )}
-      </div>
-      <span className="font-bold text-gray-700">Page {pageNum}/{totalPages}</span>
-    </div>
-  </div>
-);
 
 function VerifyPage() {
   const searchParams = useSearchParams();
@@ -280,84 +199,16 @@ function VerifyPage() {
         
         {/* Responsive Fit-to-Screen Document Viewport */}
         <MobileDocumentViewport pageCount={totalPages}>
-          {/* PAGE 1 */}
-          <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
-            <div className="flex-1">
-              <PageOneData data={formData} />
-            </div>
-            <PASFooter pageNum={1} totalPages={totalPages} seal={activeSeal} />
-          </div>
-
-          {/* TEST PAGES (Dynamically chunked) */}
-          {testChunks.map((chunk, index) => (
-            <div 
-              key={`test-page-${index}`} 
-              className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" 
-              style={{ width: '794px', height: '1123px' }}
-            >
-              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
-              <div className="flex-1">
-                <TestTable 
-                  tests={chunk} 
-                  data={formData} 
-                  isFirstPage={index === 0}
-                  isLastPage={index === testChunks.length - 1}
-                />
-              </div>
-              <PASFooter pageNum={2 + index} totalPages={totalPages} seal={activeSeal} />
-            </div>
-          ))}
-
-          {/* Sample Images Page */}
-          {hasImages && (
-            <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
-              <div className="flex-1 flex flex-col px-10">
-                <div className="flex-1 w-full relative">
-                  {images.map((img, imgIdx) => (
-                    <CanvaImage 
-                      key={img.id || imgIdx}
-                      src={img.src}
-                      caption={images.length > 1 ? `Product Picture #${imgIdx + 1}` : 'Product Picture'} 
-                      defaultWidth={400} 
-                      defaultHeight={400} 
-                      className="border border-gray-200 shadow-sm bg-white p-2 absolute" 
-                      isReadOnly={true}
-                    />
-                  ))}
-                </div>
-              </div>
-              <PASFooter pageNum={1 + testPagesCount + 1} totalPages={totalPages} seal={activeSeal} />
-            </div>
-          )}
-
-          {/* Extra Pages */}
-          {extraPages && extraPages.map((page, index) => {
-            const pageNum = 1 + testPagesCount + sampleImagesCount + 1 + index;
-            return (
-              <div key={page.id || index} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-                <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} seal={activeSeal} password={password} />
-                <div className="flex-1 flex flex-col px-10 relative">
-                  {page.image && (
-                    <div className="flex-1 flex justify-center items-start mb-4 relative">
-                      <CanvaImage 
-                        src={page.image}
-                        className="max-w-full max-h-[850px] object-contain"
-                        isReadOnly={true}
-                      />
-                    </div>
-                  )}
-                  {page.text && (
-                    <div className="whitespace-pre-wrap font-sans text-sm pb-10">
-                      {page.text}
-                    </div>
-                  )}
-                </div>
-                <PASFooter pageNum={pageNum} totalPages={totalPages} seal={activeSeal} />
-              </div>
-            );
-          })}
+          <ReportDocumentView
+            formData={formData}
+            tests={tests}
+            sampleImage={sampleImage}
+            sampleImages={sampleImages}
+            extraPages={extraPages}
+            seal={activeSeal}
+            password={password}
+            isReadOnly={true}
+          />
         </MobileDocumentViewport>
 
       </div>

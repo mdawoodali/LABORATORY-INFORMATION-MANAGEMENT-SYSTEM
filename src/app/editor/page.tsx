@@ -33,6 +33,12 @@ function EditorContent() {
   const templateId = searchParams.get('template');
   const reportId = searchParams.get('report') || searchParams.get('id');
 
+  useEffect(() => {
+    // Legacy /editor/ is permanently unified onto modern /pas-report/
+    const params = searchParams ? searchParams.toString() : '';
+    router.replace(`/pas-report/${params ? `?${params}` : ''}`);
+  }, [router, searchParams]);
+
   const [formData, setFormData] = useState<ReportFormData>(() => ({
     ...DEFAULT_FORM_DATA,
     reportNo: String(Math.floor(100000 + Math.random() * 900000)),

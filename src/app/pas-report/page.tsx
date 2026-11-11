@@ -12,110 +12,16 @@ const EndOfReportMarker = () => (
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SettingsModal from '@/components/SettingsModal';
-import PQSWordmark from '@/components/report/PQSWordmark';
-import PQSLogoImage from '@/components/report/PQSLogoImage';
 import ReportForm from '@/components/form/ReportForm';
-import Header from '@/components/report/Header';
-import SubHeader from '@/components/report/SubHeader';
-import PageOneData from '@/components/report/PageOneData';
-import TestTable from '@/components/report/TestTable';
-import Signature from '@/components/report/Signature';
-import CanvaImage from '@/components/report/CanvaImage';
+import ReportDocumentView from '@/components/report/ReportDocumentView';
 import { ReportFormData, TestRow, Template, DEFAULT_FORM_DATA, DEFAULT_TESTS, AppSettings, DEFAULT_SETTINGS, migrateToDynamicFields, ExtraPage, is7ColumnReport } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { extractAndSaveOptions } from '@/lib/sync';
 import UnsavedModal, { UnsavedAction } from '@/components/UnsavedModal';
 import { toast } from 'react-hot-toast';
 import { Undo2, Redo2, ZoomIn, ZoomOut, Printer } from 'lucide-react';
-import QRCode from 'react-qr-code';
 import { generateDocumentSeal } from '@/utils/cryptoSeal';
 import MobileDocumentViewport from '@/components/MobileDocumentViewport';
-
-const convertDate = (d: string) => {
-  if (!d) return '';
-  const p = d.split('-');
-  if (p.length !== 3) return d;
-  return `${p[2]}-${p[1]}-${p[0]}`;
-};
-
-const PASHeader = ({ reportNo, reportingDate, onReportingDateChange, seal, password }: { reportNo: string, reportingDate: string, onReportingDateChange?: (date: string) => void, seal?: string, password?: string }) => {
-  const pwdParam = password ? `&pwd=${encodeURIComponent(password)}` : '';
-  const sealParam = seal ? `&seal=${seal}` : '';
-  const verifyUrl = `https://limsreportgenerator.vercel.app/verify/receipt?id=${reportNo}${sealParam}${pwdParam}`;
-
-  return (
-    <div className="flex justify-between items-start mb-6 border-b-2 border-gray-800 pb-4 px-10 pt-6">
-      <div className="flex items-center gap-3 shrink-0">
-        <PQSLogoImage className="w-[90px] h-[90px] object-contain" />
-        <div className="flex flex-col">
-          <PQSWordmark className="mb-2" />
-          <div className="text-xs text-gray-500 mt-1">
-            R-332/9, Dastagir, F.B Area, Karachi, 75950.
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            Contact: 03322673373
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            Email: precisionqualityserviceslabs@gmail.com
-          </div>
-        </div>
-      </div>
-      
-      <div className="text-right flex flex-col items-end">
-        <div className="flex items-start mb-4">
-          <div className="flex flex-col items-center mr-4 mt-1">
-            <QRCode 
-              value={verifyUrl} 
-              size={40}
-              level="M"
-            />
-            <span className="text-[7px] mt-0.5 text-gray-500 font-bold uppercase tracking-wider">Scan Me</span>
-            {seal && <span className="text-[6.5px] text-gray-400 font-mono tracking-tighter mt-0.5">{seal}</span>}
-          </div>
-          <div className="text-2xl font-bold tracking-wider text-gray-800 border border-gray-800 px-4 py-1">
-            REPORT
-          </div>
-        </div>
-        <div className="flex gap-2 text-sm">
-          <span className="font-bold w-20 text-right whitespace-nowrap">Report #:</span>
-          <span className="w-28 text-left border-b border-gray-400">{reportNo}</span>
-        </div>
-        <div className="flex gap-2 text-sm mt-1">
-          <span className="font-bold w-20 text-right whitespace-nowrap">Report Date:</span>
-          {onReportingDateChange ? (
-            <label className="w-28 text-left border-b border-gray-400 relative cursor-pointer block">
-              {reportingDate}
-              <input 
-                type="date"
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                value={convertDate(reportingDate)}
-                onChange={(e) => onReportingDateChange(convertDate(e.target.value))}
-              />
-            </label>
-          ) : (
-            <span className="w-28 text-left border-b border-gray-400">{reportingDate}</span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const PASFooter = ({ pageNum, totalPages, seal }: { pageNum: number, totalPages: number, seal?: string }) => (
-  <div className="absolute bottom-10 left-0 w-full flex flex-col items-center">
-    <div className="w-[85%] flex justify-between items-center border-t border-gray-400 pt-3 text-xs text-gray-500">
-      <div className="flex flex-col text-left">
-        <span className="italic tracking-wide">This is a computer generated document and doesn&apos;t need a signature.</span>
-        {seal && (
-          <span className="text-[9px] text-gray-400 font-mono mt-0.5">
-            Digital Integrity Seal: {seal} • ISO/IEC 17025 Compliant Electronic Audit Trail
-          </span>
-        )}
-      </div>
-      <span className="font-bold text-gray-700">Page {pageNum}/{totalPages}</span>
-    </div>
-  </div>
-);
 
 function EditorContent() {
   const router = useRouter();
@@ -433,28 +339,30 @@ function EditorContent() {
         }
       });
 
-      // Restore hidden elements before capture setup
-      hiddenElements.forEach(({ el, prev }) => { el.style.display = prev; });
-      ringElements.forEach(({ el, prev }) => { el.style.boxShadow = prev; });
-      handleDots.forEach(({ el, prev }) => { el.style.display = prev; });
+      try {
+        const pages = document.querySelectorAll('.report-a4-page');
+        const { createDocumentPdf } = await import('@/utils/pdfGenerator');
+        const { pdf, blob } = await createDocumentPdf({
+          pages,
+          filename: formData.reportNo,
+          password: effectivePassword,
+          type: 'report'
+        });
 
-      const pages = document.querySelectorAll('.report-a4-page');
-      const { createDocumentPdf } = await import('@/utils/pdfGenerator');
-      const { pdf, blob } = await createDocumentPdf({
-        pages,
-        filename: formData.reportNo,
-        password: effectivePassword,
-        type: 'report'
-      });
-
-      // Save using Tauri natively, or fallback to browser download
-      const { saveSilentBackup } = await import('@/utils/exportManager');
-      await saveSilentBackup(formData.reportNo, blob, isSilent, 'report');
-      
-      if (!isSilent) {
-        setIsSuccess(true);
-        setTimeout(() => setIsSuccess(false), 5000);
-        setIsGenerating(false);
+        // Save using Tauri natively, or fallback to browser download
+        const { saveSilentBackup } = await import('@/utils/exportManager');
+        await saveSilentBackup(formData.reportNo, blob, isSilent, 'report');
+        
+        if (!isSilent) {
+          setIsSuccess(true);
+          setTimeout(() => setIsSuccess(false), 5000);
+          setIsGenerating(false);
+        }
+      } finally {
+        // Restore hidden elements AFTER capture completes
+        hiddenElements.forEach(({ el, prev }) => { el.style.display = prev; });
+        ringElements.forEach(({ el, prev }) => { el.style.boxShadow = prev; });
+        handleDots.forEach(({ el, prev }) => { el.style.display = prev; });
       }
       } catch (err: unknown) {
         console.error(err);
@@ -868,79 +776,16 @@ function EditorContent() {
         </div>
 
         <MobileDocumentViewport pageCount={totalPages} onScaleChange={setZoom}>
-        {/* PAGE 1 */}
-        <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300" style={{ width: '794px', height: '1123px' }}>
-          <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password} />
-          <div className="flex-1">
-            <PageOneData data={formData} />
-          </div>
-          <PASFooter pageNum={1} totalPages={totalPages} seal={seal} />
-        </div>
-
-        {/* TEST PAGES (Dynamically chunked) */}
-        {testChunks.map((chunk, index) => (
-          <div key={`test-page-${index}`} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password} />
-            <div className="flex-1">
-              <TestTable 
-                tests={chunk} 
-                data={formData} 
-                isFirstPage={index === 0}
-                isLastPage={index === testChunks.length - 1}
-              />
-            </div>
-            <PASFooter pageNum={2 + index} totalPages={totalPages} seal={seal} />
-          </div>
-        ))}
-
-        {/* PAGE 3 - Sample Image */}
-        {sampleImages.length > 0 && (
-          <div className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-            <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password} />
-            <div className="flex-1 flex flex-col px-10">
-                <div className="flex-1 w-full relative">
-                        {sampleImages.map(img => (
-                          <CanvaImage 
-                            key={img.id}
-                            src={img.src}
-                            caption={sampleImages.length > 1 ? `Product Picture #${sampleImages.indexOf(img) + 1}` : 'Product Picture'} 
-                            defaultWidth={400} 
-                            defaultHeight={400} 
-                            className="border border-gray-200 shadow-sm bg-white p-2 absolute" 
-                          />
-                        ))}
-                      </div>
-                
-              </div>
-              <PASFooter pageNum={1 + testPagesCount + 1} totalPages={totalPages} seal={seal} />
-          </div>
-        )}
-
-        {/* Extra Pages */}
-        {extraPages.map((page, index) => {
-          const pageNum = 1 + testPagesCount + (sampleImages.length > 0 ? 1 : 0) + 1 + index;
-          return (
-            <div key={page.id} className="report-a4-page relative overflow-hidden flex flex-col bg-white shadow-xl print:shadow-none shrink-0 border border-gray-300 mt-8" style={{ width: '794px', height: '1123px' }}>
-              <PASHeader reportNo={formData.reportNo} reportingDate={formData.reportDate || ''} onReportingDateChange={(date) => updateField('reportDate', date)} seal={seal} password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password} />
-              <div className="flex-1 flex flex-col px-10 relative">
-                {page.image && (
-                  <div className="flex-1 flex justify-center items-start mb-4">
-                    <CanvaImage 
-                      src={page.image}
-                      className="max-w-full max-h-[850px] object-contain"
-                    />
-                  </div>
-                )}
-                {page.text && (
-                  <div className="whitespace-pre-wrap font-sans text-sm pb-10">
-                    {page.text}
-                  </div>
-                )}
-              </div>
-              <PASFooter pageNum={pageNum} totalPages={totalPages} seal={seal} />
-            </div>
-          );
-        })}
+          <ReportDocumentView
+            formData={formData}
+            tests={tests}
+            sampleImages={sampleImages}
+            extraPages={extraPages}
+            seal={seal}
+            password={(!password || (reportId && password === reportId.slice(-4))) ? (formData.reportNo?.slice(-4) || '1234') : password}
+            onReportingDateChange={(date) => updateField('reportDate', date)}
+            isReadOnly={isGenerating}
+          />
         </MobileDocumentViewport>
       </div>
     </div>

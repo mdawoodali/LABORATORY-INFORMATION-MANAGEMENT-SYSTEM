@@ -343,7 +343,7 @@ export default function HomePage() {
   };
 
   const handleNewReport = () => {
-    window.location.href = '/editor/';
+    window.location.href = '/pas-report/';
   };
 
   const handleOpenTemplate = (template: Template) => {
@@ -351,25 +351,13 @@ export default function HomePage() {
       window.location.href = '/pqs-letterhead/';
       return;
     }
-    if (template.id === 'pqs-report') {
-      window.location.href = '/pas-report/';
-      return;
-    }
-    if (template.id === 'pqs-invoice') {
+    if (template.id === 'pqs-invoice' || template.id === 'pas-invoice') {
       window.location.href = '/invoice/';
       return;
     }
-    if (template.id === 'pas-report') {
-      window.location.href = '/pas-report/';
-      return;
-    }
-    if (template.id === 'pas-invoice') {
-      window.location.href = '/invoice/';
-      return;
-    }
-    // Store template data in sessionStorage so editor can pick it up
+    // All report templates use the modern PQS Report engine (/pas-report/)
     sessionStorage.setItem('sr_template_data', JSON.stringify(template));
-    window.location.href = '/editor/?template=' + template.id;
+    window.location.href = '/pas-report/?template=' + template.id;
   };
 
   const handleOpenReport = (report: Record<string, unknown>) => {
