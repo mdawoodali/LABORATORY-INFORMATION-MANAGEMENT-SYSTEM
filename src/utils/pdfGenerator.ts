@@ -184,31 +184,85 @@ export async function createDocumentPdf(options: GeneratePdfOptions): Promise<{ 
     creator: 'Precision Quality Services LIMS Engine v6.6.0'
   });
 
-  for (let i = 0; i < pages.length; i++) {
-    const pageEl = pages[i] as HTMLElement;
-    if (i > 0) pdf.addPage();
+  // Temporarily neutralize all ancestor CSS transforms and zooms (e.g. MobileDocumentViewport pinch/fit scaling or editor zoom)
+  // so html2canvas and injectSelectableTextLayer always render at true unscaled 100% 794px × 1123px A4 geometry!
+  interface RestorableElement {
+    el: HTMLElement;
+    prevTransform: string;
+    prevTransition: string;
+    prevMarginBottom: string;
+  }
+  const restorableAncestors: RestorableElement[] = [];
 
-    await new Promise((r) => setTimeout(r, 100));
+  try {
+    const firstPage = pages[0] as HTMLElement;
+    let currentAncestor = firstPage?.parentElement;
+    while (currentAncestor && currentAncestor !== document.body) {
+      const computed = window.getComputedStyle(currentAncestor);
+      if (computed.transform !== 'none' || currentAncestor.style.transform) {
+        restorableAncestors.push({
+          el: currentAncestor,
+          prevTransform: currentAncestor.style.transform,
+          prevTransition: currentAncestor.style.transition,
+          prevMarginBottom: currentAncestor.style.marginBottom
+        });
+        currentAncestor.style.transition = 'none';
+        currentAncestor.style.transform = 'none';
+        currentAncestor.style.marginBottom = '0px';
+      }
+      currentAncestor = currentAncestor.parentElement;
+    }
 
-    // High resolution capture (scale: 3.5 = 330+ DPI print standard)
-    const canvas = await html2canvas(pageEl, {
-      scale: 3.5,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width: pageEl.offsetWidth,
-      height: pageEl.offsetHeight
+    // Also check page elements themselves for inline transforms
+    Array.from(pages).forEach(p => {
+      const el = p as HTMLElement;
+      if (el.style.transform && el.style.transform !== 'none') {
+        restorableAncestors.push({
+          el,
+          prevTransform: el.style.transform,
+          prevTransition: el.style.transition,
+          prevMarginBottom: el.style.marginBottom
+        });
+        el.style.transition = 'none';
+        el.style.transform = 'none';
+      }
     });
 
-    const imgData = canvas.toDataURL('image/png');
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+    for (let i = 0; i < pages.length; i++) {
+      const pageEl = pages[i] as HTMLElement;
+      if (i > 0) pdf.addPage();
 
-    // Embed selectable, searchable vector text layer
-    injectSelectableTextLayer(pdf, pageEl, pdfWidth, pdfHeight);
+      await new Promise((r) => setTimeout(r, 100));
 
-    // Memory hygiene: zero canvas dimensions to allow immediate garbage collection
-    canvas.width = 0;
-    canvas.height = 0;
+      // High resolution capture (scale: 3.5 = 330+ DPI print standard)
+      const canvas = await html2canvas(pageEl, {
+        scale: 3.5,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: pageEl.offsetWidth || 794,
+        height: pageEl.offsetHeight || 1123,
+        windowWidth: 794,
+        windowHeight: 1123
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+
+      // Embed selectable, searchable vector text layer
+      injectSelectableTextLayer(pdf, pageEl, pdfWidth, pdfHeight);
+
+      // Memory hygiene: zero canvas dimensions to allow immediate garbage collection
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+  } finally {
+    // Restore all ancestor transforms and scaling
+    restorableAncestors.forEach(({ el, prevTransform, prevTransition, prevMarginBottom }) => {
+      el.style.transform = prevTransform;
+      el.style.transition = prevTransition;
+      el.style.marginBottom = prevMarginBottom;
+    });
   }
 
   const blob = pdf.output('blob');
